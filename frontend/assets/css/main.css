@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+/* =========================================================
+   GLOBAL SAFETY FIXES
+   ========================================================= */
+html,
+body,
+#__nuxt {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+/* =========================================================
+   NAVBAR – DESKTOP ONLY (≥1024px)
+   ========================================================= */
+@media (min-width: 1024px) {
+  /* Push nav links away from center logo */
+  nav .flex-1:first-of-type {
+    margin-left: 60px;
+    gap: 4.5rem !important;
+  }
+
+  nav .flex-1:last-of-type {
+    margin-right: 60px;
+    gap: 4.5rem !important;
+  }
+
+  /* Slim rounded navbar container */
+  div.bg-\[#f8f8f8\].rounded-full {
+    height: 35px !important;
+    max-height: 35px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  nav > div > div > div:first-child {
+    overflow: hidden !important;
+  }
+}
+
+/* =========================================================
+   HERO SECTION – BASE (SHARED)
+   ========================================================= */
+section:has(h1) {
+  padding: 0 !important;
+  max-width: 100vw !important;
+}
+
+h1 {
+  line-height: 1 !important;
+}
+
+.space-y-6 > * + * {
+  margin-top: 0.5rem !important;
+}
+
+/* =========================================================
+   HERO SECTION – DESKTOP (≥1024px)
+   ========================================================= */
+@media (min-width: 1024px) {
+  section:has(h1) {
+    padding-top: 480px !important;
+    padding-left: 115px !important;
+  }
+
+  /* Main hero image placement */
+  .hero-main {
+    margin-top: -30rem !important;
+    transform: translateX(16rem) !important;
+  }
+
+  /* Decorative elements visible on desktop */
+  .hero-buffs-chicken {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .order-2 {
+    margin-top: 0 !important;
+  }
+}
+
+/* =========================================================
+   HERO SECTION – MOBILE & TABLET (<1024px)
+   ========================================================= */
+@media (max-width: 1023px) {
+  /* Mobile hero spacing */
+  section:has(h1) {
+    padding: 1.5rem 1rem 3rem !important;
+  }
+
+  /* Typography scaling for mobile */
+  h1 {
+    font-size: 4.5rem !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.03em !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  h2 {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1.75rem !important;
+  }
+
+  /* Description paragraph */
+  .description-paragraph {
+    font-size: 1.125rem !important;
+    line-height: 1.8 !important;
+    max-width: 100% !important;
+    color: #374151 !important;
+  }
+
+  /* HIDE BUTTONS AND HERO IMAGES EXCEPT LOGO */
+  button,
+  .hero-main,
+  .hero-buffs-chicken,
+  .hero-pesto,
+  img:not(.logo) {  /* keep logo visible */
+    display: none !important;
+  }
+
+  /* Optional: hide links styled as buttons */
+  a.button {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   EXTRA SMALL PHONES (<640px)
+   ========================================================= */
+@media (max-width: 639px) {
+  section:has(h1) {
+    padding: 1rem 0.75rem 2.5rem !important;
+  }
+
+  h1 {
+    font-size: 3.75rem !important;
+  }
+
+  h2 {
+    font-size: 1.75rem !important;
+  }
+
+  .description-paragraph {
+    font-size: 1rem !important;
+    line-height: 1.75 !important;
+  }
+
+  .space-y-6 > * + * {
+    margin-top: 1.5rem !important;
+  }
+
+  /* Hide hero buttons/images except logo */
+  button,
+  .hero-main,
+  .hero-buffs-chicken,
+  .hero-pesto,
+  img:not(.logo) {
+    display: none !important;
+  }
+}
