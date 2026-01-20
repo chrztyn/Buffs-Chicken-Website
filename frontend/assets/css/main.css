@@ -11,6 +11,179 @@ body,
 }
 
 /* =========================================================
+   POPULAR PICKS – creative layout, placements, alignments
+   ========================================================= */
+.popular-picks-section {
+  margin-top: 8vh !important;
+  padding-top: 5rem !important;
+  padding-bottom: 4.5rem !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+  box-sizing: border-box !important;
+  min-height: 500px !important;
+  position: relative !important;
+}
+
+/* Layered background */
+.popular-picks-bg {
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 40%, #2563eb 100%) !important;
+  z-index: 0 !important;
+}
+
+.popular-picks-glow {
+  position: absolute !important;
+  border-radius: 50% !important;
+  filter: blur(80px) !important;
+  opacity: 0.4 !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.popular-picks-glow--1 {
+  width: 320px !important;
+  height: 320px !important;
+  background: radial-gradient(circle, #FEB90E 0%, transparent 70%) !important;
+  top: -80px !important;
+  right: -60px !important;
+}
+
+.popular-picks-glow--2 {
+  width: 280px !important;
+  height: 280px !important;
+  background: radial-gradient(circle, #FE601C 0%, transparent 70%) !important;
+  bottom: -60px !important;
+  left: -40px !important;
+}
+
+.popular-picks-dots {
+  position: absolute !important;
+  inset: 0 !important;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px) !important;
+  background-size: 28px 28px !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* Header block */
+.popular-picks-header {
+  text-align: center !important;
+  margin-bottom: 2.5rem !important;
+}
+
+.popular-picks-subtitle {
+  font-family: 'Unbounded', system-ui, sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.35em !important;
+  text-transform: uppercase !important;
+  color: rgba(254, 185, 14, 0.95) !important;
+  margin: 0 0 0.5rem 0 !important;
+}
+
+.popular-picks-title {
+  font-family: 'Caprasimo', serif !important;
+  font-size: clamp(2rem, 5vw, 3.25rem) !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  margin: 0 !important;
+  letter-spacing: 0.02em !important;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Grid */
+.popular-picks-grid {
+  display: grid !important;
+  gap: 2rem !important;
+  max-width: 1100px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-items: center !important;
+  align-items: start !important;
+}
+
+@media (min-width: 768px) {
+  .popular-picks-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Staggered card layout – middle card slightly raised */
+  .popular-picks-grid .food-card:nth-child(1) { transform: translateY(10px); }
+  .popular-picks-grid .food-card:nth-child(2) { transform: translateY(-6px); }
+  .popular-picks-grid .food-card:nth-child(3) { transform: translateY(10px); }
+}
+
+@media (max-width: 767px) {
+  .popular-picks-grid {
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+  }
+
+  .popular-picks-grid .food-card { transform: none !important; }
+}
+
+/* Food cards – consistent width, creative hover, no overflow, label spacing */
+.food-card {
+  width: 100% !important;
+  max-width: 400px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease !important;
+  border: 2px solid transparent !important;
+  padding: 1.25rem 1.25rem 2.25rem 1.25rem !important;
+}
+
+/* Larger image; space taken from card padding so the card doesn't grow */
+.food-card > div:first-of-type {
+  margin-bottom: 0.375rem !important;
+}
+
+/* Image: fixed height keeps card size constant; change --food-card-img-scale to resize image only (e.g. 1.2 = bigger, 0.9 = smaller) */
+.food-card img {
+  --food-card-img-scale: 2.6;
+  width: 100% !important;
+  height: 200px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: scale(var(--food-card-img-scale)) !important;
+  transform-origin: center center !important;
+}
+
+.food-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(254, 185, 14, 0.5) !important;
+  border-color: rgba(254, 185, 14, 0.4) !important;
+}
+
+@media (min-width: 768px) {
+  .food-card:hover {
+    transform: translateY(calc(-8px - 6px)) !important;  /* account for nth-child(2) stagger */
+  }
+
+  .popular-picks-grid .food-card:nth-child(2):hover {
+    transform: translateY(-14px) !important;  /* -6 - 8 */
+  }
+}
+
+.food-card .food-card-footer {
+  min-width: 0 !important;
+  gap: 0.5rem !important;
+  padding-top: 6rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  padding-bottom: -1rem !important;
+}
+
+.food-card .food-card-footer span:first-child {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* =========================================================
    NAVBAR – DESKTOP ONLY (≥1024px)
    ========================================================= */
 @media (min-width: 1024px) {

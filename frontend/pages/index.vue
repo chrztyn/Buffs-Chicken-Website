@@ -3,8 +3,8 @@
     <!-- Navigation Bar -->
     <Navbar />
 
-    <!-- Hero Section -->
-    <section class="w-full px-4 lg:px-8 py-12 lg:py-40 overflow-x-hidden">
+    <!-- Hero Section - exactly one viewport, no extra scroll -->
+    <section class="w-full h-[calc(100vh-7rem)] px-4 lg:px-8 py-12 lg:py-40 overflow-x-hidden overflow-y-hidden flex flex-col justify-center">
       <div class="max-w-7xl mx-auto">
         <div class="flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-12">
 
@@ -71,5 +71,21 @@
         </div>
       </div>
     </section>
+
+    <!-- Popular Picks Section -->
+    <PopularPicks />
+
   </div>
 </template>
+
+<script>
+import Navbar from '~/components/Navbar.vue';
+import PopularPicks from '~/components/PopularPicks.vue';
+
+export default {
+  components: {
+    Navbar,
+    PopularPicks
+  }
+};
+</script>

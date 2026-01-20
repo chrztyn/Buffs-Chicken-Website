@@ -18,7 +18,7 @@
           <div class="flex items-center gap-2 sm:gap-6 lg:gap-12 flex-1 justify-end pr-2 sm:pr-0">
             <a href="#" class="font-['Unbounded'] font-normal text-[10px] sm:text-sm lg:text-base text-black no-underline lowercase transition-colors duration-200 hover:text-[#FE601C] whitespace-nowrap">about</a>
             <a href="#" class="font-['Unbounded'] font-normal text-[10px] sm:text-sm lg:text-base text-black no-underline lowercase transition-colors duration-200 hover:text-[#FE601C] whitespace-nowrap">contact</a>
-            <button class="font-['Unbounded'] font-semibold text-[10px] sm:text-sm lg:text-base bg-[#1A4189] text-[#FEB90E] border-none py-1.5 sm:py-2.5 px-3 sm:px-6 rounded-full cursor-pointer lowercase transition-all duration-200 hover:bg-[#15306d] hover:shadow-lg active:scale-95 whitespace-nowrap">cart</button>
+            <button class="w-14 font-['Unbounded'] font-semibold text-[10px] sm:text-sm lg:text-base bg-[#1A4189] text-[#FEB90E] border-none py-1.5 sm:py-2.5 px-3 sm:px-6 rounded-full cursor-pointer lowercase transition-all duration-200 hover:bg-[#15306d] hover:shadow-lg active:scale-95 whitespace-nowrap">cart</button>
           </div>
         </div>
 
