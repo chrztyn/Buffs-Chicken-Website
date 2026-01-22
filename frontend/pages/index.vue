@@ -74,17 +74,36 @@
     <!-- Popular Picks Section -->
     <PopularPicks />
 
+    <!-- Blog Section -->
+    <h2 class="blog-title text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-12 font-['Unbounded'] px-4">
+                The latest from Buffs
+    </h2>
+    <Blog />
+
+    <!-- FAQ Section -->
+    <FAQ />
+
+    <!-- Footer Section -->
+    <Footer />
+
   </div>
+    
 </template>
 
 <script>
+import Blog from '~/components/Blog.vue';
+import FAQ from '~/components/FAQ.vue';
+import Footer from '~/components/Footer.vue';
 import Navbar from '~/components/Navbar.vue';
 import PopularPicks from '~/components/PopularPicks.vue';
 
 export default {
   components: {
     Navbar,
-    PopularPicks
+    PopularPicks,
+    Blog,
+    FAQ,
+    Footer
   }
 };
 </script>
