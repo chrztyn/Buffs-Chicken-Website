@@ -1,7 +1,8 @@
 <template>
-  <div class="min-h-screen bg-[#FBF4E5] overflow-x-hidden max-w-[100vw]">
-    <!-- Navigation Bar -->
-    <Navbar />
+  <NuxtLayout>
+    <div class="min-h-screen bg-[#FBF4E5] overflow-x-hidden max-w-[100vw]">
+      <!-- Navigation Bar -->
+      <Navbar />
 
     <!-- Hero Section -->
     <section class="w-full h-[calc(100vh-7rem)] px-4 lg:px-8 py-12 lg:py-40 overflow-x-hidden overflow-y-hidden flex flex-col justify-center max-w-[100vw] !p-0 lg:!pt-[480px] lg:!pl-[100px] max-[1023px]:!p-6 max-[1023px]:!pb-12 max-[639px]:!p-4 max-[639px]:!pb-10">
@@ -75,6 +76,7 @@
     <PopularPicks />
 
   </div>
+  </NuxtLayout>
 </template>
 
 <script>

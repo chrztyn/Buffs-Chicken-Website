@@ -1,0 +1,123 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
+const path = require('path');
+
+// Load environment variables
+dotenv.config();
+
+// Import routes
+const productRoutes = require('./routes/products');
+const categoryRoutes = require('./routes/categories');
+const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/orders');
+const userRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
+const blogRoutes = require('./routes/blogs');
+const notificationRoutes = require('./routes/notifications');
+const paymentRoutes = require('./routes/payments');
+
+// Initialize Express app
+const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
+// Middleware
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Make io accessible to route handlers
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log('MongoDB connection error:', err));
+
+// Routes
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments', paymentRoutes);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'Server is running' });
+});
+
+// Socket.io Connection
+io.on('connection', (socket) => {
+  console.log('New user connected:', socket.id);
+
+  // Join user room for personal notifications
+  socket.on('join-user', (userId) => {
+    socket.join(`user-${userId}`);
+    console.log(`User ${userId} joined their notification room`);
+  });
+
+  // Join admin room for notifications
+  socket.on('join-admin', (adminId) => {
+    socket.join(`admin-${adminId}`);
+    console.log(`Admin ${adminId} joined admin notification room`);
+  });
+
+  // Join admin orders room
+  socket.on('join-admin-orders', () => {
+    socket.join('admin-orders');
+    console.log('Socket joined admin-orders room');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+module.exports = { app, io };
