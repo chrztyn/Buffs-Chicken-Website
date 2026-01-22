@@ -42,6 +42,13 @@
         >
           Blogs
         </NuxtLink>
+        <NuxtLink
+          to="/admin/analytics"
+          class="block px-4 py-2 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
+          @click="menuOpen = false"
+        >
+          Analytics
+        </NuxtLink>
         <button
           @click="handleLogout"
           class="w-full text-left px-4 py-2 text-[#FE601C] font-['Unbounded'] font-semibold hover:bg-red-50 rounded-lg transition"
@@ -81,6 +88,12 @@
               class="block px-4 py-3 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
             >
               Blogs
+            </NuxtLink>
+            <NuxtLink
+              to="/admin/analytics"
+              class="block px-4 py-3 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
+            >
+              Analytics
             </NuxtLink>
           </nav>
 
@@ -126,5 +139,12 @@ const handleLogout = () => {
 
 onMounted(() => {
   initToken()
+  
+  // Add Google Analytics tracking for admin pages
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('config', 'G-P48SW3GZ05', {
+      'page_path': window.location.pathname
+    })
+  }
 })
 </script>
