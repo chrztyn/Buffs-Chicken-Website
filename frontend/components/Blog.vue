@@ -86,8 +86,11 @@
     const loadBlogs = async () => {
       try {
         loading.value = true;
+        console.log('Fetching blogs...')
         const response = await getBlogs();
+        console.log('Blogs response:', response)
         blogPosts.value = response.data || [];
+        console.log('Blogs loaded:', blogPosts.value.length)
       } catch (err) {
         console.error('Failed to load blogs:', err);
         error.value = 'Failed to load blog posts';
