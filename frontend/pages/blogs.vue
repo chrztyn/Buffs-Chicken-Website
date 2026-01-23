@@ -4,7 +4,7 @@
         <Navbar class="relative z-20" />
 
         <!-- Blogs Top Section -->
-        <div class="blogs-hero-section relative h-[500px] w-full overflow-hidden -mt-16">
+        <div class="blogs-hero-section relative h-[500px] md:h-[550px] w-full overflow-hidden -mt-16">
         
             <!-- Background Image with Blur -->
             <img
@@ -17,7 +17,7 @@
             <div class="absolute inset-0 bg-orange-500 opacity-40"></div>
 
             <!-- Content -->
-            <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
+            <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 md:px-6">
                 <h1 class="text-6xl md:text-7xl font-['Caprasimo'] text-white mb-4 drop-shadow-lg">
                 Fresh Off the Fryer
                 </h1>
@@ -29,30 +29,30 @@
 
         <!-- Search and Topics Section -->
         <div class="blogs-search max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 mb-16">
-            <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+            <div class="flex flex-col lg:flex-row items-start lg:items-left gap-6 md:gap-8">
                 <!-- Search Bar -->
-                <div class="h-10 bg-white rounded-full shadow-xl px-4 py-3 flex items-center gap-3 flex-1 w-full">
-                    <button class="w-30 h-10 bg-[#1A4189] hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-full transition-all duration-200 hover:shadow-md flex-shrink-0">
+                <div class="h-12 md:h-14 bg-white rounded-full shadow-xl px-4 py-3 flex items-left gap-3 flex-1 w-full">
+                    <button class="w-30 h-12 md:h-14 bg-[#1A4189] hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-full transition-all duration-200 hover:shadow-md flex-shrink-0 text-sm md:text-base">
                         Search
                     </button>
                     <input 
                         type="text" 
                         placeholder="Search for blog posts..."
-                        class="flex-1 outline-none text-gray-700 placeholder-gray-400 text-base px-2"
+                        class="flex-1 outline-none text-gray-700 placeholder-gray-400 text-xs md:text-sm px-2"
                     />
                 </div>
 
         <!-- Explore Topics -->
                 <div class="blogs-explore flex flex-col items-start gap-3 flex-shrink-0">
-                <span class="text-gray-800 text-xs">Explore topics</span>
+                <span class="text-gray-800 text-xs md:text-sm">Explore topics</span>
                 <div class="flex flex-wrap gap-3">
-                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs">
+                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
                         Chicken
                     </button>
-                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs">
+                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
                         Pop-up
                     </button>
-                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs">
+                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
                         Angeles
                     </button>
                 </div>
@@ -66,7 +66,7 @@
         
         <!-- Navigation Buttons - Bottom Right -->
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-            <div class="flex justify-end items-center gap-3" style="padding-bottom: 2rem;">
+            <div class="flex justify-end items-center gap-3 md:gap-4" style="padding-bottom: 2rem; margin-right: -12rem;">
                 <!-- Previous Button -->
                 <button 
                     @click="handlePrevious"

@@ -74,7 +74,7 @@
             title: 'This is a blog title',
             excerpt: 'A strong sample headline starts here—designed to grab attention and draw readers in.',
             image: '/images/blog/placeholder-3.jpg'
-            }
+            }  
         ]
         }
     }
