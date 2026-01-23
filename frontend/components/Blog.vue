@@ -91,34 +91,12 @@
       } catch (err) {
         console.error('Failed to load blogs:', err);
         error.value = 'Failed to load blog posts';
-        // Fallback to mock data if API fails
-        blogPosts.value = [
-          {
-            id: 1,
-            slug: 'blog-post-1',
-            date: 'December 07, 2025',
-            title: 'This is a blog title',
-            excerpt: 'A strong sample headline starts here—designed to grab attention and draw readers in.',
-            image: '/images/blog/placeholder-1.jpg'
-          },
-          {
-            id: 2,
-            slug: 'blog-post-2',
-            date: 'December 07, 2025',
-            title: 'This is a blog title',
-            excerpt: 'A strong sample headline starts here—designed to grab attention and draw readers in.',
-            image: '/images/blog/placeholder-2.jpg'
-          },
-          {
-            id: 3,
-            slug: 'blog-post-3',
-            date: 'December 07, 2025',
-            title: 'This is a blog title',
-            excerpt: 'A strong sample headline starts here—designed to grab attention and draw readers in.',
-            image: '/images/blog/placeholder-3.jpg'
-            }  
-        ]
-        }
-    }
-    }
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      loadBlogs();
+    });
     </script>
