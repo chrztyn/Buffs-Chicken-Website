@@ -38,8 +38,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.API_BASE_URL || 'http://localhost:3000/api',
-      socketUrl: process.env.SOCKET_URL || 'http://localhost:3000'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000/api',
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:3000'
     }
   }
 })

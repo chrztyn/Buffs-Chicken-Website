@@ -14,9 +14,9 @@ const { Readable } = require('stream');
 
 // Configure Cloudinary (optional - for image uploads)
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME || 'demo',
-  api_key: process.env.CLOUDINARY_API_KEY || 'key',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'secret'
+  cloud_name: 'dkpa3ohnl',
+  api_key: '995717211964521',
+  api_secret: 'VM2MIzKejNE9p_xU0-kSjd6x-Z4'
 });
 
 // Multer setup for file uploads
@@ -70,6 +70,30 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// ========== UPLOAD ROUTES ==========
+
+// Upload image to Cloudinary
+router.post('/upload', authenticateAdmin, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+
+    console.log('Image upload request received:', req.file.originalname);
+
+    const imageUrl = await uploadToCloudinary(req.file);
+    console.log('Image uploaded to Cloudinary:', imageUrl);
+
+    res.json({ 
+      message: 'Image uploaded successfully',
+      url: imageUrl 
+    });
+  } catch (error) {
+    console.error('Image upload error:', error);
+    res.status(500).json({ message: 'Failed to upload image', error: error.message });
   }
 });
 
@@ -189,14 +213,18 @@ router.delete('/categories/:id', authenticateAdmin, async (req, res) => {
 // ========== BLOG ROUTES ==========
 
 // Create blog
-router.post('/blogs', authenticateAdmin, upload.single('image'), async (req, res) => {
+router.post('/blogs', authenticateAdmin, async (req, res) => {
   try {
-    const { title, excerpt, content, metaDescription, metaKeywords, isPublished } = req.body;
-    let imageUrl = null;
-
-    if (req.file) {
-      imageUrl = await uploadToCloudinary(req.file);
-    }
+    const { title, excerpt, content, metaDescription, image, isPublished } = req.body;
+    
+    console.log('Blog creation request received:', {
+      title,
+      excerpt,
+      content: content?.substring(0, 50) + '...',
+      metaDescription,
+      image: image ? `${image.substring(0, 50)}...` : 'NO IMAGE',
+      isPublished
+    })
 
     const slug = title.toLowerCase().replace(/\s+/g, '-');
 
@@ -205,34 +233,38 @@ router.post('/blogs', authenticateAdmin, upload.single('image'), async (req, res
       excerpt,
       description: excerpt, // Use excerpt as description
       content,
-      image: imageUrl,
+      image: image || null,
       metaDescription,
-      metaKeywords: Array.isArray(metaKeywords) ? metaKeywords : (metaKeywords ? JSON.parse(metaKeywords) : []),
       slug,
       author: req.admin.id,
       isPublished: isPublished || false
     });
 
     await blog.save();
+    
+    console.log('Blog created successfully:', {
+      id: blog._id,
+      title: blog.title,
+      image: blog.image ? 'YES' : 'NO'
+    })
+    
     res.status(201).json({ message: 'Blog created', blog });
   } catch (error) {
+    console.error('Blog creation error:', error)
     res.status(500).json({ message: error.message });
   }
 });
 
 // Update blog
-router.put('/blogs/:id', authenticateAdmin, upload.single('image'), async (req, res) => {
+router.put('/blogs/:id', authenticateAdmin, async (req, res) => {
   try {
-    const { title, excerpt, content, metaDescription, metaKeywords, isPublished } = req.body;
+    const { title, excerpt, content, metaDescription, image, isPublished } = req.body;
     const updateData = { title, excerpt, description: excerpt, content, metaDescription, isPublished };
 
-    if (req.file) {
-      updateData.image = await uploadToCloudinary(req.file);
+    if (image) {
+      updateData.image = image;
     }
 
-    if (metaKeywords) {
-      updateData.metaKeywords = Array.isArray(metaKeywords) ? metaKeywords : JSON.parse(metaKeywords);
-    }
     if (title) updateData.slug = title.toLowerCase().replace(/\s+/g, '-');
     if (isPublished === true) updateData.publishedAt = new Date();
 

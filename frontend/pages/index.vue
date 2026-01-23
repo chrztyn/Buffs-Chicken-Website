@@ -88,7 +88,7 @@
     <Footer />
 
   </div>
-    
+</NuxtLayout>    
 </template>
 
 <script>

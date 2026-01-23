@@ -29,12 +29,16 @@
           class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
         >
           <!-- Blog Image -->
-          <div v-if="blog.image" class="w-full h-40 bg-gray-200 overflow-hidden">
+          <div class="w-full h-48 bg-gray-200 overflow-hidden">
             <img
+              v-if="blog.image"
               :src="blog.image"
               :alt="blog.title"
               class="w-full h-full object-cover"
             />
+            <div v-else class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600 font-['Unbounded']">
+              No Image
+            </div>
           </div>
 
           <!-- Blog Info -->
@@ -45,6 +49,12 @@
             <div class="flex items-center justify-between mb-4 text-xs font-['Unbounded'] text-gray-600">
               <span>{{ formatDate(blog.publishedAt) }}</span>
               <span>👁️ {{ blog.views }} views</span>
+            </div>
+
+            <!-- Image Status Indicator -->
+            <div class="mb-4 p-2 bg-gray-50 rounded text-xs font-['Unbounded']">
+              <span v-if="blog.image" class="text-green-600">✓ Image: Uploaded</span>
+              <span v-else class="text-red-600">✗ No Image</span>
             </div>
 
             <!-- Action Buttons -->
@@ -138,7 +148,7 @@
                 class="max-h-40 rounded-lg"
               />
               <button
-                @click.stop="blogForm.imagePreview = ''"
+                @click.stop="blogForm.imagePreview = blogForm.image"
                 class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
               >
                 ✕
@@ -175,32 +185,6 @@
               {{ blogForm.metaDescription?.length || 0 }}/160 characters
             </p>
           </div>
-
-          <!-- Keywords -->
-          <div>
-            <label class="block font-['Unbounded'] font-semibold text-[#1A4189] mb-2">
-              Keywords (comma-separated)
-            </label>
-            <input
-              v-model="keywordInput"
-              type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C]"
-              placeholder="e.g., chicken, recipe, food"
-              @keyup.enter="addKeyword"
-            />
-            <div class="mt-2 flex flex-wrap gap-2">
-              <span
-                v-for="(keyword, idx) in blogForm.metaKeywords"
-                :key="idx"
-                class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-['Unbounded'] font-bold flex items-center gap-2"
-              >
-                {{ keyword }}
-                <button @click="removeKeyword(idx)" type="button" class="hover:text-blue-900">
-                  ✕
-                </button>
-              </span>
-            </div>
-          </div>
         </div>
 
         <!-- Publishing -->
@@ -235,6 +219,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useApi } from '~/composables/useApi'
+import { useAdmin } from '~/composables/useAdmin'
 import Modal from '~/components/admin/Modal.vue'
 import ConfirmModal from '~/components/admin/ConfirmModal.vue'
 
@@ -243,12 +228,12 @@ definePageMeta({
 })
 
 const { getBlogs, createBlog, updateBlog, deleteBlog: deleteBlogApi } = useApi()
+const { token, getAuthHeader } = useAdmin()
 
 const blogs = ref<any[]>([])
 const showBlogModal = ref(false)
 const editingBlog = ref<any>(null)
 const fileInput = ref()
-const keywordInput = ref('')
 
 const blogForm = ref<any>({
   title: '',
@@ -257,7 +242,6 @@ const blogForm = ref<any>({
   image: '',
   imagePreview: '',
   metaDescription: '',
-  metaKeywords: [],
   isPublished: false
 })
 
@@ -286,10 +270,8 @@ const openAddBlog = () => {
     image: '',
     imagePreview: '',
     metaDescription: '',
-    metaKeywords: [],
     isPublished: false
   }
-  keywordInput.value = ''
   showBlogModal.value = true
 }
 
@@ -302,10 +284,8 @@ const openEditBlog = (blog: any) => {
     image: blog.image,
     imagePreview: blog.image,
     metaDescription: blog.metaDescription,
-    metaKeywords: [...(blog.metaKeywords || [])],
     isPublished: blog.isPublished
   }
-  keywordInput.value = ''
   showBlogModal.value = true
 }
 
@@ -322,39 +302,52 @@ const handleImageUpload = async (event: any) => {
   const file = event.target.files?.[0]
   if (!file) return
 
+  console.log('Image upload started for file:', file.name, 'Size:', file.size)
+
   // Create preview
   const reader = new FileReader()
   reader.onload = (e) => {
     blogForm.value.imagePreview = e.target?.result
+    console.log('Image preview set')
   }
   reader.readAsDataURL(file)
 
-  // Upload to Cloudinary
+  // Upload to backend
   const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', 'buffs_restaurant')
+  formData.append('image', file)
 
   try {
-    const response = await fetch('https://api.cloudinary.com/v1_1/buffs-chicken/image/upload', {
+    console.log('Uploading to backend...')
+    const authHeader = getAuthHeader()
+    console.log('Auth header:', authHeader)
+    
+    const response = await fetch('http://localhost:5001/api/admin/upload', {
       method: 'POST',
-      body: formData
+      body: formData,
+      headers: authHeader
     })
+    
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(`Upload failed: ${errorData.message || response.status}`)
+    }
+    
     const data = await response.json()
-    blogForm.value.image = data.secure_url
+    console.log('Backend upload successful:', data.url)
+    blogForm.value.image = data.url
+    console.log('Image URL set in form:', blogForm.value.image)
   } catch (error) {
     console.error('Image upload failed:', error)
+    alert('Failed to upload image. Please try again.')
   }
 }
 
 const addKeyword = () => {
-  if (keywordInput.value.trim() && !blogForm.value.metaKeywords.includes(keywordInput.value.trim())) {
-    blogForm.value.metaKeywords.push(keywordInput.value.trim())
-    keywordInput.value = ''
-  }
+  // Keywords removed - no longer needed
 }
 
 const removeKeyword = (idx: number) => {
-  blogForm.value.metaKeywords.splice(idx, 1)
+  // Keywords removed - no longer needed
 }
 
 const saveBlog = async () => {
@@ -364,6 +357,7 @@ const saveBlog = async () => {
   }
 
   try {
+    console.log('Saving blog with data:', blogForm.value)
     if (editingBlog.value) {
       await updateBlog(editingBlog.value._id, blogForm.value)
     } else {
@@ -372,6 +366,7 @@ const saveBlog = async () => {
     closeBlogModal()
     await loadBlogs()
   } catch (error: any) {
+    console.error('Error saving blog:', error.response?.data || error.message)
     alert(error.response?.data?.message || 'Failed to save blog')
   }
 }

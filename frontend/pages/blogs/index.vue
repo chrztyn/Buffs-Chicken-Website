@@ -111,40 +111,28 @@
 </template>
 
 
-<script>
-import Navbar from '~/components/Navbar.vue';
-import Footer from '~/components/Footer.vue';
+<script setup>
+import Navbar from '~/components/Navbar.vue'
+import Footer from '~/components/Footer.vue'
+import Blog from '~/components/Blog.vue'
+import { ref } from 'vue'
 
-export default {
-    components: {
-        Navbar,
-        Footer
-    },
-    data() {
-        return {
-            currentPage: 1,
-            totalPages: 5 // Update this based on your actual total pages
-        };
-    },
-    methods: {
-        handleNext() {
-            if (this.currentPage < this.totalPages) {
-                this.currentPage++;
-                // Add your pagination logic here
-                console.log('Next page:', this.currentPage);
-                // Example: this.$router.push({ query: { page: this.currentPage } })
-            }
-        },
-        handlePrevious() {
-            if (this.currentPage > 1) {
-                this.currentPage--;
-                // Add your pagination logic here
-                console.log('Previous page:', this.currentPage);
-                // Example: this.$router.push({ query: { page: this.currentPage } })
-            }
-        }
+const currentPage = ref(1)
+const totalPages = ref(5) // Update this based on your actual total pages
+
+const handleNext = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++
+        console.log('Next page:', currentPage.value)
     }
-};
+}
+
+const handlePrevious = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--
+        console.log('Previous page:', currentPage.value)
+    }
+}
 </script>
 
 <style scoped>

@@ -75,9 +75,9 @@ export const useApi = () => {
 
   // Blog endpoints
   const getBlogs = () => api.get('/blogs')
-  const getBlogBySlug = (slug: string) => api.get(`/blogs/${slug}`)
+  const getBlogBySlug = (slug: string) => api.get(`/blogs/slug/${slug}`)
   const getBlogsByCategory = (category: string) =>
-    api.get(`/blogs?category=${category}`)
+    api.get(`/blogs/category/${category}`)
   const createBlog = (data: any) => api.post('/admin/blogs', data)
   const updateBlog = (id: string, data: any) => api.put(`/admin/blogs/${id}`, data)
   const deleteBlog = (id: string) => api.delete(`/admin/blogs/${id}`)
