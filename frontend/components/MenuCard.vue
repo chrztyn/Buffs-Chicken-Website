@@ -80,5 +80,12 @@ export default {
 .product-description {
     font-size: 8px;
     line-height: 1;
+    padding-bottom: 8px;
+}
+
+.description-section {
+  margin-top: -0.5rem; /* moves it upward */
+  padding-left: 0.25rem; /* same as px-1 */
+  padding-top: 0; /* remove any extra padding at the top */
 }
 </style>

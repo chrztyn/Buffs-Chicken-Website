@@ -1632,7 +1632,7 @@ a[title="TikTok"] {
 .menu-card {
   display: flex;
   flex-direction: column;
-  aspect-ratio: 1.6 / 1;  /* Changed from 1.4 / 1 to make it wider/shorter */
+  aspect-ratio: 1.6 / 1; 
   background: #ffffff;
   border-radius: 12px;
   padding: 0.5rem;
@@ -1643,7 +1643,7 @@ a[title="TikTok"] {
   overflow: hidden;
   max-width: 280px;
   margin: 0 auto;
-  max-height: 180px;  /* Changed from 220px to reduce height */
+  max-height: 180px; 
 }
 
 .menu-card:hover {
