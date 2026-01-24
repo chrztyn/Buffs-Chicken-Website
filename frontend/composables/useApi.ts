@@ -91,6 +91,9 @@ export const useApi = () => {
     api.put(`/notifications/${id}/read`, {})
   const deleteNotification = (id: string) => api.delete(`/notifications/${id}`)
 
+  // Contact endpoints
+  const submitContactForm = (data: any) => api.post('/contact/submit', data)
+
   return {
     api,
     adminLogin,
@@ -120,6 +123,7 @@ export const useApi = () => {
     getAnalytics,
     getAdminNotifications,
     markNotificationRead,
-    deleteNotification
+    deleteNotification,
+    submitContactForm
   }
 }

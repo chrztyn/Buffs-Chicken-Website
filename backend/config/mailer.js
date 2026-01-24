@@ -74,4 +74,34 @@ const sendOrderNotification = async (email, orderNumber, status) => {
   }
 };
 
-module.exports = { sendOTP, sendOrderNotification, transporter };
+const sendContactFormEmail = async (name, email, message) => {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      replyTo: email,
+      subject: `New Contact Form Submission from ${name} - Buffs Restaurant`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1A4189;">New Contact Form Submission</h2>
+          <div style="background-color: #f9f5ed; padding: 20px; border-radius: 8px; border-left: 4px solid #1A4189;">
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+            <p><strong>Message:</strong></p>
+            <p style="background-color: white; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${message}</p>
+          </div>
+          <br>
+          <p style="color: #666; font-size: 12px;">This is an automated message from your Buffs Restaurant website.</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error('Email sending error:', error);
+    throw new Error('Failed to send contact form email');
+  }
+};
+
+module.exports = { sendOTP, sendOrderNotification, sendContactFormEmail, transporter };

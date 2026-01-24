@@ -153,9 +153,10 @@
                     <div class="form-button-wrapper">
                         <button
                             type="submit"
+                            :disabled="isSubmitting"
                             class="form-submit-btn text-xs sm:text-sm"
                         >
-                            Submit
+                            {{ isSubmitting ? 'Sending...' : 'Submit' }}
                         </button>
                     </div>
 
@@ -174,6 +175,8 @@
 </template>
 
     <script>
+    import { useApi } from '~/composables/useApi'
+    
     export default {
     name: 'Contact',
     data() {
@@ -184,7 +187,8 @@
             message: ''
         },
         successMessage: '',
-        errorMessage: ''
+        errorMessage: '',
+        isSubmitting: false
         }
     },
     methods: {
@@ -199,31 +203,35 @@
             return;
             }
 
-            // Send form data to backend (if you have an API endpoint)
-            // For now, we'll just show a success message
-            // const response = await fetch('/api/contact', {
-            //   method: 'POST',
-            //   headers: { 'Content-Type': 'application/json' },
-            //   body: JSON.stringify(this.form)
-            // });
+            // Set loading state
+            this.isSubmitting = true;
 
-            // Mock success response
-            this.successMessage = 'Thank you for your message! We\'ll get back to you shortly.';
-            
-            // Reset form
-            this.form = {
-            name: '',
-            email: '',
-            message: ''
-            };
+            // Use useApi composable for API call
+            const { submitContactForm } = useApi();
+            const response = await submitContactForm(this.form);
 
-            // Clear success message after 5 seconds
-            setTimeout(() => {
-            this.successMessage = '';
-            }, 5000);
+            if (response.data?.success) {
+              this.successMessage = response.data.message || 'Thank you for your message! We\'ll get back to you shortly.';
+              
+              // Reset form
+              this.form = {
+                name: '',
+                email: '',
+                message: ''
+              };
+
+              // Clear success message after 5 seconds
+              setTimeout(() => {
+                this.successMessage = '';
+              }, 5000);
+            } else {
+              this.errorMessage = response.data?.message || 'An error occurred. Please try again.';
+            }
         } catch (error) {
-            this.errorMessage = 'An error occurred. Please try again.';
+            this.errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
             console.error('Form submission error:', error);
+        } finally {
+            this.isSubmitting = false;
         }
         }
     }
@@ -447,6 +455,12 @@
 
     .form-submit-btn:active {
         transform: translateY(-1px);
+    }
+
+    .form-submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
     }
 
     /* ===== MESSAGE NOTIFICATIONS ===== */

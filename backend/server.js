@@ -19,6 +19,7 @@ const adminRoutes = require('./routes/admin');
 const blogRoutes = require('./routes/blogs');
 const notificationRoutes = require('./routes/notifications');
 const paymentRoutes = require('./routes/payments');
+const contactRoutes = require('./routes/contact');
 
 // Initialize Express app
 const app = express();
@@ -67,6 +68,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
