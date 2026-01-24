@@ -13,8 +13,8 @@
                 class="absolute inset-0 w-full h-full object-cover filter blur-sm scale-105"
             />
 
-            <!-- Orange Overlay -->
-            <div class="absolute inset-0 bg-orange-500 opacity-40"></div>
+            <!-- Overlay -->
+            <div class="about-overlay absolute inset-0 bg-[rgba(26,65,137,0.3)]"></div>
 
             <!-- Content -->
             <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 md:px-6">
@@ -46,13 +46,13 @@
                 <div class="blogs-explore flex flex-col items-start gap-3 flex-shrink-0">
                 <span class="text-gray-800 text-xs md:text-sm">Explore topics</span>
                 <div class="flex flex-wrap gap-3">
-                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
+                    <button class="blogs-button w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-10 py-4 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
                         Chicken
                     </button>
-                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
+                    <button class="blogs-button w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-10 py-4 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
                         Pop-up
                     </button>
-                    <button class="w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-5 py-2 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
+                    <button class="blogs-button w-18 bg-[#FEB90E] hover:bg-yellow-500 text-white font-semibold px-10 py-4 rounded-full transition-all duration-200 hover:shadow-md text-xs md:text-sm">
                         Angeles
                     </button>
                 </div>

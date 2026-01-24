@@ -1,6 +1,7 @@
 <template>
-    <section class="blog-section bg-[#FBF4E5] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
+    <section class="blog-section bg-[#F5F1E8] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
         <div class="max-w-6xl mx-auto px-4 sm:px-8 lg:px-10">
+
             <!-- Blog Posts List -->
             <div class="space-y-0">
                 <article 
@@ -74,7 +75,7 @@
             title: 'This is a blog title',
             excerpt: 'A strong sample headline starts here—designed to grab attention and draw readers in.',
             image: '/images/blog/placeholder-3.jpg'
-            }  
+            }
         ]
         }
     }
