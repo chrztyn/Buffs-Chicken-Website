@@ -1,6 +1,7 @@
 <template>
-    <section class="blog-section bg-[#FBF4E5] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
+    <section class="blog-section bg-[#F5F1E8] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
         <div class="max-w-6xl mx-auto px-4 sm:px-8 lg:px-10">
+<<<<<<< HEAD
             <!-- Loading State -->
             <div v-if="loading" class="text-center py-12">
                 <p class="text-gray-600">Loading blog posts...</p>
@@ -15,6 +16,8 @@
             <div v-else-if="blogPosts.length === 0" class="text-center py-12">
                 <p class="text-gray-600">No blog posts available yet.</p>
             </div>
+=======
+>>>>>>> origin/frontend
 
             <!-- Blog Posts List -->
             <div v-else class="space-y-0">

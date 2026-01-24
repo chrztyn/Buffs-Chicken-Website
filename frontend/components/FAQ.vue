@@ -24,7 +24,7 @@
                 </div>
 
                 <!-- Right Column: FAQ Accordion -->
-                <div class="flex flex-col space-y-4">
+                <div class="faq-accordion flex flex-col space-y-4">
                     <div
                         v-for="(faq, index) in faqs"
                         :key="faq.id"

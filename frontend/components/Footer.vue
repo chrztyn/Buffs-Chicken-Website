@@ -5,7 +5,7 @@
             <!-- Brand Section -->
             <div>
             <h2 class="text-[#FE601C] font-['Caprasimo'] text-xl mb-4">Buffs Chicken</h2>
-            <p class="text-sm leading-relaxed">
+            <p class="address text-sm leading-relaxed">
                 The Hood, Angeles City<br />
                 Pampanga © 2026 Buffs Chicken.<br />
                 All Rights Reserved.
