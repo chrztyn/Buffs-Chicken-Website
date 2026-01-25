@@ -216,6 +216,14 @@ export default {
       ]
     }
   },
+  mounted() {
+    // Load cart count on page load
+    const savedCart = localStorage.getItem('buffs_cart');
+    if (savedCart) {
+      const cartItems = JSON.parse(savedCart);
+      this.cartCount = cartItems.length;
+    }
+  },
   computed: {
     filteredMenuItems() {
       let items = this.menuItems
@@ -239,9 +247,36 @@ export default {
   },
   methods: {
     handleAddToCart(item) {
-      this.cartCount++
-      console.log('Added to cart:', item)
-      // You can add cart logic here
+      // Load existing cart
+      const savedCart = localStorage.getItem('buffs_cart');
+      let cartItems = savedCart ? JSON.parse(savedCart) : [];
+
+      // Check if item already exists in cart
+      const existingItemIndex = cartItems.findIndex(
+        cartItem => cartItem.name === item.name && cartItem.notes === (item.notes || '')
+      );
+
+      if (existingItemIndex > -1) {
+        // If item exists, increase quantity
+        cartItems[existingItemIndex].quantity += item.quantity;
+      } else {
+        // Add new item with quantity
+        cartItems.push({
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          quantity: item.quantity,
+          notes: item.notes || '',
+          totalPrice: item.totalPrice
+        });
+      }
+
+      // Save updated cart to localStorage
+      localStorage.setItem('buffs_cart', JSON.stringify(cartItems));
+      
+      this.cartCount = cartItems.length;
+      console.log('Added to cart:', item);
+      alert('Item added to cart!');
     },
     handleSearch() {
       // Search is handled by computed property
