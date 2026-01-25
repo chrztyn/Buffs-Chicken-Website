@@ -52,10 +52,11 @@ export const useApi = () => {
   const getProduct = (id: string) => api.get(`/products/${id}`)
   const getProductsByCategory = (categoryId: string) =>
     api.get(`/products/category/${categoryId}`)
-  const createProduct = (data: any) => api.post('/admin/products', data)
+  const createProduct = (data: any) => api.post('/products/admin/create', data)
   const updateProduct = (id: string, data: any) =>
-    api.put(`/admin/products/${id}`, data)
-  const deleteProduct = (id: string) => api.delete(`/admin/products/${id}`)
+    api.put(`/products/admin/${id}`, data)
+  const deleteProduct = (id: string) => api.delete(`/products/admin/${id}`)
+  const getAllProductsAdmin = () => api.get('/products/admin/all')
 
   // Category endpoints
   const getCategories = () => api.get('/categories')
@@ -104,6 +105,7 @@ export const useApi = () => {
     createProduct,
     updateProduct,
     deleteProduct,
+    getAllProductsAdmin,
     getCategories,
     getCategory,
     createCategory,

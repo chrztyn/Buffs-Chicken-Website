@@ -7,7 +7,7 @@
             <img 
                 :src="image" 
                 :alt="name" 
-                class="w-full h-40 object-contain transition-transform duration-300 group-hover:scale-105"
+                class="w-full h-56 object-contain transition-transform duration-300 group-hover:scale-105"
             />
         </div>
         
@@ -65,7 +65,7 @@ export default {
 
 <style scoped>
 .menu-card {
-    min-height: 300px;
+    min-height: 380px;
     transition: transform 0.3s ease;
 }
 
@@ -74,7 +74,7 @@ export default {
 }
 
 .image-container {
-    min-height: 220px;
+    min-height: 280px;
 }
 
 .product-description {
@@ -84,8 +84,8 @@ export default {
 }
 
 .description-section {
-  margin-top: -0.5rem; /* moves it upward */
-  padding-left: 0.25rem; /* same as px-1 */
-  padding-top: 0; /* remove any extra padding at the top */
+  margin-top: -0.5rem;
+  padding-left: 0.25rem;
+  padding-top: 0;
 }
 </style>

@@ -97,6 +97,7 @@
 import Navbar from '~/components/Navbar.vue'
 import Footer from '~/components/Footer.vue'
 import MenuCard from '~/components/MenuCard.vue'
+import { useApi } from '~/composables/useApi'
 
 export default {
   name: 'MenuPage',
@@ -110,111 +111,14 @@ export default {
       searchQuery: '',
       selectedFilters: [],
       cartCount: 0,
-      filterCategories: [
-        { id: 'wings', name: 'Wings' },
-        { id: 'sandwiches', name: 'Sandwiches' },
-        { id: 'combos', name: 'Combos' },
-        { id: 'sides', name: 'Sides' }
-      ],
-      menuItems: [
-        {
-          id: 1,
-          name: 'OG Flavored Wings',
-          price: 230,
-          image: '/og-flavored-wings.png',
-          category: 'wings',
-          description: 'Signature crispy wings with our OG flavor'
-        },
-        {
-          id: 2,
-          name: 'Chicken Poppers',
-          price: 215,
-          image: '/chicken-poppers.png',
-          category: 'sides',
-          description: 'Crispy bite-sized chicken pieces'
-        },
-        {
-          id: 3,
-          name: 'Chicken Sandwich',
-          price: 260,
-          image: '/chicken-sandwich.png',
-          category: 'sandwiches',
-          description: 'Juicy chicken breast in a soft bun'
-        },
-        {
-          id: 4,
-          name: 'Poppers and Fries',
-          price: 240,
-          image: '/poppers-and-fries.png',
-          category: 'combos',
-          description: 'Chicken poppers served with crispy fries'
-        },
-        {
-          id: 5,
-          name: 'Buffalo Wings',
-          price: 245,
-          image: '/og-flavored-wings.png',
-          category: 'wings',
-          description: 'Spicy buffalo sauce wings'
-        },
-        {
-          id: 6,
-          name: 'Honey Mustard Wings',
-          price: 245,
-          image: '/og-flavored-wings.png',
-          category: 'wings',
-          description: 'Sweet and tangy honey mustard wings'
-        },
-        {
-          id: 7,
-          name: 'BBQ Wings',
-          price: 245,
-          image: '/og-flavored-wings.png',
-          category: 'wings',
-          description: 'Smoky BBQ flavored wings'
-        },
-        {
-          id: 8,
-          name: 'Spicy Chicken Sandwich',
-          price: 270,
-          image: '/chicken-sandwich.png',
-          category: 'sandwiches',
-          description: 'Spicy chicken with special sauce'
-        },
-        {
-          id: 9,
-          name: 'Classic Combo',
-          price: 280,
-          image: '/poppers-and-fries.png',
-          category: 'combos',
-          description: 'Wings, fries, and drink'
-        },
-        {
-          id: 10,
-          name: 'Family Combo',
-          price: 450,
-          image: '/poppers-and-fries.png',
-          category: 'combos',
-          description: 'Perfect for sharing with the family'
-        },
-        {
-          id: 11,
-          name: 'Crispy Fries',
-          price: 120,
-          image: '/poppers-and-fries.png',
-          category: 'sides',
-          description: 'Golden crispy fries'
-        },
-        {
-          id: 12,
-          name: 'Onion Rings',
-          price: 130,
-          image: '/chicken-poppers.png',
-          category: 'sides',
-          description: 'Crispy battered onion rings'
-        }
-      ]
+      menuItems: [],
+      filterCategories: [],
+      loading: true,
+      error: null
     }
+  },
+  async mounted() {
+    await this.loadProducts()
   },
   computed: {
     filteredMenuItems() {
@@ -238,6 +142,56 @@ export default {
     }
   },
   methods: {
+    async loadProducts() {
+      try {
+        const { getProducts } = useApi()
+        const response = await getProducts()
+        this.menuItems = response.data.map(product => ({
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          category: product.category,
+          description: product.description,
+          variants: product.variants || [],
+          addons: product.addons || []
+        }))
+        
+        // Extract unique categories from products
+        this.loadCategoriesFromProducts()
+        this.loading = false
+      } catch (error) {
+        console.error('Error loading products:', error)
+        this.error = 'Failed to load menu items'
+        this.loading = false
+      }
+    },
+    loadCategoriesFromProducts() {
+      const uniqueCategories = new Set()
+      this.menuItems.forEach(item => {
+        if (item.category) {
+          uniqueCategories.add(item.category)
+        }
+      })
+      
+      // Map categories to filter format (capitalize first letter)
+      this.filterCategories = Array.from(uniqueCategories).map(cat => ({
+        id: cat,
+        name: cat.charAt(0).toUpperCase() + cat.slice(1)
+      }))
+    },
+    async loadCategories() {
+      try {
+        const { getCategories } = useApi()
+        const response = await getCategories()
+        this.filterCategories = response.data.map(cat => ({
+          id: cat._id,
+          name: cat.name
+        }))
+      } catch (error) {
+        console.error('Error loading categories:', error)
+      }
+    },
     handleAddToCart(item) {
       this.cartCount++
       console.log('Added to cart:', item)
@@ -268,7 +222,7 @@ export default {
   overflow: hidden;
   max-width: 280px;
   margin: 0 auto;
-  height: 165px;
+  height: 220px;
 }
 
 :deep(.menu-card:hover) {
@@ -282,7 +236,7 @@ export default {
   border-radius: 10px;
   padding: 0.5rem;
   margin-bottom: 0.625rem;
-  height: 95px;
+  height: 145px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -297,14 +251,15 @@ export default {
 :deep(.menu-card .image-container img) {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   transition: transform 0.3s ease;
-  max-width: 85%;
-  max-height: 85%;
+  max-width: 100%;
+  max-height: 100%;
+  transform: scale(1.06);
 }
 
 :deep(.menu-card:hover .image-container img) {
-  transform: scale(1.06);
+  transform: scale(1.1);
 }
 
 :deep(.menu-card .text-section) {

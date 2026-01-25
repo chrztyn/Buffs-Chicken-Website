@@ -27,8 +27,8 @@ const productSchema = new mongoose.Schema(
       required: true
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
+      type: String,
+      enum: ['wings', 'sandwiches', 'combos', 'sides', 'meals', 'pasta'],
       required: true
     },
     image: String, // URL to image

@@ -53,6 +53,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))

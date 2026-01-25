@@ -14,6 +14,9 @@ useHead({
     { charset: 'utf-8' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
   ],
+  link: [
+    { rel: 'icon', href: '/buffs-logo.png' }
+  ],
   script: [
     {
       src: 'https://www.googletagmanager.com/gtag/js?id=G-P48SW3GZ05',

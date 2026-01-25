@@ -15,22 +15,27 @@
     </div>
 
     <!-- Search & Filter -->
-    <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search products..."
-        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] font-['Unbounded']"
-      />
-      <select
-        v-model="filterCategory"
-        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] font-['Unbounded']"
-      >
-        <option value="">All Categories</option>
-        <option v-for="cat in categories" :key="cat._id" :value="cat._id">
-          {{ cat.name }}
-        </option>
-      </select>
+    <div class="mb-6 space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search products..."
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] font-['Unbounded']"
+        />
+        <select
+          v-model="filterCategory"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] font-['Unbounded']"
+        >
+          <option value="">All Categories</option>
+          <option value="wings">Wings</option>
+          <option value="sandwiches">Sandwiches</option>
+          <option value="combos">Combos</option>
+          <option value="sides">Sides</option>
+          <option value="meals">Meals</option>
+          <option value="pasta">Pasta</option>
+        </select>
+      </div>
     </div>
 
     <!-- Products Grid -->
@@ -42,10 +47,10 @@
       <div
         v-for="product in filteredProducts"
         :key="product._id"
-        class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
+        class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col h-full"
       >
         <!-- Product Image -->
-        <div class="w-full h-48 bg-gray-200 overflow-hidden">
+        <div class="w-full h-56 bg-gray-200 overflow-hidden flex-shrink-0">
           <img
             :src="product.image"
             :alt="product.name"
@@ -54,40 +59,49 @@
         </div>
 
         <!-- Product Info -->
-        <div class="p-4">
-          <h3 class="font-['Caprasimo'] text-xl text-[#1A4189] mb-1">{{ product.name }}</h3>
-          <p class="text-gray-600 text-sm font-['Unbounded'] mb-3">{{ product.description }}</p>
+        <div class="p-5 flex flex-col flex-grow">
+          <!-- Title -->
+          <h3 class="font-['Caprasimo'] text-lg text-[#1A4189] mb-1 line-clamp-2">{{ product.name }}</h3>
+          
+          <!-- Description -->
+          <p class="text-gray-600 text-xs font-['Unbounded'] mb-4 line-clamp-2 flex-grow">{{ product.description }}</p>
 
-          <div class="flex items-center justify-between mb-4">
+          <!-- Price & Status -->
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
             <span class="font-['Caprasimo'] text-2xl text-[#FE601C]">${{ product.price }}</span>
             <span
-              :class="product.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-              class="px-3 py-1 rounded-full text-xs font-['Unbounded'] font-bold"
+              :class="product.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+              class="px-2 py-1 rounded-full text-xs font-['Unbounded'] font-bold whitespace-nowrap"
             >
               {{ product.isAvailable ? 'Available' : 'Out of Stock' }}
             </span>
           </div>
 
           <!-- Variants & Add-ons Preview -->
-          <div v-if="product.variants?.length > 0" class="mb-3 text-sm font-['Unbounded']">
-            <p class="text-gray-700 font-semibold">Variants: {{ product.variants.length }}</p>
-          </div>
-
-          <div v-if="product.addons?.length > 0" class="mb-3 text-sm font-['Unbounded']">
-            <p class="text-gray-700 font-semibold">Extras: {{ product.addons.length }}</p>
+          <div v-if="product.variants?.length > 0 || product.addons?.length > 0" class="mb-4 text-xs font-['Unbounded'] text-gray-700">
+            <div class="flex gap-3">
+              <span v-if="product.variants?.length > 0" class="flex items-center gap-1">
+                <span class="font-semibold">Variants:</span>
+                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ product.variants.length }}</span>
+              </span>
+              <span v-if="product.addons?.length > 0" class="flex items-center gap-1">
+                <span class="font-semibold">Extras:</span>
+                <span class="bg-green-100 text-green-700 px-2 py-1 rounded">{{ product.addons.length }}</span>
+              </span>
+            </div>
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex gap-2">
+          <div class="flex gap-3">
             <button
               @click="openEditProduct(product)"
-              class="flex-1 px-3 py-2 bg-blue-100 text-blue-700 font-['Unbounded'] font-bold rounded-lg hover:bg-blue-200 transition"
+              class="flex-1 px-4 py-2 bg-[#1A4189] text-white font-['Unbounded'] font-bold rounded-lg hover:bg-[#153066] transition"
             >
               Edit
             </button>
             <button
               @click="deleteProduct(product._id)"
-              class="flex-1 px-3 py-2 bg-red-100 text-red-700 font-['Unbounded'] font-bold rounded-lg hover:bg-red-200 transition"
+              class="flex-1 px-4 py-2 bg-[#FE601C] text-white font-['Unbounded'] font-bold rounded-lg hover:bg-[#e5551a] transition"
             >
               Delete
             </button>
@@ -146,15 +160,18 @@
             <label class="block font-['Unbounded'] font-semibold text-[#1A4189] mb-2">
               Category
             </label>
-            <select
-              v-model="productForm.category"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C]"
-            >
-              <option value="">Select Category</option>
-              <option v-for="cat in categories" :key="cat._id" :value="cat._id">
-                {{ cat.name }}
-              </option>
-            </select>
+        <select
+          v-model="productForm.category"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C]"
+        >
+          <option value="">Select Category</option>
+          <option value="wings">Wings</option>
+          <option value="sandwiches">Sandwiches</option>
+          <option value="combos">Combos</option>
+          <option value="sides">Sides</option>
+          <option value="meals">Meals</option>
+          <option value="pasta">Pasta</option>
+        </select>
           </div>
         </div>
 
@@ -165,7 +182,15 @@
           </label>
           <div
             @click="triggerFileInput"
-            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#FE601C] transition"
+            @dragover.prevent="isDragOver = true"
+            @dragleave="isDragOver = false"
+            @drop.prevent="handleDrop"
+            :class="[
+              'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition',
+              isDragOver 
+                ? 'border-[#FE601C] bg-orange-50' 
+                : 'border-gray-300 hover:border-[#FE601C]'
+            ]"
           >
             <div v-if="!productForm.imagePreview" class="text-gray-500 font-['Unbounded']">
               <p class="mb-2">Click to upload or drag and drop</p>
@@ -331,10 +356,10 @@ const products = ref<any[]>([])
 const categories = ref<any[]>([])
 const searchQuery = ref('')
 const filterCategory = ref('')
-
 const showProductModal = ref(false)
 const editingProduct = ref<any>(null)
 const fileInput = ref()
+const isDragOver = ref(false)
 
 const productForm = ref<any>({
   name: '',
@@ -375,6 +400,7 @@ const loadCategories = async () => {
   try {
     const response = await getCategories()
     categories.value = response.data
+    console.log('Categories loaded:', categories.value)
   } catch (error) {
     console.error('Failed to load categories:', error)
   }
@@ -423,6 +449,23 @@ const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
+const handleDrop = (event: DragEvent) => {
+  isDragOver.value = false
+  const files = event.dataTransfer?.files
+  if (files && files.length > 0) {
+    const file = files[0]
+    // Simulate a change event with the dropped file
+    const dataTransfer = new DataTransfer()
+    dataTransfer.items.add(file)
+    const changeEvent = new Event('change', { bubbles: true })
+    Object.defineProperty(changeEvent, 'target', {
+      value: { files: dataTransfer.files },
+      enumerable: true
+    })
+    handleImageUpload(changeEvent)
+  }
+}
+
 const handleImageUpload = async (event: any) => {
   const file = event.target.files?.[0]
   if (!file) return
@@ -434,20 +477,35 @@ const handleImageUpload = async (event: any) => {
   }
   reader.readAsDataURL(file)
 
-  // Upload to Cloudinary
+  // Upload to backend (saves locally + Cloudinary backup)
   const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', 'buffs_restaurant') // Make sure this preset exists
+  formData.append('image', file)
 
   try {
-    const response = await fetch('https://api.cloudinary.com/v1_1/buffs-menu/image/upload', {
+    const token = localStorage.getItem('admin_token')
+    if (!token) {
+      throw new Error('Admin token not found. Please log in again.')
+    }
+
+    const response = await fetch('http://localhost:5001/api/admin/upload', {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
       body: formData
     })
+    
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Upload failed')
+    }
+    
     const data = await response.json()
-    productForm.value.image = data.secure_url
+    productForm.value.image = data.url
+    console.log('Image uploaded:', { local: data.url, cloudinary: data.cloudinaryUrl })
   } catch (error) {
     console.error('Image upload failed:', error)
+    alert('Failed to upload image: ' + (error instanceof Error ? error.message : 'Unknown error'))
   }
 }
 

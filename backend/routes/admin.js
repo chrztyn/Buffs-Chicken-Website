@@ -9,33 +9,37 @@ const Blog = require('../models/Blog');
 const Notification = require('../models/Notification');
 const authenticateAdmin = require('../middleware/authenticateAdmin');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { Readable } = require('stream');
+const fs = require('fs');
+const path = require('path');
 
-// Configure Cloudinary (optional - for image uploads)
-cloudinary.config({
-  cloud_name: 'dkpa3ohnl',
-  api_key: '995717211964521',
-  api_secret: 'VM2MIzKejNE9p_xU0-kSjd6x-Z4'
-});
+// Ensure backend-images directory exists
+const backendImagesDir = path.join(__dirname, '../public/backend-images');
+if (!fs.existsSync(backendImagesDir)) {
+  fs.mkdirSync(backendImagesDir, { recursive: true });
+}
 
 // Multer setup for file uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Helper to upload to Cloudinary
-const uploadToCloudinary = (file) => {
+// Helper to save image locally
+const saveImageLocally = (file) => {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { resource_type: 'auto' },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      }
-    );
-    Readable.from(file.buffer).pipe(stream);
+    try {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = path.extname(file.originalname);
+      const name = path.basename(file.originalname, ext);
+      const filename = `${name}-${uniqueSuffix}${ext}`;
+      const filepath = path.join(backendImagesDir, filename);
+      
+      fs.writeFileSync(filepath, file.buffer);
+      resolve(`/backend-images/${filename}`);
+    } catch (error) {
+      reject(error);
+    }
   });
 };
+
 
 // Admin Login
 router.post('/login', async (req, res) => {
@@ -75,7 +79,7 @@ router.post('/login', async (req, res) => {
 
 // ========== UPLOAD ROUTES ==========
 
-// Upload image to Cloudinary
+// Upload image endpoint
 router.post('/upload', authenticateAdmin, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
@@ -84,12 +88,17 @@ router.post('/upload', authenticateAdmin, upload.single('image'), async (req, re
 
     console.log('Image upload request received:', req.file.originalname);
 
-    const imageUrl = await uploadToCloudinary(req.file);
-    console.log('Image uploaded to Cloudinary:', imageUrl);
+    // Save locally (primary storage)
+    const localUrl = await saveImageLocally(req.file);
+    console.log('Image saved locally:', localUrl);
+
+    const protocol = req.protocol || 'http';
+    const host = req.get('host') || 'localhost:5001';
+    const fullUrl = `${protocol}://${host}${localUrl}`;
 
     res.json({ 
       message: 'Image uploaded successfully',
-      url: imageUrl 
+      url: fullUrl
     });
   } catch (error) {
     console.error('Image upload error:', error);
@@ -106,7 +115,7 @@ router.post('/products', authenticateAdmin, upload.single('image'), async (req, 
     let imageUrl = null;
 
     if (req.file) {
-      imageUrl = await uploadToCloudinary(req.file);
+      imageUrl = await saveImageLocally(req.file);
     }
 
     const product = new Product({
@@ -133,7 +142,7 @@ router.put('/products/:id', authenticateAdmin, upload.single('image'), async (re
     const updateData = { name, description, price, category, isAvailable };
 
     if (req.file) {
-      updateData.image = await uploadToCloudinary(req.file);
+      updateData.image = await saveImageLocally(req.file);
     }
 
     if (variants) updateData.variants = JSON.parse(variants);
@@ -165,7 +174,7 @@ router.post('/categories', authenticateAdmin, upload.single('image'), async (req
     let imageUrl = null;
 
     if (req.file) {
-      imageUrl = await uploadToCloudinary(req.file);
+      imageUrl = await saveImageLocally(req.file);
     }
 
     const category = new Category({
@@ -190,7 +199,7 @@ router.put('/categories/:id', authenticateAdmin, upload.single('image'), async (
     const updateData = { name, description, displayOrder };
 
     if (req.file) {
-      updateData.image = await uploadToCloudinary(req.file);
+      updateData.image = await saveImageLocally(req.file);
     }
 
     const category = await Category.findByIdAndUpdate(req.params.id, updateData, { new: true });
@@ -211,6 +220,33 @@ router.delete('/categories/:id', authenticateAdmin, async (req, res) => {
 });
 
 // ========== BLOG ROUTES ==========
+
+// Upload blog image
+router.post('/blogs/upload', authenticateAdmin, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+
+    console.log('Blog image upload request received:', req.file.originalname);
+
+    // Save locally
+    const localUrl = await saveImageLocally(req.file);
+    console.log('Blog image saved locally:', localUrl);
+
+    const protocol = req.protocol || 'http';
+    const host = req.get('host') || 'localhost:5001';
+    const fullUrl = `${protocol}://${host}${localUrl}`;
+
+    res.json({ 
+      message: 'Blog image uploaded successfully',
+      url: fullUrl
+    });
+  } catch (error) {
+    console.error('Blog image upload error:', error);
+    res.status(500).json({ message: 'Failed to upload blog image', error: error.message });
+  }
+});
 
 // Create blog
 router.post('/blogs', authenticateAdmin, async (req, res) => {
