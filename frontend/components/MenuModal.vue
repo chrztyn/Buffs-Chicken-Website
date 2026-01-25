@@ -5,7 +5,7 @@
             <div 
                 v-if="isOpen"
                 @click="closeModal"
-                class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+                class="fixed inset-0 bg-black/50 backdrop-blur-sm z-100"
             ></div>
         </transition>
 
@@ -13,11 +13,11 @@
         <transition name="slide-scale">
             <div 
                 v-if="isOpen"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+                class="fixed inset-0 z-150 flex items-center justify-center p-4 pointer-events-none"
             >
                 <div 
                     @click.stop
-                    class="bg-white rounded-2xl shadow-xl max-w-sm w-full pointer-events-auto overflow-y-auto max-h-[85vh]"
+                    class="bg-white rounded-2xl shadow-xl w-full max-w-2xl pointer-events-auto overflow-y-auto max-h-[85vh]"
                 >
                     <!-- Close Button -->
                     <button
@@ -73,6 +73,87 @@
                                 Customize
                             </h2>
 
+                            <!-- Variants Section -->
+                            <div v-for="variant in item.variants" :key="variant.name" class="variant-group">
+                                <label class="variant-label" style="font-family: 'Unbounded';">
+                                    {{ variant.name }}
+                                </label>
+                                <div class="variant-buttons-container">
+                                    <button
+                                        v-for="option in variant.options"
+                                        :key="option.name"
+                                        type="button"
+                                        @click="handleVariantChange(variant.name, option.name)"
+                                        :class="['variant-button', {
+                                            'variant-button-active': selectedVariants[variant.name] === option.name
+                                        }]"
+                                    >
+                                        <span class="variant-button-text">{{ option.name }}</span>
+                                        <span v-if="option.priceModifier > 0" class="variant-button-price">
+                                            ₱{{ option.priceModifier.toFixed(2) }}
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Addons Section -->
+                            <div v-if="item.addons && item.addons.length > 0" class="addons-group">
+                                <label class="addons-label" style="font-family: 'Unbounded';">
+                                    Add-ons
+                                </label>
+                                <div class="addon-options">
+                                    <label 
+                                        v-for="addon in item.addons" 
+                                        :key="addon.name"
+                                        class="addon-option"
+                                    >
+                                        <input 
+                                            type="checkbox" 
+                                            :value="addon.name"
+                                            v-model="selectedAddons"
+                                            class="addon-checkbox"
+                                        />
+                                        <span style="font-family: 'Unbounded';">
+                                            {{ addon.name }}
+                                        </span>
+                                        <span class="addon-price">₱{{ addon.price.toFixed(2) }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Sauces Section -->
+                            <div v-if="item.sauces && item.sauces.length > 0" class="sauces-wrapper">
+                                <div v-for="sauce in item.sauces" :key="sauce.name" class="sauces-group">
+                                    <label class="sauces-label" style="font-family: 'Unbounded';">
+                                        {{ sauce.name }}
+                                        <span class="sauce-counter">
+                                            ({{ selectedSauces[sauce.name]?.length || 0 }} of {{ sauce.maxSelections }} selected)
+                                        </span>
+                                    </label>
+                                    <div class="sauce-options">
+                                        <label 
+                                            v-for="option in sauce.options" 
+                                            :key="option.name"
+                                            class="sauce-option"
+                                        >
+                                            <input 
+                                                type="checkbox" 
+                                                :checked="selectedSauces[sauce.name]?.includes(option.name)"
+                                                :disabled="selectedSauces[sauce.name]?.length >= sauce.maxSelections && !selectedSauces[sauce.name]?.includes(option.name)"
+                                                @change="handleSauceChange(sauce.name, option.name)"
+                                                class="sauce-checkbox"
+                                            />
+                                            <span style="font-family: 'Unbounded';">
+                                                {{ option.name }}
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <p v-if="selectedSauces[sauce.name]?.length >= sauce.maxSelections" class="sauce-max-reached" style="font-family: 'Unbounded';">
+                                        ✓ Maximum {{ sauce.name.toLowerCase() }} selected
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- Quantity Selector -->
                             <div class="quantity-group">
                                 <label class="quantity-label" style="font-family: 'Unbounded';">
@@ -115,11 +196,25 @@
                         <!-- Divider -->
                         <div class="modal-divider"></div>
 
+                        <!-- Validation Error Message -->
+                        <transition name="slide-down">
+                            <div v-if="validationError" class="validation-error">
+                                <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>{{ validationError }}</span>
+                            </div>
+                        </transition>
+
                         <!-- Price Summary -->
                         <div class="price-summary">
                             <div class="price-row">
-                                <span class="text-gray-600" style="font-family: 'Unbounded';">Subtotal ({{ quantity }} x ₱{{ item.price }})</span>
-                                <span class="font-semibold text-gray-900">₱{{ (item.price * quantity).toFixed(2) }}</span>
+                                <span class="text-gray-600" style="font-family: 'Unbounded';">Subtotal ({{ quantity }} x ₱{{ basePrice.toFixed(2) }})</span>
+                                <span class="font-semibold text-gray-900">₱{{ (basePrice * quantity).toFixed(2) }}</span>
+                            </div>
+                            <div v-if="addonsCost > 0" class="price-row">
+                                <span class="text-gray-600" style="font-family: 'Unbounded';">Add-ons</span>
+                                <span class="font-semibold text-gray-900">₱{{ addonsCost.toFixed(2) }}</span>
                             </div>
                             <div class="price-divider"></div>
                             <div class="price-total-row">
@@ -157,10 +252,15 @@
 <script>
 export default {
     name: 'MenuModal',
+    emits: ['close', 'add-to-cart'],
     data() {
         return {
             quantity: 1,
-            notes: ''
+            notes: '',
+            selectedVariants: {},
+            selectedAddons: [],
+            selectedSauces: {},
+            validationError: ''
         };
     },
     props: {
@@ -175,23 +275,102 @@ export default {
                 name: String,
                 price: Number,
                 image: String,
-                description: String
+                description: String,
+                variants: Array,
+                addons: Array
             }
         }
     },
     computed: {
+        basePrice() {
+            // Check if any variant is selected
+            if (this.item.variants && this.item.variants.length > 0) {
+                for (const variant of this.item.variants) {
+                    const selectedOption = variant.options.find(
+                        opt => opt.name === this.selectedVariants[variant.name]
+                    );
+                    if (selectedOption && selectedOption.priceModifier !== undefined) {
+                        // priceModifier is the TOTAL price for this variant, not an addition
+                        return selectedOption.priceModifier;
+                    }
+                }
+            }
+            
+            // If no variant selected, use base product price
+            return this.item.price;
+        },
+        addonsCost() {
+            let cost = 0;
+            if (this.item.addons && this.selectedAddons.length > 0) {
+                this.item.addons.forEach(addon => {
+                    if (this.selectedAddons.includes(addon.name)) {
+                        cost += addon.price;
+                    }
+                });
+            }
+            return cost;
+        },
         totalPrice() {
-            return this.item.price * this.quantity;
+            return (this.basePrice * this.quantity) + this.addonsCost;
+        }
+    },
+    watch: {
+        isOpen(newVal) {
+            if (newVal) {
+                this.initializeVariants();
+            }
         }
     },
     methods: {
+        handleVariantChange(variantName, optionName) {
+            // Toggle: if already selected, deselect; otherwise select
+            if (this.selectedVariants[variantName] === optionName) {
+                delete this.selectedVariants[variantName];
+            } else {
+                this.selectedVariants[variantName] = optionName;
+            }
+        },
+        handleSauceChange(sauceName, optionName) {
+            // Toggle sauce selection
+            if (!this.selectedSauces[sauceName]) {
+                this.selectedSauces[sauceName] = [];
+            }
+            
+            const index = this.selectedSauces[sauceName].indexOf(optionName);
+            if (index > -1) {
+                // Remove if already selected
+                this.selectedSauces[sauceName].splice(index, 1);
+            } else {
+                // Add if not selected
+                this.selectedSauces[sauceName].push(optionName);
+            }
+        },
         addToCart() {
-            this.$emit('add-to-cart', {
+            // Validate that at least one sauce is selected for each sauce group
+            if (this.item.sauces && this.item.sauces.length > 0) {
+                for (const sauce of this.item.sauces) {
+                    if (!this.selectedSauces[sauce.name] || this.selectedSauces[sauce.name].length === 0) {
+                        this.validationError = `Please select at least one ${sauce.name.toLowerCase()}`;
+                        setTimeout(() => {
+                            this.validationError = '';
+                        }, 3000);
+                        return;
+                    }
+                }
+            }
+
+            const cartItem = {
                 ...this.item,
                 quantity: this.quantity,
                 notes: this.notes,
+                selectedVariants: { ...this.selectedVariants },
+                selectedAddons: [...this.selectedAddons],
+                selectedSauces: JSON.parse(JSON.stringify(this.selectedSauces)),
+                basePrice: this.basePrice,
+                addonsCost: this.addonsCost,
                 totalPrice: this.totalPrice
-            });
+            };
+            this.$emit('add-to-cart', cartItem);
             this.resetModal();
             this.closeModal();
         },
@@ -201,6 +380,25 @@ export default {
         resetModal() {
             this.quantity = 1;
             this.notes = '';
+            this.selectedVariants = {};
+            this.selectedAddons = [];
+            this.selectedSauces = {};
+            this.validationError = '';
+        },
+        initializeVariants() {
+            // Initialize variants as EMPTY (no auto-selection)
+            // User selects variant only if they want a different size
+            this.selectedVariants = {};
+
+            // Initialize sauces with empty arrays
+            const sauces = {};
+            if (this.item.sauces && this.item.sauces.length > 0) {
+                this.item.sauces.forEach(sauce => {
+                    sauces[sauce.name] = [];
+                });
+            }
+            this.selectedSauces = sauces;
+            this.validationError = '';
         }
     }
 };
@@ -295,6 +493,224 @@ export default {
     letter-spacing: 0.25em;
 }
 
+/* Variants Section */
+.variant-group {
+    margin-bottom: 2rem;
+}
+
+.variant-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.variant-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.variant-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Unbounded', sans-serif;
+    position: relative;
+    background: white;
+}
+
+.variant-button:hover {
+    border-color: #FE601C;
+    background-color: #fff8f4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(254, 96, 28, 0.15);
+}
+
+.variant-button-active {
+    border-color: #FE601C !important;
+    background: linear-gradient(135deg, #FE601C 0%, #ff7d3a 100%);
+    color: white;
+    box-shadow: 0 6px 20px rgba(254, 96, 28, 0.4);
+}
+
+.variant-button-active .variant-button-text {
+    color: white;
+    font-weight: 700;
+}
+
+.variant-button-active .variant-button-price {
+    color: #fff8f4;
+    font-weight: 600;
+}
+
+.variant-button-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    transition: color 0.25s;
+}
+
+.variant-button-price {
+    font-size: 0.8rem;
+    color: #FE601C;
+    font-weight: 600;
+    transition: color 0.25s;
+}
+
+/* Addons Section */
+.addons-group {
+    margin-bottom: 1.75rem;
+}
+
+.addons-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.addon-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.addon-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: #374151;
+    justify-content: space-between;
+}
+
+.addon-checkbox {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: #FE601C;
+}
+
+.addon-price {
+    color: #FE601C;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Sauces Section */
+.sauces-group {
+    margin-bottom: 1.75rem;
+}
+
+.sauces-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sauce-counter {
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
+}
+
+.sauce-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.sauce-option {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #374151;
+    transition: all 0.2s;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
+.sauce-option:hover {
+    background-color: #f3f4f6;
+}
+
+.sauce-option:has(.sauce-checkbox:checked) {
+    background-color: #fef3e2;
+}
+
+.sauce-checkbox {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: #FE601C;
+    flex-shrink: 0;
+}
+
+.sauce-checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: #f3f4f6;
+}
+
+.sauce-max-reached {
+    font-size: 0.8rem;
+    color: #059669;
+    font-weight: 500;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background-color: #ecfdf5;
+    border-radius: 6px;
+    border-left: 3px solid #059669;
+}
+
+/* Sauces Wrapper */
+.sauces-wrapper {
+    margin-bottom: 1.75rem;
+}
+
+/* Validation Error */
+.validation-error {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: #fee2e2;
+    border-radius: 8px;
+    border-left: 4px solid #dc2626;
+    color: #991b1b;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.error-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: #dc2626;
+}
+
+/* Quantity Section */
 .quantity-group {
     margin-bottom: 1.75rem;
 }
@@ -486,5 +902,20 @@ export default {
 .slide-scale-leave-to {
     opacity: 0;
     transform: scale(0.7) translateY(20px);
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+    transition: all 0.3s ease;
+}
+
+.slide-down-enter-from {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.slide-down-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 </style>

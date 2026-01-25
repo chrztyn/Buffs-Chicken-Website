@@ -42,7 +42,7 @@ router.get('/category/:categoryId', async (req, res) => {
 // Admin: Create product
 router.post('/admin/create', async (req, res) => {
   try {
-    const { name, description, price, category, image, variants, addons } = req.body;
+    const { name, description, price, category, image, variants, sauces, addons } = req.body;
 
     // Validation
     if (!name || !price || !category) {
@@ -56,6 +56,7 @@ router.post('/admin/create', async (req, res) => {
       category,
       image,
       variants: variants || [],
+      sauces: sauces || [],
       addons: addons || [],
       isAvailable: true
     });
@@ -70,7 +71,7 @@ router.post('/admin/create', async (req, res) => {
 // Admin: Update product
 router.put('/admin/:id', async (req, res) => {
   try {
-    const { name, description, price, category, image, variants, addons, isAvailable } = req.body;
+    const { name, description, price, category, image, variants, sauces, addons, isAvailable } = req.body;
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -81,6 +82,7 @@ router.put('/admin/:id', async (req, res) => {
         category,
         image,
         variants: variants || [],
+        sauces: sauces || [],
         addons: addons || [],
         isAvailable: isAvailable !== undefined ? isAvailable : true
       },

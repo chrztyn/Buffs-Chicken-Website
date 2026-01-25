@@ -235,37 +235,137 @@
         <!-- Variants Section -->
         <div class="border-t pt-4">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="font-['Unbounded'] font-bold text-[#1A4189]">Variants (Sizes/Types)</h3>
+            <h3 class="font-['Unbounded'] font-bold text-[#1A4189]">Variants (e.g., Pieces, Size)</h3>
             <button
               @click="addVariant"
               type="button"
               class="px-3 py-1 bg-blue-100 text-blue-700 font-['Unbounded'] font-bold rounded text-sm hover:bg-blue-200"
             >
-              + Add
+              + Add Variant
             </button>
           </div>
-          <div v-for="(variant, idx) in productForm.variants" :key="idx" class="mb-3 p-3 bg-blue-50 rounded-lg">
-            <div class="grid grid-cols-2 gap-2 mb-2">
+          <div v-for="(variant, vidx) in productForm.variants" :key="vidx" class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="mb-3">
               <input
                 v-model="variant.name"
                 type="text"
-                placeholder="e.g., Small, Medium, Large"
-                class="px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#FE601C]"
-              />
-              <input
-                v-model.number="variant.price"
-                type="number"
-                step="0.01"
-                placeholder="Extra price"
-                class="px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#FE601C]"
+                placeholder="e.g., Pieces, Size, Protein Type"
+                class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#FE601C] font-['Unbounded'] font-semibold"
               />
             </div>
+            
+            <!-- Variant Options -->
+            <div class="mb-3">
+              <label class="text-xs font-['Unbounded'] font-bold text-gray-700 mb-2 block">Options for this variant:</label>
+              <div v-for="(option, oidx) in variant.options" :key="oidx" class="grid grid-cols-3 gap-2 mb-2">
+                <input
+                  v-model="option.name"
+                  type="text"
+                  placeholder="e.g., 6 Pieces"
+                  class="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#FE601C]"
+                />
+                <input
+                  v-model.number="option.priceModifier"
+                  type="number"
+                  step="0.01"
+                  placeholder="Price modifier"
+                  class="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#FE601C]"
+                />
+                <button
+                  @click="removeVariantOption(vidx, oidx)"
+                  type="button"
+                  class="text-red-600 font-['Unbounded'] font-bold text-xs hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+              <button
+                @click="addVariantOption(vidx)"
+                type="button"
+                class="text-xs px-2 py-1 bg-blue-200 text-blue-800 font-['Unbounded'] font-bold rounded hover:bg-blue-300"
+              >
+                + Add Option
+              </button>
+            </div>
+            
             <button
-              @click="removeVariant(idx)"
+              @click="removeVariant(vidx)"
               type="button"
               class="text-red-600 font-['Unbounded'] font-bold text-sm hover:underline"
             >
-              Remove
+              Remove Variant
+            </button>
+          </div>
+        </div>
+
+        <!-- Sauces Section -->
+        <div class="border-t pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-['Unbounded'] font-bold text-[#1A4189]">Sauces (Optional)</h3>
+            <button
+              @click="addSauce"
+              type="button"
+              class="px-3 py-1 bg-orange-100 text-orange-700 font-['Unbounded'] font-bold rounded text-sm hover:bg-orange-200"
+            >
+              + Add Sauce Group
+            </button>
+          </div>
+          <div v-for="(sauce, sidx) in productForm.sauces" :key="sidx" class="mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label class="text-xs font-['Unbounded'] font-bold text-gray-700 mb-1 block">Sauce Group Name:</label>
+                <input
+                  v-model="sauce.name"
+                  type="text"
+                  placeholder="e.g., Sauce Type, Dipping Sauce"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#FE601C]"
+                />
+              </div>
+              <div>
+                <label class="text-xs font-['Unbounded'] font-bold text-gray-700 mb-1 block">Max Selections:</label>
+                <input
+                  v-model.number="sauce.maxSelections"
+                  type="number"
+                  min="1"
+                  placeholder="e.g., 2"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#FE601C]"
+                />
+              </div>
+            </div>
+            
+            <!-- Sauce Options -->
+            <div class="mb-3">
+              <label class="text-xs font-['Unbounded'] font-bold text-gray-700 mb-2 block">Sauce Options:</label>
+              <div v-for="(option, oidx) in sauce.options" :key="oidx" class="flex gap-2 mb-2">
+                <input
+                  v-model="option.name"
+                  type="text"
+                  placeholder="e.g., Spicy, Mild, BBQ"
+                  class="flex-1 px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-[#FE601C]"
+                />
+                <button
+                  @click="removeSauceOption(sidx, oidx)"
+                  type="button"
+                  class="text-red-600 font-['Unbounded'] font-bold text-xs hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+              <button
+                @click="addSauceOption(sidx)"
+                type="button"
+                class="text-xs px-2 py-1 bg-orange-200 text-orange-800 font-['Unbounded'] font-bold rounded hover:bg-orange-300"
+              >
+                + Add Sauce Option
+              </button>
+            </div>
+            
+            <button
+              @click="removeSauce(sidx)"
+              type="button"
+              class="text-red-600 font-['Unbounded'] font-bold text-sm hover:underline"
+            >
+              Remove Sauce Group
             </button>
           </div>
         </div>
@@ -370,6 +470,7 @@ const productForm = ref<any>({
   imagePreview: '',
   isAvailable: true,
   variants: [],
+  sauces: [],
   addons: [],
   allowSpecialRequests: false
 })
@@ -417,6 +518,7 @@ const openAddProduct = () => {
     imagePreview: '',
     isAvailable: true,
     variants: [],
+    sauces: [],
     addons: [],
     allowSpecialRequests: false
   }
@@ -434,6 +536,7 @@ const openEditProduct = (product: any) => {
     imagePreview: product.image,
     isAvailable: product.isAvailable,
     variants: product.variants || [],
+    sauces: product.sauces || [],
     addons: product.addons || [],
     allowSpecialRequests: product.allowSpecialRequests || false
   }
@@ -510,11 +613,42 @@ const handleImageUpload = async (event: any) => {
 }
 
 const addVariant = () => {
-  productForm.value.variants.push({ name: '', price: 0 })
+  productForm.value.variants.push({ 
+    name: '', 
+    options: [{ name: '', priceModifier: 0 }]
+  })
 }
 
 const removeVariant = (idx: number) => {
   productForm.value.variants.splice(idx, 1)
+}
+
+const addVariantOption = (variantIdx: number) => {
+  productForm.value.variants[variantIdx].options.push({ name: '', priceModifier: 0 })
+}
+
+const removeVariantOption = (variantIdx: number, optionIdx: number) => {
+  productForm.value.variants[variantIdx].options.splice(optionIdx, 1)
+}
+
+const addSauce = () => {
+  productForm.value.sauces.push({ 
+    name: '', 
+    maxSelections: 1,
+    options: [{ name: '' }]
+  })
+}
+
+const removeSauce = (idx: number) => {
+  productForm.value.sauces.splice(idx, 1)
+}
+
+const addSauceOption = (sauceIdx: number) => {
+  productForm.value.sauces[sauceIdx].options.push({ name: '' })
+}
+
+const removeSauceOption = (sauceIdx: number, optionIdx: number) => {
+  productForm.value.sauces[sauceIdx].options.splice(optionIdx, 1)
 }
 
 const addAddon = () => {

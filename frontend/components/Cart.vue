@@ -42,7 +42,16 @@
                     <h3 class="text-lg sm:text-xl font-['Unbounded'] font-bold text-gray-900 mb-1">
                         {{ item.name }}
                     </h3>
-                    <p class="text-[#FE601C] font-bold text-lg mb-4">₱{{ item.price }}</p>
+                    
+                    <!-- Order Description (Variant, Sauces, Add-ons, Notes) -->
+                    <div v-if="getOrderDescription(item).length > 0" class="text-xs text-gray-600 mb-3 space-y-1">
+                        <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2">
+                            <span class="text-gray-400 mt-0.5">•</span>
+                            <span>{{ description }}</span>
+                        </div>
+                    </div>
+                    
+                    <p class="text-[#FE601C] font-bold text-lg mb-4">₱{{ ((item.basePrice || item.price) + (item.addonsCost || 0)).toFixed(2) }}</p>
                     
                     <!-- Quantity Controls -->
                     <div class="flex items-center gap-3">
@@ -65,7 +74,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         </button>
-                        <span class="ml-auto text-gray-500 text-sm font-semibold">₱{{ (item.price * item.quantity).toFixed(2) }}</span>
+                        <span class="ml-auto text-gray-500 text-sm font-semibold">₱{{ (((item.basePrice || item.price) + (item.addonsCost || 0)) * item.quantity).toFixed(2) }}</span>
                     </div>
                     </div>
 
@@ -161,13 +170,58 @@
     },
     computed: {
         subtotal() {
-        return this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        return this.cartItems.reduce((sum, item) => {
+            // Use totalPrice if available (which includes basePrice + addonsCost for 1 quantity)
+            // Then multiply by quantity
+            const itemPrice = item.basePrice || item.price;
+            const addonsTotal = item.addonsCost || 0;
+            const itemTotalPrice = (itemPrice + addonsTotal) * item.quantity;
+            return sum + itemTotalPrice;
+        }, 0);
         },
         total() {
         return this.subtotal + this.deliveryFee;
         }
     },
     methods: {
+        getOrderDescription(item) {
+            const descriptions = [];
+            
+            // Add variant if selected
+            if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0) {
+                Object.values(item.selectedVariants).forEach(variantOption => {
+                    if (variantOption) {
+                        descriptions.push(variantOption);
+                    }
+                });
+            }
+            
+            // Add sauces if selected
+            if (item.selectedSauces && Object.keys(item.selectedSauces).length > 0) {
+                Object.values(item.selectedSauces).forEach(sauceArray => {
+                    if (Array.isArray(sauceArray) && sauceArray.length > 0) {
+                        descriptions.push(sauceArray.join(', '));
+                    }
+                });
+            }
+            
+            // Add add-ons if selected
+            if (item.selectedAddons && item.selectedAddons.length > 0) {
+                const addonNames = item.selectedAddons.map(addon => 
+                    typeof addon === 'string' ? addon : addon.name
+                ).join(', ');
+                if (addonNames) {
+                    descriptions.push(addonNames);
+                }
+            }
+            
+            // Add notes if provided
+            if (item.notes && item.notes.trim()) {
+                descriptions.push(`Notes: ${item.notes}`);
+            }
+            
+            return descriptions;
+        },
         increaseQuantity(index) {
         if (this.cartItems[index]) {
             this.cartItems[index].quantity++;

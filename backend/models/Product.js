@@ -1,11 +1,22 @@
 const mongoose = require('mongoose');
 
 const variantSchema = new mongoose.Schema({
-  name: String, // e.g., "Size"
+  name: String, // e.g., "Pieces", "Size"
   options: [
     {
-      name: String, // e.g., "Small", "Large"
+      name: String, // e.g., "6 Pieces", "Small"
       priceModifier: { type: Number, default: 0 }
+    }
+  ]
+});
+
+const sauceSchema = new mongoose.Schema({
+  name: String, // e.g., "Sauce Type"
+  maxSelections: { type: Number, default: 1 }, // How many sauces user can pick
+  options: [
+    {
+      name: String, // e.g., "Spicy", "Mild"
+      price: { type: Number, default: 0 } // Free sauces
     }
   ]
 });
@@ -33,6 +44,7 @@ const productSchema = new mongoose.Schema(
     },
     image: String, // URL to image
     variants: [variantSchema],
+    sauces: [sauceSchema],
     addons: [addonSchema],
     isAvailable: {
       type: Boolean,

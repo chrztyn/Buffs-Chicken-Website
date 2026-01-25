@@ -1,5 +1,5 @@
 <template>
-  <nav class="sticky top-8 z-[100] py-6">
+  <nav class="sticky top-8 z-10 py-6">
     <div class="w-full flex justify-center px-4">
       <div class="relative w-full max-w-[1000px]">
         <!-- Navbar Container -->

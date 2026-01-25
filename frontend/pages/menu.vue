@@ -1,5 +1,31 @@
 <template>
     <div class="menu-page min-h-screen bg-[#FBF4E5] overflow-x-hidden w-full">
+        <!-- Toast Notification -->
+        <transition name="toast-fade">
+            <div 
+                v-if="notification.show"
+                class="fixed top-6 right-6 z-100 flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg shadow-lg px-6 py-4 max-w-sm"
+            >
+                <div class="flex-shrink-0">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold text-gray-800">{{ notification.title }}</p>
+                    <p class="text-sm text-gray-600">{{ notification.message }}</p>
+                </div>
+                <button 
+                    @click="notification.show = false"
+                    class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </transition>
+
         <Navbar class="relative z-20" />
 
         <!-- Menu Content Section -->
@@ -67,10 +93,7 @@
                         <MenuCard
                             v-for="item in filteredMenuItems"
                             :key="item.id"
-                            :image="item.image"
-                            :name="item.name"
-                            :price="item.price"
-                            :description="item.description"
+                            :product="item"
                             @add-to-cart="handleAddToCart"
                         />
                     </div>
@@ -114,21 +137,18 @@ export default {
       menuItems: [],
       filterCategories: [],
       loading: true,
-      error: null
+      error: null,
+      notification: {
+        show: false,
+        title: '',
+        message: ''
+      }
     }
   },
   async mounted() {
+    // Load products
     await this.loadProducts()
-  },
-  mounted() {
-    // Load cart count on page load
-    const savedCart = localStorage.getItem('buffs_cart');
-    if (savedCart) {
-      const cartItems = JSON.parse(savedCart);
-      this.cartCount = cartItems.length;
-    }
-  },
-  mounted() {
+    
     // Load cart count on page load
     const savedCart = localStorage.getItem('buffs_cart');
     if (savedCart) {
@@ -170,7 +190,8 @@ export default {
           category: product.category,
           description: product.description,
           variants: product.variants || [],
-          addons: product.addons || []
+          addons: product.addons || [],
+          sauces: product.sauces || []
         }))
         
         // Extract unique categories from products
@@ -213,23 +234,40 @@ export default {
       const savedCart = localStorage.getItem('buffs_cart');
       let cartItems = savedCart ? JSON.parse(savedCart) : [];
 
-      // Check if item already exists in cart
+      // Create a unique key based on product and customizations (including sauces)
+      const customizationKey = JSON.stringify({
+        selectedVariants: item.selectedVariants || {},
+        selectedAddons: item.selectedAddons || [],
+        selectedSauces: item.selectedSauces || {}
+      });
+
+      // Check if item with same customizations already exists
       const existingItemIndex = cartItems.findIndex(
-        cartItem => cartItem.name === item.name && cartItem.notes === (item.notes || '')
+        cartItem => 
+          cartItem.id === item.id && 
+          cartItem.customizationKey === customizationKey &&
+          cartItem.notes === (item.notes || '')
       );
 
       if (existingItemIndex > -1) {
-        // If item exists, increase quantity
+        // If item exists with same customizations, increase quantity
         cartItems[existingItemIndex].quantity += item.quantity;
       } else {
-        // Add new item with quantity
+        // Add new item with all customization details (including sauces)
         cartItems.push({
+          id: item.id,
           name: item.name,
           price: item.price,
           image: item.image,
           quantity: item.quantity,
           notes: item.notes || '',
-          totalPrice: item.totalPrice
+          selectedVariants: item.selectedVariants || {},
+          selectedAddons: item.selectedAddons || [],
+          selectedSauces: item.selectedSauces || {},
+          basePrice: item.basePrice,
+          addonsCost: item.addonsCost,
+          totalPrice: item.totalPrice,
+          customizationKey: customizationKey
         });
       }
 
@@ -238,7 +276,21 @@ export default {
       
       this.cartCount = cartItems.length;
       console.log('Added to cart:', item);
-      alert('Item added to cart!');
+      
+      // Show professional notification
+      this.showNotification(`${item.name}`, `Added ${item.quantity} item${item.quantity > 1 ? 's' : ''} to cart`);
+    },
+    showNotification(title, message) {
+      this.notification = {
+        show: true,
+        title: title,
+        message: message
+      };
+      
+      // Auto-hide after 4 seconds
+      setTimeout(() => {
+        this.notification.show = false;
+      }, 4000);
     },
     handleSearch() {
       // Search is handled by computed property
@@ -251,6 +303,22 @@ export default {
 </script>
 
 <style scoped>
+/* Toast Notification Animations */
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast-fade-enter-from {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.toast-fade-leave-to {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
 /* ============ MENU CARD STYLES - SHORTENED ============ */
 :deep(.menu-card) {
   display: flex;

@@ -34,7 +34,7 @@
         <!-- Modal -->
         <MenuModal
             :isOpen="isModalOpen"
-            :item="{ name, price, image, description }"
+            :item="product"
             @close="closeModal"
             @add-to-cart="handleAddToCart"
         />
@@ -55,21 +55,33 @@ export default {
         };
     },
     props: {
-        image: {
-            type: String,
-            required: true
+        product: {
+            type: Object,
+            required: true,
+            properties: {
+                id: String,
+                name: String,
+                price: Number,
+                image: String,
+                description: String,
+                category: String,
+                variants: Array,
+                addons: Array
+            }
+        }
+    },
+    computed: {
+        image() {
+            return this.product.image;
         },
-        name: {
-            type: String,
-            required: true
+        name() {
+            return this.product.name;
         },
-        price: {
-            type: Number,
-            required: true
+        price() {
+            return this.product.price;
         },
-        description: {
-            type: String,
-            required: false
+        description() {
+            return this.product.description;
         }
     },
     methods: {
