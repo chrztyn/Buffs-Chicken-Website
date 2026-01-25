@@ -2,29 +2,29 @@
     <div>
         <div 
             @click="openModal"
-            class="menu-card bg-white rounded-2xl p-3 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 group cursor-pointer"
+            class="menu-card bg-white rounded-2xl p-2 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 group cursor-pointer"
         >
             <!-- Image Section -->
-            <div class="image-container rounded-xl p-2 mb-2 flex items-center justify-center overflow-hidden transition-colors duration-300">
+            <div class="image-container rounded-xl p-1 mb-1 flex items-center justify-center overflow-hidden transition-colors duration-300">
                 <img 
                     :src="image" 
                     :alt="name" 
-                    class="w-full h-40 object-contain transition-transform duration-300 group-hover:scale-105"
+                    class="w-full h-32 object-contain transition-transform duration-300 group-hover:scale-105"
                 />
             </div>
             
             <!-- Text Section: Name on left, Price on right -->
             <div class="text-section flex items-center justify-between px-1 pb-0 pt-0">
-                <span class="product-name text-lg font-bold text-[#1A4189] font-['Unbounded'] tracking-tight leading-tight">
+                <span class="product-name text-sm font-bold text-[#1A4189] font-['Unbounded'] tracking-tight leading-tight">
                     {{ name }}
                 </span>
-                <span class="product-price text-base font-bold text-gray-800 font-['Unbounded'] tracking-tight">
+                <span class="product-price text-xs font-bold text-gray-800 font-['Unbounded'] tracking-tight">
                     P{{ price }}
                 </span>
             </div>
             
             <!-- Description Section -->
-            <div class="description-section px-1 pt-2">
+            <div class="description-section px-1 pt-1">
                 <span class="product-description text-gray-600 font-['Unbounded']">
                     {{ description }}
                 </span>

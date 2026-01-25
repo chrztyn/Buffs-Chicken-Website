@@ -1,5 +1,16 @@
 <template>
     <div class="cart-container bg-[#FBF4E5] min-h-screen flex flex-col">
+        <!-- Order Confirm Modal -->
+        <OrderConfirmModal
+            :isOpen="showOrderConfirmModal"
+            :subtotal="subtotal"
+            :deliveryFee="deliveryFee"
+            :total="total"
+            :itemsCount="cartItems.length"
+            @close="handleModalClose"
+            @confirm="handleConfirmOrder"
+        />
+
         <!-- Empty Cart State -->
         <div v-if="cartItems.length === 0" class="flex flex-col items-center justify-center flex-1 px-4">
         <svg class="w-24 h-24 text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,13 +142,30 @@
                     </div>
                 </div>
 
-                <!-- Place Order Button -->
-                <button
-                @click="placeOrder"
-                class="w-auto mx-2 px-6 bg-[#FEB90E] text-gray-900 font-['Unbounded'] font-bold py-3 rounded-xl hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 transform"
-                >
-                Place Order
-                </button>
+                <!-- Place Order / View Order Status Buttons -->
+                <div class="flex gap-3 mx-2">
+                  <button
+                  @click="openOrderConfirmModal"
+                  class="flex-1 px-4 bg-[#FEB90E] text-gray-900 font-['Unbounded'] font-bold py-2 text-sm rounded-lg hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 transform"
+                  >
+                  Place Order
+                  </button>
+
+                  <!-- View Order Status Button -->
+                  <button
+                  @click="goToOrderStatus"
+                  :disabled="!hasActiveOrder"
+                  :class="[
+                    'flex-1 px-4 font-bold py-2 text-sm rounded-lg transition-all duration-200 hover:scale-105 transform',
+                    hasActiveOrder
+                      ? 'bg-gradient-to-r from-[#FE601C] to-[#FEB90E] text-gray-900 hover:shadow-lg cursor-pointer'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ]"
+                  style="font-family: 'Unbounded', sans-serif;"
+                  >
+                  View Status
+                  </button>
+                </div>
 
                 <!-- Info Text -->
                 <p class="text-xs text-white text-center mt-2 px-2">
@@ -151,12 +179,19 @@
 </template>
 
     <script>
+    import OrderConfirmModal from './OrderConfirmModal.vue';
+    
     export default {
     name: 'Cart',
+    components: {
+        OrderConfirmModal
+    },
     data() {
         return {
         cartItems: [],
         deliveryFee: 40,
+        hasActiveOrder: false,
+        showOrderConfirmModal: false,
         };
     },
     computed: {
@@ -186,14 +221,48 @@
         this.cartItems.splice(index, 1);
         this.saveCart();
         },
-        placeOrder() {
-        this.$emit('place-order', {
+        openOrderConfirmModal() {
+        this.showOrderConfirmModal = true;
+        },
+        handleModalClose() {
+        this.showOrderConfirmModal = false;
+        },
+        handleConfirmOrder(customerData) {
+        // Generate order ID
+        const orderId = Math.floor(Math.random() * 1000000) + 100000;
+        
+        // Save order to localStorage
+        const orderData = {
+            orderId: orderId,
             items: this.cartItems,
             subtotal: this.subtotal,
-            tax: this.tax,
             deliveryFee: this.deliveryFee,
-            total: this.total
-        });
+            total: this.total,
+            itemsCount: this.cartItems.length,
+            status: 'confirming',
+            timestamp: new Date().toISOString(),
+            customer: customerData
+        };
+        
+        localStorage.setItem('buffs_order', JSON.stringify(orderData));
+        
+        // Clear cart after order placed
+        this.cartItems = [];
+        this.saveCart();
+        
+        // Update active order state
+        this.hasActiveOrder = true;
+        
+        // Close modal
+        this.showOrderConfirmModal = false;
+        
+        // Redirect to order status page
+        this.$router.push('/order-status');
+        },
+        goToOrderStatus() {
+        if (this.hasActiveOrder) {
+            this.$router.push('/order-status');
+        }
         },
         saveCart() {
         // Save cart to localStorage for persistence
@@ -205,10 +274,15 @@
         if (saved) {
             this.cartItems = JSON.parse(saved);
         }
+        },
+        checkForActiveOrder() {
+        const order = localStorage.getItem('buffs_order');
+        this.hasActiveOrder = !!order;
         }
     },
     mounted() {
         this.loadCart();
+        this.checkForActiveOrder();
     }
     };
     </script>
