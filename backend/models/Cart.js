@@ -13,15 +13,22 @@ const cartItemSchema = new mongoose.Schema({
   },
   selectedVariants: {
     type: Map,
-    of: String // Map variant name to selected option
+    of: String 
   },
+  selectedSauces: [
+    {
+      _id: mongoose.Schema.Types.ObjectId,
+      name: String,
+      price: Number
+    }
+  ],
   selectedAddons: [
     {
       name: String,
       price: Number
     }
   ],
-  itemTotal: Number // price * quantity + addons total
+  itemTotal: Number 
 });
 
 const cartSchema = new mongoose.Schema(
@@ -30,7 +37,7 @@ const cartSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
-    sessionId: String, // For anonymous users
+    sessionId: String, 
     items: [cartItemSchema],
     cartTotal: {
       type: Number,

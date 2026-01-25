@@ -1,5 +1,31 @@
 <template>
   <div class="order-status-container bg-gradient-to-br from-[#FBF4E5] via-[#fef9ed] to-[#f5ead9] min-h-screen flex flex-col relative overflow-hidden">
+    <!-- Toast Notification -->
+    <Transition name="toast">
+      <div
+        v-if="showToast"
+        :class="[
+          'fixed top-6 right-6 rounded-lg shadow-2xl p-4 max-w-sm z-50 animate-slide-in',
+          toastType === 'success' ? 'bg-green-500' : toastType === 'error' ? 'bg-red-500' : 'bg-blue-500'
+        ]"
+      >
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0">
+            <svg v-if="toastType === 'success'" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-white font-bold text-sm">{{ toastTitle }}</h3>
+            <p class="text-white/90 text-xs mt-1">{{ toastMessage }}</p>
+          </div>
+        </div>
+      </div>
+    </Transition>
+    
     <!-- Decorative Background Elements -->
     <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#2356b4]/5 to-transparent rounded-full blur-3xl"></div>
     <div class="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-[#1A4189]/5 to-transparent rounded-full blur-3xl"></div>
@@ -114,8 +140,11 @@
               <!-- Progress Bar with Gradient -->
               <div class="relative h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                 <div
-                  class="h-full bg-gradient-to-r from-[#1A4189] via-[#1e4d9f] to-[#2356b4] rounded-full transition-all duration-700 relative overflow-hidden"
-                  :style="{ width: `${getProgressPercentage()}%` }"
+                  class="h-full rounded-full transition-all duration-700 relative overflow-hidden"
+                  :style="{ 
+                    width: `${getProgressPercentage()}%`,
+                    background: 'linear-gradient(90deg, #1A4189 0%, #1e4d9f 50%, #2356b4 100%)'
+                  }"
                 >
                   <div class="absolute inset-0 bg-white/30 animate-shimmer"></div>
                 </div>
@@ -165,15 +194,22 @@
               <h3 class="section-title">Status Update</h3>
             </div>
             
-            <div v-if="currentStatus === 'confirming'" class="status-alert status-alert-blue">
+            <div v-if="currentStatus === 'pending'" class="status-alert status-alert-blue">
               <div class="status-icon-wrapper status-icon-blue">
                 <svg class="status-alert-icon" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2z" clip-rule="evenodd"></path>
                 </svg>
               </div>
-              <div>
+              <div class="flex-1">
                 <h4 class="status-alert-title">Confirming Your Order</h4>
                 <p class="status-alert-description">Your order is being verified. Please wait a moment while we process your request.</p>
+                <button
+                  v-if="canCancelOrder"
+                  @click="cancelOrder"
+                  class="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-colors"
+                >
+                  Cancel Order
+                </button>
               </div>
             </div>
 
@@ -189,7 +225,7 @@
               </div>
             </div>
 
-            <div v-if="currentStatus === 'outForDelivery'" class="status-alert status-alert-purple">
+            <div v-if="currentStatus === 'out for delivery'" class="status-alert status-alert-purple">
               <div class="status-icon-wrapper status-icon-purple">
                 <svg class="status-alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9-4v2m4-2v2"></path>
@@ -210,6 +246,18 @@
               <div>
                 <h4 class="status-alert-title">Delivered Successfully!</h4>
                 <p class="status-alert-description">Your order has arrived. Enjoy your delicious meal!</p>
+              </div>
+            </div>
+
+            <div v-if="currentStatus === 'cancelled'" class="status-alert status-alert-red">
+              <div class="status-icon-wrapper status-icon-red">
+                <svg class="status-alert-icon" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div>
+                <h4 class="status-alert-title">Order Cancelled</h4>
+                <p class="status-alert-description">Your order has been cancelled. You can place a new order anytime.</p>
               </div>
             </div>
           </div>
@@ -259,45 +307,108 @@
 
     <!-- Footer -->
     <Footer />
+
+    <!-- Thank You Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showThankYouModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+          <!-- Modal Header with Gradient -->
+          <div class="bg-gradient-to-r from-[#1A4189] to-[#2356b4] px-8 py-12 text-center">
+            <div class="flex justify-center mb-4">
+              <svg class="w-16 h-16 text-white animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <h2 class="text-2xl font-['Unbounded'] font-bold text-white mb-2">Thank You!</h2>
+            <p class="text-white/90 text-sm">We hope you enjoyed your meal</p>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="px-8 py-8">
+            <p class="text-gray-700 text-center mb-6 leading-relaxed">
+              Your order has been successfully delivered. We appreciate your business and hope to serve you again soon!
+            </p>
+
+            <!-- Buttons -->
+            <div class="space-y-3">
+              <button
+                @click="goToBlogs"
+                class="w-full bg-gradient-to-r from-[#1A4189] to-[#2356b4] text-white font-bold py-3 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+              >
+                Read More About Buffs
+              </button>
+              <button
+                @click="closeThankYouModal"
+                class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-xl transition-all duration-300"
+              >
+                Back to Menu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useRuntimeConfig } from '#app'
+import io from 'socket.io-client'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 
 const orderId = ref('')
-const currentStatus = ref('confirming')
+const currentStatus = ref('pending')
 const hasOrder = ref(false)
 
 const subtotal = ref(0)
 const deliveryFee = ref(40)
 const itemsCount = ref(0)
 
+// Toast notification state
+const toastMessage = ref('')
+const toastTitle = ref('')
+const showToast = ref(false)
+const toastType = ref('success') // 'success', 'info', 'warning', 'error'
+
 const statuses = ref([
-  { id: 'confirming', label: 'Confirming' },
+  { id: 'pending', label: 'Confirming' },
   { id: 'preparing', label: 'Preparing' },
-  { id: 'outForDelivery', label: 'Out for Delivery' },
+  { id: 'out for delivery', label: 'Out for Delivery' },
   { id: 'delivered', label: 'Delivered' }
 ])
 
 const statusOrder = {
-  confirming: 0,
+  pending: 0,
   preparing: 1,
-  outForDelivery: 2,
-  delivered: 3
+  'out for delivery': 2,
+  delivered: 3,
+  cancelled: -1
 }
+
+// Thank you modal state
+const showThankYouModal = ref(false)
 
 const total = computed(() => subtotal.value + deliveryFee.value)
 
 const getProgressPercentage = () => {
   const currentIndex = statusOrder[currentStatus.value]
   const totalSteps = statuses.value.length - 1
-  return ((currentIndex) / totalSteps) * 100
+  if (currentIndex === -1) return 0 // cancelled
+  
+  const percentage = ((currentIndex) / totalSteps) * 100
+  console.log('Progress calculation:', {
+    currentStatus: currentStatus.value,
+    currentIndex,
+    totalSteps,
+    percentage: percentage.toFixed(2) + '%'
+  })
+  
+  return percentage
 }
 
 const isStatusActive = (statusId) => {
@@ -305,7 +416,49 @@ const isStatusActive = (statusId) => {
 }
 
 const isStatusCompleted = (statusId) => {
-  return statusOrder[statusId] < statusOrder[currentStatus.value]
+  return statusOrder[statusId] < statusOrder[currentStatus.value] && statusOrder[statusId] !== -1
+}
+
+const canCancelOrder = computed(() => {
+  return currentStatus.value === 'pending'
+})
+
+const playNotificationSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    const now = audioContext.currentTime
+    const oscillator = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+
+    oscillator.connect(gain)
+    gain.connect(audioContext.destination)
+
+    oscillator.frequency.value = 800
+    oscillator.type = 'sine'
+
+    gain.gain.setValueAtTime(0.3, now)
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5)
+
+    oscillator.start(now)
+    oscillator.stop(now + 0.5)
+  } catch (error) {
+    console.log('Audio notification not available:', error)
+  }
+}
+
+const showNotification = (title, message, type = 'success') => {
+  toastTitle.value = title
+  toastMessage.value = message
+  toastType.value = type
+  showToast.value = true
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    showToast.value = false
+  }, 5000)
+  
+  // Play sound
+  playNotificationSound()
 }
 
 const loadOrder = () => {
@@ -313,47 +466,142 @@ const loadOrder = () => {
   if (saved) {
     const order = JSON.parse(saved)
     orderId.value = order.orderId
-    currentStatus.value = order.status
+    currentStatus.value = order.status || 'pending'
     subtotal.value = order.subtotal
     deliveryFee.value = order.deliveryFee
     itemsCount.value = order.itemsCount
     hasOrder.value = true
-  }
-}
-
-const clearOrder = () => {
-  localStorage.removeItem('buffs_order')
-  hasOrder.value = false
-  orderId.value = ''
-  currentStatus.value = 'confirming'
-}
-
-const updateOrderStatus = () => {
-  if (currentStatus.value === 'confirming') {
-    currentStatus.value = 'preparing'
-    setTimeout(() => {
-      currentStatus.value = 'outForDelivery'
-      saveOrderStatus()
-    }, 3000)
-
-    setTimeout(() => {
-      currentStatus.value = 'delivered'
-      saveOrderStatus()
-    }, 6000)
+    
+    console.log('Order loaded from localStorage:', {
+      orderId: orderId.value,
+      status: currentStatus.value,
+      type: typeof orderId.value
+    })
   }
 }
 
 const saveOrderStatus = () => {
-  const order = JSON.parse(localStorage.getItem('buffs_order') || '{}')
-  order.status = currentStatus.value
-  localStorage.setItem('buffs_order', JSON.stringify(order))
+  if (hasOrder.value) {
+    const order = JSON.parse(localStorage.getItem('buffs_order') || '{}')
+    order.status = currentStatus.value
+    localStorage.setItem('buffs_order', JSON.stringify(order))
+  }
+}
+
+const handleOrderStatusUpdate = (data) => {
+  console.log('Order status update received:', data)
+  // Check if this update is for our order
+  if (data.orderId === orderId.value || data.orderId === orderId.value.toString()) {
+    currentStatus.value = data.status
+    saveOrderStatus()
+    
+    // Show notification
+    const statusMessages = {
+      pending: 'Confirming',
+      preparing: 'Your order is being prepared',
+      'out for delivery': 'Your order is on the way',
+      delivered: 'Your order has arrived',
+      cancelled: 'Your order has been cancelled'
+    }
+    
+    showNotification('Order Updated', data.message || statusMessages[data.status], 'info')
+    
+    // Show thank you modal when delivered
+    if (data.status === 'delivered') {
+      setTimeout(() => {
+        showThankYouModal.value = true
+      }, 1000)
+    }
+  }
+}
+
+const cancelOrder = async () => {
+  try {
+    const response = await fetch(
+      `${useRuntimeConfig().public.apiBase}/orders/${orderId.value}/cancel`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    if (response.ok) {
+      currentStatus.value = 'cancelled'
+      saveOrderStatus()
+    } else {
+      const error = await response.json()
+      alert(error.message || 'Failed to cancel order')
+    }
+  } catch (error) {
+    console.error('Error cancelling order:', error)
+    alert('Error cancelling order')
+  }
+}
+
+const closeThankYouModal = () => {
+  showThankYouModal.value = false
+  // Auto-redirect to menu after 3 seconds
+  setTimeout(() => {
+    router.push('/menu')
+  }, 3000)
+}
+
+const goToBlogs = () => {
+  showThankYouModal.value = false
+  router.push('/blogs')
 }
 
 onMounted(() => {
+  console.log('=== ORDER STATUS PAGE MOUNTED ===')
   loadOrder()
+  
   if (hasOrder.value) {
-    updateOrderStatus()
+    console.log('Has order, connecting to Socket.io...')
+    // Initialize Socket.io connection directly without using the admin composable
+    const socketUrl = useRuntimeConfig().public.socketUrl || 'http://localhost:5001'
+    
+    const directSocket = io(socketUrl, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5
+    })
+
+    // Set up connection listeners
+    directSocket.on('connect', () => {
+      console.log('✅ Socket connected! ID:', directSocket.id)
+      // Join the specific order room
+      directSocket.emit('join-order', orderId.value.toString())
+      console.log('✅ Emitted join-order for orderId:', orderId.value)
+    })
+
+    directSocket.on('order-status', (data) => {
+      console.log('🔔 Socket event received - order-status:', data)
+      handleOrderStatusUpdate(data)
+    })
+
+    directSocket.on('disconnect', () => {
+      console.log('❌ Socket disconnected')
+    })
+
+    directSocket.on('error', (error) => {
+      console.error('❌ Socket error:', error)
+    })
+
+    // Clean up on unmount
+    onBeforeUnmount(() => {
+      console.log('Cleaning up socket connection...')
+      directSocket.disconnect()
+    })
+  } else {
+    console.log('No order found in localStorage')
   }
+})
+
+onUnmounted(() => {
+  // Cleanup will be handled in onBeforeUnmount inside onMounted
 })
 </script>
 
@@ -535,6 +783,10 @@ onMounted(() => {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 }
 
+.status-icon-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
 .status-alert-blue {
   background: linear-gradient(135deg, rgba(235, 239, 247, 0.95) 0%, rgba(221, 233, 251, 0.95) 100%);
   border-color: #93c5fd;
@@ -583,6 +835,19 @@ onMounted(() => {
 
 .status-alert-green .status-alert-title {
   color: #166534;
+}
+
+.status-alert-red {
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(254, 226, 226, 0.95) 100%);
+  border-color: #fca5a5;
+}
+
+.status-alert-red .status-alert-title {
+  color: #991b1b;
+}
+
+.status-icon-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 .status-alert-description {
@@ -668,6 +933,17 @@ onMounted(() => {
   }
 }
 
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .animate-spin-slow {
   animation: spin-slow 3s linear infinite;
 }
@@ -678,6 +954,22 @@ onMounted(() => {
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Toast Transition */
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  transform: translateX(400px);
+  opacity: 0;
 }
 
 /* Responsive */
@@ -709,5 +1001,38 @@ onMounted(() => {
   .summary-total-amount {
     font-size: 1.5rem;
   }
+}
+
+/* Modal Animations */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.modal-fade-enter-active {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-fade-leave-active {
+  animation: modalFadeIn 0.3s ease-out reverse;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
 }
 </style>

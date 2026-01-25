@@ -11,10 +11,15 @@ export const useSocket = () => {
   const connect = () => {
     if (!token.value || socket.value?.connected) return
 
-    socket.value = io('http://localhost:3000', {
+    const socketUrl = process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:5001'
+    socket.value = io(socketUrl, {
       auth: {
         token: token.value
-      }
+      },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5
     })
 
     socket.value.on('connect', () => {

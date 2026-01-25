@@ -4,6 +4,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   pages: true,
   css: ['~/assets/css/main.css'],
+  router: {
+    options: {
+      strict: false
+    }
+  },
   postcss: {
     plugins: {
       '@tailwindcss/postcss': {},
@@ -39,7 +44,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3000/api',
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:3000'
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:5001'
     }
   }
 })

@@ -96,31 +96,6 @@
                                 </div>
                             </div>
 
-                            <!-- Addons Section -->
-                            <div v-if="item.addons && item.addons.length > 0" class="addons-group">
-                                <label class="addons-label" style="font-family: 'Unbounded';">
-                                    Add-ons
-                                </label>
-                                <div class="addon-options">
-                                    <label 
-                                        v-for="addon in item.addons" 
-                                        :key="addon.name"
-                                        class="addon-option"
-                                    >
-                                        <input 
-                                            type="checkbox" 
-                                            :value="addon.name"
-                                            v-model="selectedAddons"
-                                            class="addon-checkbox"
-                                        />
-                                        <span style="font-family: 'Unbounded';">
-                                            {{ addon.name }}
-                                        </span>
-                                        <span class="addon-price">₱{{ addon.price.toFixed(2) }}</span>
-                                    </label>
-                                </div>
-                            </div>
-
                             <!-- Sauces Section -->
                             <div v-if="item.sauces && item.sauces.length > 0" class="sauces-wrapper">
                                 <div v-for="sauce in item.sauces" :key="sauce.name" class="sauces-group">
@@ -151,6 +126,36 @@
                                     <p v-if="selectedSauces[sauce.name]?.length >= sauce.maxSelections" class="sauce-max-reached" style="font-family: 'Unbounded';">
                                         ✓ Maximum {{ sauce.name.toLowerCase() }} selected
                                     </p>
+                                </div>
+                            </div>
+
+                            <!-- Addons Section -->
+                            <div v-if="item.addons && item.addons.length > 0" class="addons-wrapper">
+                                <div class="addons-group">
+                                    <label class="addons-label" style="font-family: 'Unbounded';">
+                                        Add-ons
+                                        <span class="addons-counter">
+                                            ({{ selectedAddons.length }} selected)
+                                        </span>
+                                    </label>
+                                    <div class="addon-options">
+                                        <label 
+                                            v-for="addon in item.addons" 
+                                            :key="addon.name"
+                                            class="addon-option"
+                                        >
+                                            <input 
+                                                type="checkbox" 
+                                                :value="addon.name"
+                                                v-model="selectedAddons"
+                                                class="addon-checkbox"
+                                            />
+                                            <span style="font-family: 'Unbounded';">
+                                                {{ addon.name }}
+                                            </span>
+                                            <span class="addon-price">₱{{ addon.price.toFixed(2) }}</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -359,13 +364,31 @@ export default {
                 }
             }
 
+            // Transform selectedSauces from {sauceName: [optionNames]} to [{name, price, _id}]
+            const transformedSauces = [];
+            if (this.item.sauces && Object.keys(this.selectedSauces).length > 0) {
+                this.item.sauces.forEach(sauceGroup => {
+                    const selectedOptions = this.selectedSauces[sauceGroup.name] || [];
+                    selectedOptions.forEach(optionName => {
+                        const option = sauceGroup.options.find(o => o.name === optionName);
+                        if (option) {
+                            transformedSauces.push({
+                                _id: option._id || undefined,
+                                name: option.name,
+                                price: option.price || 0
+                            });
+                        }
+                    });
+                });
+            }
+
             const cartItem = {
                 ...this.item,
                 quantity: this.quantity,
                 notes: this.notes,
                 selectedVariants: { ...this.selectedVariants },
                 selectedAddons: [...this.selectedAddons],
-                selectedSauces: JSON.parse(JSON.stringify(this.selectedSauces)),
+                selectedSauces: transformedSauces,
                 basePrice: this.basePrice,
                 addonsCost: this.addonsCost,
                 totalPrice: this.totalPrice
@@ -493,40 +516,139 @@ export default {
     letter-spacing: 0.25em;
 }
 
-.quantity-group {
+/* Variants Section */
+.variant-group {
+    margin-bottom: 2rem;
+}
+
+.variant-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.variant-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.variant-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Unbounded', sans-serif;
+    position: relative;
+    background: white;
+}
+
+.variant-button:hover {
+    border-color: #FE601C;
+    background-color: #fff8f4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(254, 96, 28, 0.15);
+}
+
+.variant-button-active {
+    border-color: #FE601C !important;
+    background: linear-gradient(135deg, #FE601C 0%, #ff7d3a 100%);
+    color: white;
+    box-shadow: 0 6px 20px rgba(254, 96, 28, 0.4);
+}
+
+.variant-button-active .variant-button-text {
+    color: white;
+    font-weight: 700;
+}
+
+.variant-button-active .variant-button-price {
+    color: #fff8f4;
+    font-weight: 600;
+}
+
+.variant-button-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
     margin-bottom: 0.5rem;
-    margin-top: -2rem;
+    transition: color 0.25s;
+}
+
+.variant-button-price {
+    font-size: 0.8rem;
+    color: #FE601C;
+    font-weight: 600;
+    transition: color 0.25s;
+}
+
+/* Addons Section */
+.addons-wrapper {
+    margin-bottom: 1.75rem;
+}
+
+.addons-group {
+    margin-bottom: 0;
 }
 
 .addons-label {
     font-size: 0.75rem;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 700;
+    color: #1f2937;
     margin-bottom: 0.75rem;
     display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.addons-counter {
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
 }
 
 .addon-options {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.65rem;
 }
 
 .addon-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.65rem;
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: #374151;
-    justify-content: space-between;
+    transition: all 0.2s;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
+.addon-option:hover {
+    background-color: #f3f4f6;
+}
+
+.addon-option:has(.addon-checkbox:checked) {
+    background-color: #fef3e2;
 }
 
 .addon-checkbox {
     cursor: pointer;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     accent-color: #FE601C;
+    flex-shrink: 0;
 }
 
 .addon-price {

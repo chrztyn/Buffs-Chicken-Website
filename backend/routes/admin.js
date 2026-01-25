@@ -363,10 +363,20 @@ router.put('/orders/:id/status', authenticateAdmin, async (req, res) => {
 
     // Send notification email
     const statusMessages = {
+      pending: 'Your order has been confirmed.',
       preparing: 'Your order is being prepared.',
       'out for delivery': 'Your order is out for delivery.',
       delivered: 'Your order has been delivered.',
       cancelled: 'Your order has been cancelled.'
+    };
+
+    // Map status to notification type
+    const statusToNotificationType = {
+      pending: 'order_confirmed',
+      preparing: 'order_preparing',
+      'out for delivery': 'order_out_for_delivery',
+      delivered: 'order_delivered',
+      cancelled: 'order_cancelled'
     };
 
     try {
@@ -380,12 +390,19 @@ router.put('/orders/:id/status', authenticateAdmin, async (req, res) => {
     await Notification.create({
       user: order.user._id,
       order: order._id,
-      type: `order_${status.replace(' ', '_')}`,
+      type: statusToNotificationType[status],
       title: 'Order Update',
       message: statusMessages[status]
     });
 
-    // Emit real-time notification
+    // Emit real-time notification to order-specific room
+    req.io.to(`order-${order._id}`).emit('order-status', {
+      orderId: order._id,
+      status,
+      message: statusMessages[status]
+    });
+
+    // Also emit to user room for other listeners
     req.io.to(`user-${order.user._id}`).emit('order-status', {
       orderId: order._id,
       status,

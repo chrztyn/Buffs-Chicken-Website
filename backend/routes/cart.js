@@ -4,10 +4,13 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
 // Helper function to calculate item total
-const calculateItemTotal = (product, selectedAddons) => {
+const calculateItemTotal = (product, selectedAddons, selectedSauces) => {
   let total = product.price;
   if (selectedAddons) {
     total += selectedAddons.reduce((sum, addon) => sum + addon.price, 0);
+  }
+  if (selectedSauces) {
+    total += selectedSauces.reduce((sum, sauce) => sum + sauce.price, 0);
   }
   return total;
 };
@@ -30,7 +33,7 @@ router.get('/:cartId', async (req, res) => {
 router.post('/:cartId/items', async (req, res) => {
   try {
     const { cartId } = req.params;
-    const { productId, quantity, selectedVariants, selectedAddons } = req.body;
+    const { productId, quantity, selectedVariants, selectedAddons, selectedSauces } = req.body;
 
     const product = await Product.findById(productId);
     if (!product) {
@@ -50,13 +53,14 @@ router.post('/:cartId/items', async (req, res) => {
 
     if (existingItem) {
       existingItem.quantity += quantity;
-      existingItem.itemTotal = calculateItemTotal(product, selectedAddons) * existingItem.quantity;
+      existingItem.itemTotal = calculateItemTotal(product, selectedAddons, selectedSauces) * existingItem.quantity;
     } else {
-      const itemTotal = calculateItemTotal(product, selectedAddons) * quantity;
+      const itemTotal = calculateItemTotal(product, selectedAddons, selectedSauces) * quantity;
       cart.items.push({
         product: productId,
         quantity,
         selectedVariants,
+        selectedSauces,
         selectedAddons,
         itemTotal
       });
@@ -76,7 +80,7 @@ router.post('/:cartId/items', async (req, res) => {
 router.put('/:cartId/items/:itemId', async (req, res) => {
   try {
     const { cartId, itemId } = req.params;
-    const { quantity, selectedVariants, selectedAddons } = req.body;
+    const { quantity, selectedVariants, selectedAddons, selectedSauces } = req.body;
 
     const cart = await Cart.findById(cartId).populate('items.product');
     if (!cart) {
@@ -92,9 +96,9 @@ router.put('/:cartId/items/:itemId', async (req, res) => {
 
     if (quantity !== undefined) item.quantity = quantity;
     if (selectedVariants) item.selectedVariants = selectedVariants;
-    if (selectedAddons) item.selectedAddons = selectedAddons;
+    if (selectedSauces) item.selectedSauces = selectedSauces;
 
-    item.itemTotal = calculateItemTotal(product, item.selectedAddons) * item.quantity;
+    item.itemTotal = calculateItemTotal(product, item.selectedAddons, item.selectedSauces) * item.quantity;
 
     // Recalculate cart total
     cart.cartTotal = cart.items.reduce((sum, cartItem) => sum + cartItem.itemTotal, 0);

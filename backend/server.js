@@ -88,6 +88,12 @@ io.on('connection', (socket) => {
     console.log(`User ${userId} joined their notification room`);
   });
 
+  // Join order room for order status updates
+  socket.on('join-order', (orderId) => {
+    socket.join(`order-${orderId}`);
+    console.log(`Socket joined order room: order-${orderId}`);
+  });
+
   // Join admin room for notifications
   socket.on('join-admin', (adminId) => {
     socket.join(`admin-${adminId}`);

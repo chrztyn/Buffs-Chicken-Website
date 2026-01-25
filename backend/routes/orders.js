@@ -5,7 +5,7 @@ const Cart = require('../models/Cart');
 const User = require('../models/User');
 const Payment = require('../models/Payment');
 const Notification = require('../models/Notification');
-const { sendOrderNotification } = require('../config/mailer');
+const { sendOrderNotification, sendAdminOrderNotification } = require('../config/mailer');
 
 // Create order from cart
 router.post('/', async (req, res) => {
@@ -30,6 +30,7 @@ router.post('/', async (req, res) => {
       quantity: cartItem.quantity,
       pricePerUnit: cartItem.product.price,
       selectedVariants: cartItem.selectedVariants,
+      selectedSauces: cartItem.selectedSauces,
       selectedAddons: cartItem.selectedAddons,
       itemTotal: cartItem.itemTotal
     }));
@@ -57,7 +58,19 @@ router.post('/', async (req, res) => {
     try {
       await sendOrderNotification(user.email, order.orderNumber, 'pending');
     } catch (error) {
-      console.log('Email notification failed, but order created:', error);
+      console.log('User email notification failed, but order created:', error);
+    }
+
+    // Send admin notification email
+    try {
+      await sendAdminOrderNotification(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, order, {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: order.deliveryAddress
+      });
+    } catch (error) {
+      console.log('Admin email notification failed, but order created:', error);
     }
 
     // Create database notification for user
@@ -206,6 +219,172 @@ router.post('/:orderId/reorder', async (req, res) => {
       message: 'Reorder created successfully',
       order: newOrder
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Submit order after OTP verification (for direct cart checkout)
+router.post('/submit', async (req, res) => {
+  try {
+    const { 
+      userId, 
+      name,
+      email, 
+      phone, 
+      address, 
+      cartItems, 
+      subtotal, 
+      deliveryFee, 
+      total,
+      notes 
+    } = req.body;
+
+    // Verify user
+    const user = await User.findById(userId);
+    if (!user || !user.isVerified) {
+      return res.status(400).json({ message: 'User not verified' });
+    }
+
+    // Create order items from cart
+    const orderItems = cartItems.map(item => ({
+      product: item.id || item._id,
+      productName: item.name,
+      productImage: item.image,
+      quantity: item.quantity,
+      pricePerUnit: item.price,
+      selectedVariants: item.selectedVariants || {},
+      selectedSauces: item.selectedSauces || [],
+      selectedAddons: item.selectedAddons || [],
+      itemTotal: (item.basePrice || item.price) * item.quantity + (item.addonsCost || 0)
+    }));
+
+    // Calculate totals
+    const tax = 0; // Can be calculated based on your tax rules
+    const totalAmount = subtotal + tax + deliveryFee;
+
+    // Create order
+    const order = new Order({
+      user: userId,
+      items: orderItems,
+      subtotal,
+      tax,
+      deliveryFee,
+      totalAmount,
+      deliveryAddress: address,
+      status: 'pending',
+      notes: notes || '',
+      isVerified: true
+    });
+
+    await order.save();
+
+    // Create database notification for user
+    await Notification.create({
+      user: userId,
+      order: order._id,
+      type: 'order_confirmed',
+      title: 'Order Confirmed',
+      message: `Your order ${order.orderNumber} has been received.`
+    });
+
+    // Create database notification for admin
+    await Notification.create({
+      type: 'new_order',
+      order: order._id,
+      title: 'New Order Received',
+      message: `New order ${order.orderNumber} from ${user.name}`
+    });
+
+    // Send notification to user via email
+    try {
+      await sendOrderNotification(email, order.orderNumber, 'pending');
+    } catch (error) {
+      console.log('User email notification failed, but order created:', error);
+    }
+
+    // Send admin notification email
+    try {
+      await sendAdminOrderNotification(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, order, {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: order.deliveryAddress
+      });
+    } catch (error) {
+      console.log('Admin email notification failed, but order created:', error);
+    }
+
+    // Emit real-time notification to admin
+    if (req.io) {
+      req.io.to('admin-orders').emit('new-order', {
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        customerName: user.name,
+        totalAmount: order.totalAmount,
+        timestamp: new Date(),
+        status: 'pending'
+      });
+
+      // Emit to specific user
+      req.io.to(`user-${userId}`).emit('order-status', {
+        orderId: order._id,
+        status: 'pending',
+        message: 'Order received'
+      });
+    }
+
+    res.status(201).json({
+      message: 'Order submitted successfully',
+      order,
+      orderNumber: order.orderNumber
+    });
+  } catch (error) {
+    console.error('Error submitting order:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Cancel order (customer can only cancel pending orders)
+router.put('/:id/cancel', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('user');
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (order.status !== 'pending') {
+      return res.status(400).json({ message: 'Order can only be cancelled from pending status' });
+    }
+
+    order.status = 'cancelled';
+    await order.save();
+
+    // Create notification for user
+    await Notification.create({
+      user: order.user._id,
+      order: order._id,
+      type: 'order_cancelled',
+      title: 'Order Cancelled',
+      message: 'Your order has been cancelled.'
+    });
+
+    // Emit real-time notification to order-specific room
+    req.io.to(`order-${order._id}`).emit('order-status', {
+      orderId: order._id,
+      status: 'cancelled',
+      message: 'Your order has been cancelled.'
+    });
+
+    // Emit to user room
+    req.io.to(`user-${order.user._id}`).emit('order-status', {
+      orderId: order._id,
+      status: 'cancelled',
+      message: 'Your order has been cancelled.'
+    });
+
+    res.json({ message: 'Order cancelled successfully', order });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

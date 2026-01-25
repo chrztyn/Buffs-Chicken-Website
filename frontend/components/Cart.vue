@@ -7,6 +7,7 @@
             :deliveryFee="deliveryFee"
             :total="total"
             :itemsCount="cartItems.length"
+            :cartItems="cartItems"
             @close="handleModalClose"
             @confirm="handleConfirmOrder"
         />
@@ -282,36 +283,130 @@
         this.showOrderConfirmModal = false;
         },
         handleConfirmOrder(customerData) {
-        // Generate order ID
-        const orderId = Math.floor(Math.random() * 1000000) + 100000;
-        
-        // Save order to localStorage
-        const orderData = {
-            orderId: orderId,
-            items: this.cartItems,
-            subtotal: this.subtotal,
-            deliveryFee: this.deliveryFee,
-            total: this.total,
-            itemsCount: this.cartItems.length,
-            status: 'confirming',
-            timestamp: new Date().toISOString(),
-            customer: customerData
-        };
-        
-        localStorage.setItem('buffs_order', JSON.stringify(orderData));
-        
-        // Clear cart after order placed
-        this.cartItems = [];
-        this.saveCart();
-        
-        // Update active order state
-        this.hasActiveOrder = true;
-        
-        // Close modal
-        this.showOrderConfirmModal = false;
-        
-        // Redirect to order status page
-        this.$router.push('/order-status');
+        // Submit order to backend
+        this.submitOrderToBackend(customerData);
+        },
+        async submitOrderToBackend(customerData) {
+        try {
+            const config = useRuntimeConfig();
+            const API_BASE_URL = config.public.apiBase;
+            
+            // Transform cart items to match backend schema
+            // selectedAddons and selectedSauces should be {name, price} objects
+            const transformedCartItems = this.cartItems.map(item => {
+                const selectedAddonsArray = item.selectedAddons || [];
+                const itemAddons = item.addons || [];
+                const itemSauces = item.sauces || [];
+                const selectedSaucesObj = item.selectedSauces || {};
+                
+                // Convert addon names to {name, price} objects
+                const transformedAddons = selectedAddonsArray.map(addonName => {
+                    const addonObj = itemAddons.find(a => a.name === addonName);
+                    return {
+                        name: addonName,
+                        price: addonObj ? addonObj.price : 0
+                    };
+                });
+                
+                // Convert sauces from object {sauceName: [options]} to array of {_id, name, price} objects
+                let transformedSauces = [];
+                
+                // Check if sauces are already in array format (from database)
+                if (Array.isArray(selectedSaucesObj) && selectedSaucesObj.length > 0) {
+                    transformedSauces = selectedSaucesObj;
+                } else if (typeof selectedSaucesObj === 'object' && Object.keys(selectedSaucesObj).length > 0) {
+                    // Convert from object format {sauceName: [options]}
+                    Object.entries(selectedSaucesObj).forEach(([sauceName, selectedOptions]) => {
+                        if (Array.isArray(selectedOptions) && selectedOptions.length > 0) {
+                            selectedOptions.forEach(optionName => {
+                                // Find the sauce group and option to get price
+                                const sauceGroup = itemSauces.find(s => s.name === sauceName);
+                                if (sauceGroup) {
+                                    const sauceOption = sauceGroup.options.find(o => o.name === optionName);
+                                    if (sauceOption) {
+                                        transformedSauces.push({
+                                            _id: sauceOption._id || undefined,
+                                            name: optionName,
+                                            price: sauceOption.price || 0
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                return {
+                    ...item,
+                    selectedAddons: transformedAddons,
+                    selectedSauces: transformedSauces
+                };
+            });
+            
+            // Prepare order payload
+            const orderPayload = {
+                userId: customerData.userId,
+                name: customerData.name,
+                email: customerData.email,
+                phone: customerData.phone,
+                address: customerData.address,
+                cartItems: transformedCartItems,
+                subtotal: this.subtotal,
+                deliveryFee: this.deliveryFee,
+                total: this.total,
+                notes: customerData.notes || ''
+            };
+
+            // Submit to backend
+            const response = await fetch(`${API_BASE_URL}/orders/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderPayload)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Failed to submit order (${response.status})`);
+            }
+            
+            const data = await response.json();
+
+            // Save order to localStorage for order status page
+            const orderData = {
+                orderId: data.order._id,
+                orderNumber: data.orderNumber,
+                userId: customerData.userId,
+                items: this.cartItems,
+                subtotal: this.subtotal,
+                deliveryFee: this.deliveryFee,
+                total: this.total,
+                itemsCount: this.cartItems.length,
+                status: 'pending',
+                timestamp: new Date().toISOString(),
+                customer: customerData,
+                verificationStatus: customerData.verificationStatus
+            };
+            
+            localStorage.setItem('buffs_order', JSON.stringify(orderData));
+            
+            // Clear cart after order placed
+            this.cartItems = [];
+            this.saveCart();
+            
+            // Update active order state
+            this.hasActiveOrder = true;
+            
+            // Close modal
+            this.showOrderConfirmModal = false;
+            
+            // Redirect to order status page
+            this.$router.push('/order-status');
+        } catch (error) {
+            console.error('Error submitting order:', error);
+            alert(error.message || 'Failed to submit order. Please try again.');
+        }
         },
         goToOrderStatus() {
         if (this.hasActiveOrder) {
