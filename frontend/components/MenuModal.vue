@@ -407,16 +407,16 @@ export default {
 <style scoped>
 /* Modal Container Spacing */
 .modal-content {
-    padding: 2.5rem 3.5rem;
+    padding: 1.5rem 2rem;
     max-width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 /* Header Section */
 .modal-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -424,29 +424,29 @@ export default {
 }
 
 .modal-image {
-    width: 220px;
-    height: 220px;
-    margin-top: 1.5rem;
-    margin-bottom: -1rem;
+    width: 160px;
+    height: 160px;
+    margin-top: 0.5rem;
+    margin-bottom: -0.5rem;
     border-radius: 12px;
     background: linear-gradient(135deg, #FBF4E5 0%, #f5ead9 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
+    padding: 6px;
 }
 
 .modal-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
     color: #1A4189;
 }
 
 .modal-description {
-    font-size: 0.75rem;
-    margin-bottom: 1.75rem;
+    font-size: 0.7rem;
+    margin-bottom: 0.75rem;
     color: #666;
-    line-height: 1.6;
+    line-height: 1.4;
 }
 
 .modal-price {
@@ -474,103 +474,28 @@ export default {
 .modal-divider {
     height: 1px;
     background: #e5e7eb;
-    margin: 2rem 0;
+    margin: 0.75rem 0;
 }
 
 /* Customize Section */
 .customize-section {
-    margin-bottom: 2rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
 }
 
 .customize-title {
     font-size: 0.6rem;
     font-weight: bold;
     color: #1f2937;
-    margin-bottom: 1.75rem;
+    margin-bottom: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.25em;
 }
 
-/* Variants Section */
-.variant-group {
-    margin-bottom: 2rem;
-}
-
-.variant-label {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 1rem;
-    display: block;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.variant-buttons-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-.variant-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: 'Unbounded', sans-serif;
-    position: relative;
-    background: white;
-}
-
-.variant-button:hover {
-    border-color: #FE601C;
-    background-color: #fff8f4;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(254, 96, 28, 0.15);
-}
-
-.variant-button-active {
-    border-color: #FE601C !important;
-    background: linear-gradient(135deg, #FE601C 0%, #ff7d3a 100%);
-    color: white;
-    box-shadow: 0 6px 20px rgba(254, 96, 28, 0.4);
-}
-
-.variant-button-active .variant-button-text {
-    color: white;
-    font-weight: 700;
-}
-
-.variant-button-active .variant-button-price {
-    color: #fff8f4;
-    font-weight: 600;
-}
-
-.variant-button-text {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #374151;
+.quantity-group {
     margin-bottom: 0.5rem;
-    transition: color 0.25s;
-}
-
-.variant-button-price {
-    font-size: 0.8rem;
-    color: #FE601C;
-    font-weight: 600;
-    transition: color 0.25s;
-}
-
-/* Addons Section */
-.addons-group {
-    margin-bottom: 1.75rem;
+    margin-top: -2rem;
 }
 
 .addons-label {
@@ -712,14 +637,15 @@ export default {
 
 /* Quantity Section */
 .quantity-group {
-    margin-bottom: 1.75rem;
+    margin-bottom: 0.5rem;
+    margin-top: -2rem;
 }
 
 .quantity-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: block;
 }
 
@@ -758,23 +684,23 @@ export default {
 }
 
 .notes-group {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .notes-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: block;
 }
 
 .notes-textarea {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.5rem;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-family: 'Unbounded', sans-serif;
     resize: none;
     transition: all 0.2s;
@@ -789,16 +715,16 @@ export default {
 .price-summary {
     background: #f9fafb;
     border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .price-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
-    margin-bottom: 1rem;
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
 }
 
 .price-total-row {
@@ -823,26 +749,26 @@ export default {
 .price-divider {
     height: 1px;
     background: #d1d5db;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
 }
 
 /* Action Buttons */
 .action-buttons {
     display: flex;
-    gap: 0.75rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    margin-bottom: 1.5rem;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .btn-cancel {
     flex: 1;
-    padding: 0.625rem 1rem;
+    padding: 0.5rem 0.75rem;
     border: 1px solid #d1d5db;
     background: white;
     color: #374151;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
@@ -854,11 +780,11 @@ export default {
 
 .btn-add {
     flex: 1;
-    padding: 0.625rem 1rem;
+    padding: 0.5rem 0.75rem;
     background: linear-gradient(to right, #FE601C, #ff7d3a);
     color: white;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -867,7 +793,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
+    gap: 0.25rem;
 }
 
 .btn-add:hover {
