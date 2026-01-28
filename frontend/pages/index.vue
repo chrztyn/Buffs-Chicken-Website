@@ -5,7 +5,7 @@
       <Navbar />
 
     <!-- Hero Section -->
-    <section class="w-full h-[calc(100vh-7rem)] px-4 lg:px-8 py-12 lg:py-40 overflow-x-hidden overflow-y-hidden flex flex-col justify-center max-w-[100vw] !p-0 lg:!pt-[300px] lg:!pl-[100px] max-[1023px]:!p-[1.5rem_2rem] max-[1023px]:!pb-12 max-[1023px]:!pt-8 max-[639px]:!p-4 max-[639px]:!pb-10 max-[639px]:!pt-12">
+    <section class="w-full h-[calc(100vh-7rem)] px-4 lg:px-8 py-12 lg:py-40 overflow-x-hidden overflow-y-hidden flex flex-col justify-center max-w-[100vw] !p-0 lg:!pt-[300px] lg:!pl-[100px] max-[1023px]:!p-[1.5rem_2rem] max-[1023px]:!pb-8 max-[1023px]:!pt-16 max-[639px]:!p-4 max-[639px]:!pb-10 max-[639px]:!pt-12">
       <div class="max-w-7xl mx-auto">
         <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4 max-[1023px]:gap-0.5 max-[639px]:gap-0.5 lg:gap-4">
 
@@ -13,7 +13,7 @@
           <HeroImages />
 
           <!-- Text Content -->
-          <div class="text-content-container flex-1 max-w-xl lg:max-w-5xl space-y-6 relative order-2 lg:order-1 [&>*+*]:!mt-2 max-[639px]:[&>*+*]:!mt-6 lg:!mt-40 max-[1023px]:!-mt-[14rem] max-[1023px]:!z-40 max-[639px]:!-mt-[8rem] max-[639px]:!z-30">
+          <div class="text-content-container flex-1 max-w-xl lg:max-w-5xl space-y-6 relative order-2 lg:order-1 [&>*+*]:!mt-2 max-[639px]:[&>*+*]:!mt-6 lg:!mt-40 max-[1023px]:!-mt-[10rem] max-[1023px]:!z-40 max-[639px]:!-mt-[8rem] max-[639px]:!z-30">
 
             <!-- Hero Buffs Chicken Image -->
             <div class="hero-buffs-chicken absolute -top-32 lg:-top-93 left-[-12rem] z-10 lg:!block lg:!opacity-100 lg:!visible max-[1023px]:!hidden">
@@ -21,12 +21,12 @@
             </div>
 
             <!-- Main Heading -->
-            <h1 class="font-['Caprasimo'] text-5xl sm:text-5xl lg:text-7xl text-[#1A4189] leading-tight !leading-none max-[1023px]:!text-[clamp(3.5rem,10vw,4.5rem)] max-[1023px]:!leading-[1.05] max-[1023px]:tracking-[-0.02em] max-[1023px]:!text-center max-[1023px]:!z-41 max-[1023px]:!relative max-[639px]:!text-[3rem] max-[639px]:!text-center max-[639px]:!z-31 max-[639px]:!relative">
+            <h1 class="font-['Caprasimo'] text-5xl sm:text-5xl lg:text-7xl text-[#1A4189] leading-tight !leading-none max-[1023px]:!text-[clamp(3.5rem,10vw,4.5rem)] max-[1023px]:!leading-[1.05] max-[1023px]:tracking-[-0.02em] max-[1023px]:!text-center max-[1023px]:!z-41 max-[1023px]:!relative max-[1023px]:!mt-8 max-[639px]:!text-[3rem] max-[639px]:!text-center max-[639px]:!z-31 max-[639px]:!relative">
               Buffs<br />Chicken
             </h1>
             
             <!-- Subheading -->
-            <h2 class="font-['Unbounded'] text-2xl sm:text-2xl lg:text-3xl font-bold text-[#FE601C] leading-tight max-[1023px]:!text-[1.75rem] max-[1023px]:!text-center max-[1023px]:!font-bold max-[1023px]:!mb-4 max-[1023px]:!mt-0 max-[1023px]:!z-41 max-[1023px]:!relative max-[639px]:!text-[1.5rem] max-[639px]:!text-center max-[639px]:!mb-5 max-[639px]:!mt-1 max-[639px]:!z-31 max-[639px]:!relative">
+            <h2 class="font-['Unbounded'] text-2xl sm:text-2xl lg:text-3xl font-bold text-[#FE601C] leading-tight max-[1023px]:!text-[1.75rem] max-[1023px]:!text-center max-[1023px]:!font-bold max-[1023px]:!mb-4 max-[1023px]:!mt-6 max-[1023px]:!z-41 max-[1023px]:!relative max-[639px]:!text-[1.5rem] max-[639px]:!text-center max-[639px]:!mb-5 max-[639px]:!mt-1 max-[639px]:!z-31 max-[639px]:!relative">
               your go-to comfort
             </h2>
             

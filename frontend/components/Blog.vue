@@ -68,32 +68,32 @@
             </div>
 
             <!-- Pagination Controls -->
-            <div v-if="!loading && blogPosts.length > 0" class="flex items-center justify-center gap-4 mt-16 pb-8">
+            <div v-if="!loading && blogPosts.length > 0" class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-12 sm:mt-16 pb-4 sm:pb-8">
                 <button
                     @click="previousPage"
                     :disabled="currentPage === 1 || loading"
-                    class="px-6 py-2 rounded-full font-['Unbounded'] font-semibold transition-all duration-200"
+                    class="w-full sm:w-auto px-4 sm:px-6 py-2 rounded-full font-['Unbounded'] font-semibold text-sm sm:text-base transition-all duration-200"
                     :class="currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#1A4189] text-white hover:bg-[#15306d] active:scale-95'"
                 >
                     Previous
                 </button>
                 
-                <div class="flex items-center gap-2">
-                    <span class="text-gray-600 font-['Unbounded'] font-semibold">Page</span>
+                <div class="flex items-center gap-1 sm:gap-2">
+                    <span class="text-gray-600 font-['Unbounded'] font-semibold text-sm sm:text-base">Page</span>
                     <input
                         v-model.number="currentPage"
                         type="number"
                         min="1"
                         :max="totalPages"
-                        class="w-12 px-2 py-1 text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#1A4189]"
+                        class="w-10 sm:w-12 px-2 py-1 text-center text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#1A4189]"
                     />
-                    <span class="text-gray-600 font-['Unbounded'] font-semibold">of {{ totalPages }}</span>
+                    <span class="text-gray-600 font-['Unbounded'] font-semibold text-sm sm:text-base">of {{ totalPages }}</span>
                 </div>
                 
                 <button
                     @click="nextPage"
                     :disabled="currentPage >= totalPages || loading"
-                    class="px-6 py-2 rounded-full font-['Unbounded'] font-semibold transition-all duration-200"
+                    class="w-full sm:w-auto px-4 sm:px-6 py-2 rounded-full font-['Unbounded'] font-semibold text-sm sm:text-base transition-all duration-200"
                     :class="currentPage >= totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#FE601C] text-white hover:bg-[#e5540a] active:scale-95'"
                 >
                     Next

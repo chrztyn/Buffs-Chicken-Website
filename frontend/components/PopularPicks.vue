@@ -11,7 +11,7 @@
         <h2 class="popular-picks-title">Popular Picks</h2>
         <NuxtLink
             to="/menu"
-            class="w-35 h-6 view-full-menu group mt-4 inline-flex items-center justify-center gap-1 rounded-full px-3 py-1.5 bg-[#FEB90E] text-[#1A4189] font-['Unbounded'] text-[10px] font-semibold hover:bg-[#FE601C] hover:text-white transition-colors uppercase tracking-wider border border-white/30"
+            class="view-full-menu inline-flex items-center justify-center gap-1.5 rounded-full mt-4 px-4 py-2 bg-[#FEB90E] text-[#1A4189] font-['Unbounded'] text-xs font-semibold hover:bg-[#FE601C] hover:text-white transition-all duration-200 hover:shadow-lg active:scale-95 uppercase tracking-wider"
         >
             View full menu
         </NuxtLink>
