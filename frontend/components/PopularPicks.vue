@@ -104,3 +104,33 @@
       loadPopularPicks();
     });
     </script>
+
+<style scoped>
+.popular-picks-section {
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .popular-picks-section {
+    padding: 3rem 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .popular-picks-section {
+    padding: 4rem 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .popular-picks-section {
+    padding: 5rem 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .popular-picks-section {
+    padding: 6rem 4rem;
+  }
+}
+</style>
