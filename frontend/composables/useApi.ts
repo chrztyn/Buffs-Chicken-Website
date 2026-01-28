@@ -1,21 +1,22 @@
 import axios from 'axios'
+import type { AxiosError, AxiosResponse } from 'axios'
+import { useRuntimeConfig } from '#app'
 import { useAdmin } from './useAdmin'
 
-const API_BASE_URL = 'http://localhost:5001/api'
-
 export const useApi = () => {
+  const config = useRuntimeConfig()
   const { token, getAuthHeader } = useAdmin()
 
-  // Create axios instance
+  // Create axios instance with runtime config
   const api: any = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: config.public.apiBase,
     headers: {
       'Content-Type': 'application/json'
     }
   })
 
   // Add token to requests
-  api.interceptors.request.use((config) => {
+  api.interceptors.request.use((config: any) => {
     if (token.value) {
       const authHeader = getAuthHeader()
       config.headers = {
@@ -28,8 +29,8 @@ export const useApi = () => {
 
   // Handle errors
   api.interceptors.response.use(
-    (response) => response,
-    (error) => {
+    (response: AxiosResponse) => response,
+    (error: AxiosError) => {
       if (error.response?.status === 401) {
         // Token expired - logout
         const { clearToken } = useAdmin()
@@ -48,8 +49,10 @@ export const useApi = () => {
     api.post('/admin/register', { name, email, password })
 
   // Product endpoints
-  const getProducts = () => api.get('/products')
+  const getProducts = (params?: { page?: number; limit?: number }) => 
+    api.get('/products', { params })
   const getProduct = (id: string) => api.get(`/products/${id}`)
+  const getPopularPicks = () => api.get('/products/popular')
   const getProductsByCategory = (categoryId: string) =>
     api.get(`/products/category/${categoryId}`)
   const createProduct = (data: any) => api.post('/products/admin/create', data)
@@ -75,7 +78,8 @@ export const useApi = () => {
   const cancelOrder = (id: string) => api.put(`/orders/${id}/cancel`, {})
 
   // Blog endpoints
-  const getBlogs = () => api.get('/blogs')
+  const getBlogs = (params?: { page?: number; limit?: number }) => 
+    api.get('/blogs', { params })
   const getBlogBySlug = (slug: string) => api.get(`/blogs/slug/${slug}`)
   const getBlogsByCategory = (category: string) =>
     api.get(`/blogs/category/${category}`)
@@ -126,6 +130,7 @@ export const useApi = () => {
     getAdminNotifications,
     markNotificationRead,
     deleteNotification,
-    submitContactForm
+    submitContactForm,
+    getPopularPicks
   }
 }

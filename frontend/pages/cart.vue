@@ -21,8 +21,6 @@
     methods: {
         handlePlaceOrder(orderData) {
         console.log('Order placed:', orderData);
-        // TODO: Implement place order popup/modal here
-        // For now, just log the order data
         }
     }
     };

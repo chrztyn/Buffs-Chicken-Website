@@ -19,7 +19,7 @@
         
         <!-- Image -->
         <div class="food-card-img-wrap">
-        <img 
+        <NuxtImg 
             :src="image" 
             :alt="name" 
             class="w-full h-64 object-contain"

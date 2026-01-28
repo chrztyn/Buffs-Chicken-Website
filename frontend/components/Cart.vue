@@ -13,18 +13,36 @@
         />
 
         <!-- Empty Cart State -->
-        <div v-if="cartItems.length === 0" class="flex flex-col items-center justify-center flex-1 px-4">
-        <svg class="w-24 h-24 text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div v-if="cartItems.length === 0" class="flex flex-col items-center justify-center flex-1 px-4 py-16">
+        <svg class="w-24 h-24 text-gray-300 mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
         </svg>
-        <h2 class="text-2xl sm:text-3xl font-['Unbounded'] font-bold text-gray-800 mb-2">Your Cart is Empty</h2>
-        <p class="text-gray-500 text-center empty-cart-text">Add some delicious items from our menu to get started!</p>
-        <NuxtLink 
-            to="/menu" 
-            class="w-45 h-5 text-center px-8 py-3 bg-[#FE601C] text-white rounded-full font-['Unbounded'] font-semibold hover:bg-[#e5540a] transition-all duration-200 hover:scale-105 text-sm"
-        >
-            Continue Shopping
-        </NuxtLink>
+        <h2 class="text-3xl sm:text-4xl font-['Unbounded'] font-bold text-gray-800 mb-3">Your Cart is Empty</h2>
+        <p class="text-gray-600 text-center empty-cart-text mb-10 max-w-md" v-if="!hasActiveOrder">Add some delicious items from our menu to get started!</p>
+        <p class="text-gray-600 text-center empty-cart-text mb-10 max-w-md" v-else>You have an active order. Track it or continue shopping!</p>
+        
+        <div v-if="hasActiveOrder" class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <NuxtLink 
+                to="/menu" 
+                class="flex items-center justify-center px-8 py-3.5 bg-[#FE601C] text-white rounded-lg font-['Unbounded'] font-semibold text-base transition-all duration-300 hover:bg-[#e5540a] hover:shadow-lg active:scale-95"
+            >
+                Continue Shopping
+            </NuxtLink>
+            <NuxtLink 
+                to="/order-status" 
+                class="flex items-center justify-center px-8 py-3.5 bg-[#1A4189] text-white rounded-lg font-['Unbounded'] font-semibold text-base transition-all duration-300 hover:bg-[#0f2a5e] hover:shadow-lg active:scale-95"
+            >
+                View Order
+            </NuxtLink>
+        </div>
+        <div v-else>
+            <NuxtLink 
+                to="/menu" 
+                class="flex items-center justify-center px-8 py-3.5 bg-[#FE601C] text-white rounded-lg font-['Unbounded'] font-semibold text-base transition-all duration-300 hover:bg-[#e5540a] hover:shadow-lg active:scale-95"
+            >
+                Continue Shopping
+            </NuxtLink>
+        </div>
         </div>
 
         <!-- Cart Content -->
@@ -42,7 +60,7 @@
                 >
                     <!-- Item Image -->
                     <div class="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-2xl overflow-hidden">
-                    <img 
+                    <NuxtImg 
                         :src="item.image" 
                         :alt="item.name"
                         class="w-full h-full object-contain p-2"
@@ -416,6 +434,10 @@
         saveCart() {
         // Save cart to localStorage for persistence
         localStorage.setItem('buffs_cart', JSON.stringify(this.cartItems));
+        // Dispatch custom event to notify navbar of cart changes
+        if (process.client) {
+          window.dispatchEvent(new Event('cart-updated'));
+        }
         },
         loadCart() {
         // Load cart from localStorage
@@ -471,13 +493,19 @@
         border: 1px solid #f0f0f0;
         display: flex;
         gap: 1.5rem;
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .divide-y.divide-gray-200 > div:hover {
         background: #f5f5f5;
         border-color: #e5e5e5;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .divide-y.divide-gray-200 > div {
+            transition: none;
+        }
     }
 
     /* Item Name */
@@ -586,13 +614,19 @@
         border-radius: 0.75rem;
         background: #FEB90E ;
         color: #1f2937 ;
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease, transform 0.2s ease;
         min-width: 200px;
     }
 
     .bg-gradient-to-br.rounded-3xl button:hover {
         background: #e5a70d ;
         transform: scale(1.02);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bg-gradient-to-br.rounded-3xl button {
+            transition: none;
+        }
     }
 
     /* Info Text */

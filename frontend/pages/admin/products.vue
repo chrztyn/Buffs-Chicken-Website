@@ -232,6 +232,19 @@
           </label>
         </div>
 
+        <!-- Popular Pick -->
+        <div class="flex items-center gap-2">
+          <input
+            v-model="productForm.isPopularPick"
+            type="checkbox"
+            id="isPopularPick"
+            class="w-4 h-4 rounded cursor-pointer"
+          />
+          <label for="isPopularPick" class="font-['Unbounded'] font-semibold text-[#FE601C] cursor-pointer">
+            Add to Popular Picks (featured on home page)
+          </label>
+        </div>
+
         <!-- Variants Section -->
         <div class="border-t pt-4">
           <div class="flex items-center justify-between mb-3">
@@ -450,7 +463,7 @@ definePageMeta({
   layout: 'admin'
 })
 
-const { getProducts, getCategories, createProduct, updateProduct, deleteProduct: deleteProductApi } = useApi()
+const { getProducts, getCategories, createProduct, updateProduct, deleteProduct: deleteProductApi, getAllProductsAdmin } = useApi()
 
 const products = ref<any[]>([])
 const categories = ref<any[]>([])
@@ -469,6 +482,7 @@ const productForm = ref<any>({
   image: '',
   imagePreview: '',
   isAvailable: true,
+  isPopularPick: false,
   variants: [],
   sauces: [],
   addons: [],
@@ -490,7 +504,7 @@ const filteredProducts = computed(() => {
 
 const loadProducts = async () => {
   try {
-    const response = await getProducts()
+    const response = await getAllProductsAdmin()
     products.value = response.data
   } catch (error) {
     console.error('Failed to load products:', error)
@@ -517,6 +531,7 @@ const openAddProduct = () => {
     image: '',
     imagePreview: '',
     isAvailable: true,
+    isPopularPick: false,
     variants: [],
     sauces: [],
     addons: [],
@@ -535,6 +550,7 @@ const openEditProduct = (product: any) => {
     image: product.image,
     imagePreview: product.image,
     isAvailable: product.isAvailable,
+    isPopularPick: product.isPopularPick || false,
     variants: product.variants || [],
     sauces: product.sauces || [],
     addons: product.addons || [],
@@ -557,6 +573,7 @@ const handleDrop = (event: DragEvent) => {
   const files = event.dataTransfer?.files
   if (files && files.length > 0) {
     const file = files[0]
+    if (!file) return
     // Simulate a change event with the dropped file
     const dataTransfer = new DataTransfer()
     dataTransfer.items.add(file)
@@ -619,16 +636,16 @@ const addVariant = () => {
   })
 }
 
-const removeVariant = (idx: number) => {
-  productForm.value.variants.splice(idx, 1)
+const removeVariant = (idx: number | string) => {
+  productForm.value.variants.splice(Number(idx), 1)
 }
 
-const addVariantOption = (variantIdx: number) => {
-  productForm.value.variants[variantIdx].options.push({ name: '', priceModifier: 0 })
+const addVariantOption = (variantIdx: number | string) => {
+  productForm.value.variants[Number(variantIdx)].options.push({ name: '', priceModifier: 0 })
 }
 
-const removeVariantOption = (variantIdx: number, optionIdx: number) => {
-  productForm.value.variants[variantIdx].options.splice(optionIdx, 1)
+const removeVariantOption = (variantIdx: number | string, optionIdx: number | string) => {
+  productForm.value.variants[Number(variantIdx)].options.splice(Number(optionIdx), 1)
 }
 
 const addSauce = () => {
@@ -639,24 +656,24 @@ const addSauce = () => {
   })
 }
 
-const removeSauce = (idx: number) => {
-  productForm.value.sauces.splice(idx, 1)
+const removeSauce = (idx: number | string) => {
+  productForm.value.sauces.splice(Number(idx), 1)
 }
 
-const addSauceOption = (sauceIdx: number) => {
-  productForm.value.sauces[sauceIdx].options.push({ name: '' })
+const addSauceOption = (sauceIdx: number | string) => {
+  productForm.value.sauces[Number(sauceIdx)].options.push({ name: '' })
 }
 
-const removeSauceOption = (sauceIdx: number, optionIdx: number) => {
-  productForm.value.sauces[sauceIdx].options.splice(optionIdx, 1)
+const removeSauceOption = (sauceIdx: number | string, optionIdx: number | string) => {
+  productForm.value.sauces[Number(sauceIdx)].options.splice(Number(optionIdx), 1)
 }
 
 const addAddon = () => {
   productForm.value.addons.push({ name: '', price: 0 })
 }
 
-const removeAddon = (idx: number) => {
-  productForm.value.addons.splice(idx, 1)
+const removeAddon = (idx: number | string) => {
+  productForm.value.addons.splice(Number(idx), 1)
 }
 
 const saveProduct = async () => {

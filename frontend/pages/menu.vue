@@ -142,12 +142,18 @@ export default {
         show: false,
         title: '',
         message: ''
-      }
+      },
+      // Pagination properties
+      currentPage: 1,
+      pageSize: 12,
+      totalProducts: 0,
+      hasMore: true,
+      isLoadingMore: false
     }
   },
   async mounted() {
-    // Load products
-    await this.loadProducts()
+    // Load initial products
+    await this.loadProducts(1)
     
     // Load cart count on page load
     const savedCart = localStorage.getItem('buffs_cart');
@@ -155,6 +161,14 @@ export default {
       const cartItems = JSON.parse(savedCart);
       this.cartCount = cartItems.length;
     }
+
+    // Add infinite scroll listener
+    window.addEventListener('scroll', this.handleScroll)
+  },
+
+  unmounted() {
+    // Clean up scroll listener
+    window.removeEventListener('scroll', this.handleScroll)
   },
   computed: {
     filteredMenuItems() {
@@ -178,11 +192,22 @@ export default {
     }
   },
   methods: {
-    async loadProducts() {
+    async loadProducts(page = 1) {
       try {
+        const isInitialLoad = page === 1
+        if (isInitialLoad) {
+          this.loading = true
+        } else {
+          this.isLoadingMore = true
+        }
+
         const { getProducts } = useApi()
-        const response = await getProducts()
-        this.menuItems = response.data.map(product => ({
+        const response = await getProducts({
+          page,
+          limit: this.pageSize
+        })
+        
+        const newProducts = response.data.data.map(product => ({
           id: product._id,
           name: product.name,
           price: product.price,
@@ -193,14 +218,31 @@ export default {
           addons: product.addons || [],
           sauces: product.sauces || []
         }))
+
+        // Append new products (infinite scroll) or replace (initial load)
+        if (page === 1) {
+          this.menuItems = newProducts
+        } else {
+          this.menuItems.push(...newProducts)
+        }
+
+        // Update pagination state
+        this.totalProducts = response.data.total || 0
+        this.hasMore = this.menuItems.length < this.totalProducts
+        this.currentPage = page
         
-        // Extract unique categories from products
-        this.loadCategoriesFromProducts()
+        // Extract unique categories from products on initial load
+        if (isInitialLoad) {
+          this.loadCategoriesFromProducts()
+        }
+
         this.loading = false
+        this.isLoadingMore = false
       } catch (error) {
         console.error('Error loading products:', error)
         this.error = 'Failed to load menu items'
         this.loading = false
+        this.isLoadingMore = false
       }
     },
     loadCategoriesFromProducts() {
@@ -297,6 +339,15 @@ export default {
     },
     goToCart() {
       this.$router.push('/cart')
+    },
+    handleScroll() {
+      // Check if user scrolled near bottom of page (500px from bottom)
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+        // Load more products if available and not already loading
+        if (this.hasMore && !this.isLoadingMore && !this.loading) {
+          this.loadProducts(this.currentPage + 1)
+        }
+      }
     }
   }
 }
@@ -306,7 +357,14 @@ export default {
 /* Toast Notification Animations */
 .toast-fade-enter-active,
 .toast-fade-leave-active {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-fade-enter-active,
+    .toast-fade-leave-active {
+        transition: none;
+    }
 }
 
 .toast-fade-enter-from {
@@ -328,7 +386,7 @@ export default {
   padding: 0.875rem;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   max-width: 280px;
@@ -352,11 +410,20 @@ export default {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 :deep(.menu-card:hover .image-container) {
   background: linear-gradient(135deg, #f0f1f3 0%, #e8eaed 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :deep(.menu-card) {
+        transition: none;
+    }
+    :deep(.menu-card .image-container) {
+        transition: none;
+    }
 }
 
 :deep(.menu-card .image-container img) {

@@ -12,67 +12,95 @@
         <NuxtLink
             to="/menu"
             class="w-35 h-6 view-full-menu group mt-4 inline-flex items-center justify-center gap-1 rounded-full px-3 py-1.5 bg-[#FEB90E] text-[#1A4189] font-['Unbounded'] text-[10px] font-semibold hover:bg-[#FE601C] hover:text-white transition-colors uppercase tracking-wider border border-white/30"
-
         >
             View full menu
         </NuxtLink>
         </header>
 
         <div class="popular-picks-grid grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl mx-auto justify-items-center relative z-10">
-        <FoodCard
+        <div
             v-for="item in popularItems"
-            :key="item.id"
-            :image="item.image"
-            :name="item.name"
-            :price="item.price"
-            @add-to-cart="handleAddToCart"
-        />
+            :key="item._id"
+            class="cursor-pointer transform transition-transform hover:scale-105"
+            @click="openMenuModal(item)"
+        >
+            <FoodCard
+                :image="item.image"
+                :name="item.name"
+                :price="item.price"
+                @add-to-cart="() => {}"
+            />
+        </div>
         </div>
     </section>
+    
+    <MenuModal 
+      v-if="isModalOpen && selectedProduct"
+      :is-open="isModalOpen" 
+      :item="selectedProduct" 
+      @close="closeMenuModal"
+      @add-to-cart="handleAddToCart"
+    />
     </template>
 
-    <script>
+    <script setup>
+    import { ref, onMounted } from 'vue';
     import FoodCard from './FoodCard.vue';
+    import MenuModal from './MenuModal.vue';
+    import { useApi } from '~/composables/useApi';
 
-    export default {
-    name: 'PopularPicks',
-    components: {
-        FoodCard
-    },
-    data() {
-        return {
-        popularItems: [
-            {
-            id: 1,
-            name: 'Chicken Poppers',
-            price: 215,
-            image: '/chicken-poppers.png',
-            },
-            {
-            id: 2,
-            name: 'OG Flavored Wings',
-            price: 230,
-            image: '/og-flavored-wings.png',
-            },
-            {
-            id: 3,
-            name: 'Chicken Sandwich',
-            price: 260,
-            image: '/chicken-sandwich.png',
-            },
-            {
-            id: 4,
-            name: 'Poppers and Fries',
-            price: 240,
-            image: '/poppers-and-fries.png',
-            },
-        ]
-        };
-    },
-    methods: {
-        handleAddToCart(item) {
-        console.log('Added to cart:', item);
-        }
-    }
+    const popularItems = ref([]);
+    const selectedProduct = ref(null);
+    const isModalOpen = ref(false);
+    const loading = ref(true);
+
+    const { getPopularPicks } = useApi();
+
+    const loadPopularPicks = async () => {
+      try {
+        loading.value = true;
+        const response = await getPopularPicks();
+        popularItems.value = response.data;
+      } catch (error) {
+        console.error('Failed to load popular picks:', error);
+        // Fallback to default items if loading fails
+        popularItems.value = [];
+      } finally {
+        loading.value = false;
+      }
     };
+
+    const openMenuModal = (product) => {
+      selectedProduct.value = product;
+      isModalOpen.value = true;
+    };
+
+    const closeMenuModal = () => {
+      isModalOpen.value = false;
+      selectedProduct.value = null;
+    };
+
+    const handleAddToCart = (cartData) => {
+      // Get existing cart from localStorage
+      const existingCart = localStorage.getItem('buffs_cart');
+      const cart = existingCart ? JSON.parse(existingCart) : [];
+      
+      // Add new item to cart
+      cart.push(cartData);
+      
+      // Save back to localStorage
+      localStorage.setItem('buffs_cart', JSON.stringify(cart));
+      
+      // Dispatch custom event to notify navbar of cart changes
+      if (process.client) {
+        window.dispatchEvent(new Event('cart-updated'));
+      }
+      
+      // Close modal
+      closeMenuModal();
+    };
+
+    onMounted(() => {
+      loadPopularPicks();
+    });
     </script>

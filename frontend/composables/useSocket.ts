@@ -11,6 +11,9 @@ export const useSocket = () => {
   const connect = () => {
     if (!token.value || socket.value?.connected) return
 
+    // Prevent multiple connection attempts
+    if (socket.value) return
+
     const socketUrl = process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:5001'
     socket.value = io(socketUrl, {
       auth: {
@@ -61,8 +64,18 @@ export const useSocket = () => {
   }
 
   const disconnect = () => {
-    if (socket.value?.connected) {
+    if (socket.value) {
+      // Remove all event listeners to prevent memory leaks
+      socket.value.off('connect')
+      socket.value.off('disconnect')
+      socket.value.off('new-order')
+      socket.value.off('order-status-updated')
+      socket.value.off('admin-notification')
+      
+      // Disconnect socket
       socket.value.disconnect()
+      socket.value = null
+      isConnected.value = false
     }
   }
 

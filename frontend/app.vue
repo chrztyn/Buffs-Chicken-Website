@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <OfflineNotification />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

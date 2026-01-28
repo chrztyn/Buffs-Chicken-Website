@@ -5,6 +5,7 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
+const compression = require('compression');
 
 // Load environment variables
 dotenv.config();
@@ -44,8 +45,30 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// HTTP Caching Middleware
+app.use((req, res, next) => {
+  // Cache static assets for 1 week (immutable - never changes)
+  if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+    res.set('Cache-Control', 'public, max-age=604800, immutable');
+  }
+  // Cache API responses for 5 minutes
+  else if (req.url.startsWith('/api/')) {
+    res.set('Cache-Control', 'public, max-age=300');
+  }
+  // Don't cache admin pages
+  else if (req.url.startsWith('/admin')) {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  // Default: cache for 1 hour
+  else {
+    res.set('Cache-Control', 'public, max-age=3600');
+  }
+  next();
+});
 
 // Make io accessible to route handlers
 app.use((req, res, next) => {
@@ -53,8 +76,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files from public directory with caching
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1w',
+  etag: false // Let Cache-Control headers handle freshness
+}));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
@@ -126,7 +152,7 @@ app.use((req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

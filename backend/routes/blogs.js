@@ -3,13 +3,27 @@ const router = express.Router();
 const Blog = require('../models/Blog');
 const authenticateAdmin = require('../middleware/authenticateAdmin');
 
-// Get all published blogs (for public viewing)
+// Get all published blogs (for public viewing) with pagination
 router.get('/', async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const blogs = await Blog.find({ isPublished: true })
       .select('-content')
-      .sort({ publishedAt: -1 });
-    res.json(blogs);
+      .sort({ publishedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Blog.countDocuments({ isPublished: true });
+
+    res.json({
+      data: blogs,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

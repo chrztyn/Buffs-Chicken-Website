@@ -26,7 +26,7 @@
                     <div class="flex flex-col md:flex-row gap-6 md:gap-8 pb-24 md:pb-32">
                         <!-- Blog Image -->
                         <div class="w-full md:w-[250px] h-[250px] bg-[#D1D5DB] rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
-                            <img 
+                            <NuxtImg 
                                 v-if="post.image"
                                 :src="post.image"
                                 :alt="post.title"
@@ -66,6 +66,39 @@
                     />
                 </article>
             </div>
+
+            <!-- Pagination Controls -->
+            <div v-if="!loading && blogPosts.length > 0" class="flex items-center justify-center gap-4 mt-16 pb-8">
+                <button
+                    @click="previousPage"
+                    :disabled="currentPage === 1 || loading"
+                    class="px-6 py-2 rounded-full font-['Unbounded'] font-semibold transition-all duration-200"
+                    :class="currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#1A4189] text-white hover:bg-[#15306d] active:scale-95'"
+                >
+                    Previous
+                </button>
+                
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-600 font-['Unbounded'] font-semibold">Page</span>
+                    <input
+                        v-model.number="currentPage"
+                        type="number"
+                        min="1"
+                        :max="totalPages"
+                        class="w-12 px-2 py-1 text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#1A4189]"
+                    />
+                    <span class="text-gray-600 font-['Unbounded'] font-semibold">of {{ totalPages }}</span>
+                </div>
+                
+                <button
+                    @click="nextPage"
+                    :disabled="currentPage >= totalPages || loading"
+                    class="px-6 py-2 rounded-full font-['Unbounded'] font-semibold transition-all duration-200"
+                    :class="currentPage >= totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#FE601C] text-white hover:bg-[#e5540a] active:scale-95'"
+                >
+                    Next
+                </button>
+            </div>
             
             <!-- Divider after Blog Section -->
             <hr class="border-t border-gray-300 mt-24 md:mt-28" />
@@ -74,23 +107,31 @@
 </template>
 
     <script setup>
-    import { ref, onMounted } from 'vue';
+    import { ref, computed, onMounted, watch } from 'vue';
     import { useApi } from '~/composables/useApi';
 
     const blogPosts = ref([]);
     const loading = ref(true);
     const error = ref(null);
+    const currentPage = ref(1);
+    const pageSize = ref(10);
+    const totalBlogs = ref(0);
 
     const { getBlogs } = useApi();
 
-    const loadBlogs = async () => {
+    // Compute total pages
+    const totalPages = computed(() => {
+      return Math.ceil(totalBlogs.value / pageSize.value);
+    });
+
+    const loadBlogs = async (page = 1) => {
       try {
         loading.value = true;
-        console.log('Fetching blogs...')
-        const response = await getBlogs();
-        console.log('Blogs response:', response)
-        blogPosts.value = response.data || [];
-        console.log('Blogs loaded:', blogPosts.value.length)
+        error.value = null;
+        const response = await getBlogs({ page, limit: pageSize.value });
+        blogPosts.value = response.data.data || [];
+        totalBlogs.value = response.data.total || 0;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) {
         console.error('Failed to load blogs:', err);
         error.value = 'Failed to load blog posts';
@@ -99,7 +140,24 @@
       }
     };
 
+    const nextPage = () => {
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
+    };
+
+    const previousPage = () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
+    };
+
+    // Watch for page changes and load new data
+    watch(currentPage, (newPage) => {
+      loadBlogs(newPage);
+    });
+
     onMounted(() => {
-      loadBlogs();
+      loadBlogs(1);
     });
     </script>

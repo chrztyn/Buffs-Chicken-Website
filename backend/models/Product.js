@@ -59,6 +59,10 @@ const productSchema = new mongoose.Schema(
     reviewCount: {
       type: Number,
       default: 0
+    },
+    isPopularPick: {
+      type: Boolean,
+      default: false
     }
   },
   { timestamps: true }

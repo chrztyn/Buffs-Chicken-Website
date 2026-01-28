@@ -17,7 +17,7 @@
 
             <!-- Hero Buffs Chicken Image -->
             <div class="hero-buffs-chicken absolute -top-32 lg:-top-93 left-[-12rem] z-10 lg:!block lg:!opacity-100 lg:!visible max-[1023px]:!hidden">
-              <img src="/hero-buffs-chicken.png" alt="Buffs Chicken" class="w-50 h-50 lg:w-115 lg:h-115 object-contain max-[1023px]:!w-[clamp(200px,32vw,300px)] max-[1023px]:!h-auto" />
+              <NuxtImg src="/hero-buffs-chicken.png" alt="Buffs Chicken" class="w-50 h-50 lg:w-115 lg:h-115 object-contain max-[1023px]:!w-[clamp(200px,32vw,300px)] max-[1023px]:!h-auto" />
             </div>
 
             <!-- Main Heading -->
@@ -59,12 +59,15 @@
 </template>
 
 <script>
-import Blog from '~/components/Blog.vue';
-import FAQ from '~/components/FAQ.vue';
-import Footer from '~/components/Footer.vue';
-import Navbar from '~/components/Navbar.vue';
-import PopularPicks from '~/components/PopularPicks.vue';
-import HeroImages from '~/components/HeroImages.vue';
+// Eager load (needed above fold)
+import Navbar from '~/components/Navbar.vue'
+import HeroImages from '~/components/HeroImages.vue'
+
+// Lazy load (below fold)
+const PopularPicks = defineAsyncComponent(() => import('~/components/PopularPicks.vue'))
+const Blog = defineAsyncComponent(() => import('~/components/Blog.vue'))
+const FAQ = defineAsyncComponent(() => import('~/components/FAQ.vue'))
+const Footer = defineAsyncComponent(() => import('~/components/Footer.vue'))
 
 export default {
   components: {
