@@ -1,7 +1,7 @@
 <template>
-    <footer class="bg-[#1e3a8a] text-white py-12 px-6">
-        <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-8 md:gap-12" style="padding-left: 2rem;">
+    <footer class="bg-[#1e3a8a] text-white py-12 px-6 md:px-8 lg:px-12">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 lg:pl-30">
+        <div class="grid grid-cols-1 md:grid-cols-[minmax(200px,_1fr)_minmax(100px,_auto)_minmax(120px,_auto)] gap-6 md:gap-8 lg:gap-12">
             <!-- Brand Section -->
             <div>
             <h2 class="text-[#FE601C] font-['Caprasimo'] text-xl mb-4">Buffs Chicken</h2>

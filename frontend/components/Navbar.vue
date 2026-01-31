@@ -1,18 +1,18 @@
 <template>
-  <nav class="sticky top-2 sm:top-4 lg:top-8 z-10 py-4 sm:py-5 lg:py-6">
-    <div class="w-full flex justify-center px-3 sm:px-4 lg:px-6">
-      <div class="relative w-full max-w-[1000px]">
+  <nav class="sticky top-2 sm:top-4 lg:top-8 z-10 py-4 sm:py-5 lg:py-6 overflow-visible">
+    <div class="w-full flex justify-center px-3 sm:px-4 lg:px-6 overflow-visible">
+      <div class="relative w-full max-w-[1000px] overflow-visible">
         <!-- Navbar Container -->
-        <div class="bg-[#f8f8f8] rounded-full px-2 sm:px-5 lg:px-16 py-0 flex justify-between items-center relative shadow-md overflow-visible h-14 sm:h-16 lg:h-20">
+        <div class="bg-[#f8f8f8] rounded-full px-2 sm:px-5 lg:px-16 py-0 flex justify-between items-center relative shadow-md overflow-visible h-14 sm:h-16 lg:h-20 z-0">
           
           <!-- Mobile/Tablet: Hamburger Menu Button (Left) -->
           <button 
             @click="menuOpen = !menuOpen"
-            class="hamburger-btn flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 transition-colors lg:hidden"
+            class="hamburger-btn flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full hover:bg-gray-200 transition-colors lg:hidden min-h-10 min-w-10"
             aria-label="Toggle menu"
           >
             <svg 
-              class="w-6 h-6 text-black"
+              class="w-5 h-5 sm:w-6 sm:h-6 text-black"
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -47,11 +47,11 @@
             <NuxtLink to="/contact" class="font-['Unbounded'] font-normal text-base text-black no-underline lowercase transition-colors duration-200 hover:text-[#FE601C] whitespace-nowrap">contact</NuxtLink>
             <NuxtLink 
               to="/cart" 
-              class="relative font-['Unbounded'] font-semibold text-base bg-[#1A4189] text-[#FEB90E] border-none py-2 px-6 rounded-full cursor-pointer lowercase transition-all duration-200 hover:bg-[#15306d] hover:shadow-lg active:scale-95 whitespace-nowrap inline-block text-center"
+              class="relative font-['Unbounded'] font-semibold text-base bg-[#1A4189] text-[#FEB90E] border-none py-2 px-6 rounded-full cursor-pointer lowercase transition-all duration-200 hover:bg-[#15306d] hover:shadow-lg active:scale-95 whitespace-nowrap inline-block text-center overflow-visible"
             >
               cart
               <!-- Cart Badge -->
-              <span v-if="cartCount > 0" class="absolute -top-2 -right-2 bg-[#FEB90E] text-gray-900 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+              <span v-if="cartCount > 0" class="absolute -top-3 -right-3 bg-[#FEB90E] text-gray-900 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center z-40 shadow-lg">
                 {{ cartCount }}
               </span>
             </NuxtLink>
@@ -60,10 +60,10 @@
           <!-- Mobile/Tablet: Cart Button (Right) -->
           <NuxtLink 
             to="/cart" 
-            class="cart-icon-mobile lg:hidden bg-[#1A4189] text-[#FEB90E] border-none p-2.5 rounded-full cursor-pointer transition-all duration-200 hover:bg-[#15306d] hover:shadow-lg active:scale-95 inline-flex items-center justify-center relative"
+            class="cart-icon-mobile lg:hidden bg-[#1A4189] text-[#FEB90E] border-none p-2.5 sm:p-3 rounded-full cursor-pointer transition-all duration-200 hover:bg-[#15306d] hover:shadow-lg active:scale-95 inline-flex items-center justify-center relative min-h-10 min-w-10 sm:min-h-12 sm:min-w-12"
           >
             <svg 
-              class="w-5 h-5" 
+              class="w-5 h-5 sm:w-6 sm:h-6" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -76,7 +76,7 @@
               />
             </svg>
             <!-- Cart Badge -->
-            <span v-if="cartCount > 0" class="absolute -top-2 -right-2 bg-[#FEB90E] text-gray-900 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            <span v-if="cartCount > 0" class="absolute -top-0 -right-0 sm:top-1 sm:right-1 bg-[#FEB90E] text-gray-900 text-[10px] sm:text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
               {{ cartCount }}
             </span>
           </NuxtLink>
@@ -95,13 +95,13 @@
         <transition name="menu-slide">
           <div 
             v-if="menuOpen"
-            class="mobile-menu absolute top-full left-0 right-0 mt-4 bg-[#f8f8f8] shadow-2xl overflow-hidden lg:hidden"
+            class="mobile-menu absolute top-full left-0 right-0 mt-2 sm:mt-4 bg-[#f8f8f8] shadow-2xl overflow-hidden lg:hidden rounded-2xl mx-3 sm:mx-4"
           >
-            <div class="menu-open flex flex-col py-6 pr-6 pl-16 gap-4">
+            <div class="menu-open flex flex-col py-4 sm:py-6 pr-4 sm:pr-6 pl-6 sm:pl-10 gap-3 sm:gap-4 pb-4 sm:pb-6">
               <NuxtLink 
                 to="/" 
                 @click="menuOpen = false"
-                class="font-['Unbounded'] font-normal text-base text-black no-underline lowercase transition-colors duration-200 hover:text-[#FE601C] py-3 px-4 hover:bg-gray-100 rounded-xl"
+                class="font-['Unbounded'] font-normal text-base text-black no-underline lowercase transition-colors duration-200 hover:text-[#FE601C] py-3 px-4 hover:bg-gray-100 rounded-xl block min-h-10 flex items-center"
               >
                 home
               </NuxtLink>

@@ -29,34 +29,34 @@
         <Navbar class="relative z-20" />
 
         <!-- Menu Content Section -->
-        <div class="menu-content-container pt-16 pb-24 md:pb-32 px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-32 max-w-[1920px] mx-auto">
+        <div class="menu-content-container pt-8 sm:pt-12 md:pt-16 pb-16 sm:pb-20 md:pb-24 lg:pb-32 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 max-w-[1920px] mx-auto w-full">
             <!-- Main Content: Left Sidebar and Right Grid -->
-            <div class="flex flex-col lg:flex-row gap-10 lg:gap-14 xl:gap-20 items-start">
-                <!-- Left Sidebar (25-30% width) -->
-                <div class="w-full lg:w-[28%] xl:w-[25%] flex-shrink-0">
+            <div class="flex flex-col lg:flex-row gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-16 items-start w-full">
+                <!-- Left Sidebar (Full width on mobile/tablet, 25% on desktop) -->
+                <div class="w-full lg:w-[25%] lg:flex-shrink-0">
                     <!-- Title -->
-                    <h2 class="text-4xl md:text-5xl font-['Caprasimo'] text-[#1A4189] mb-10 leading-tight">Grab your favorites</h2>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-['Caprasimo'] text-[#1A4189] mb-6 sm:mb-8 lg:mb-10 leading-tight">Grab your favorites</h2>
 
                     <!-- Search Bar and Cart -->
-                    <div class="flex flex-col gap-4 mb-10">
-                        <div class="flex gap-3 items-center">
-                            <div class="relative flex-1">
+                    <div class="flex flex-col gap-4 mb-8 sm:mb-10">
+                        <div class="flex gap-2 sm:gap-3 items-center w-full">
+                            <div class="relative flex-1 min-w-0">
                                 <input 
                                     v-model="searchQuery"
                                     type="text" 
-                                    placeholder="Search for meals" 
-                                    class="w-full px-4 py-2.5 rounded-full border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/20 transition-all shadow-sm hover:shadow-md text-sm"
+                                    placeholder="Search meals" 
+                                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-full border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/20 transition-all shadow-sm hover:shadow-md text-xs sm:text-sm"
                                 />
-                                <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
                             </div>
                             <button 
                                 @click="goToCart"
-                                class="w-10 h-10 bg-[#FEB90E] rounded-full text-[#1A4189] hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 flex items-center justify-center shrink-0"
+                                class="w-9 h-9 sm:w-10 sm:h-10 bg-[#FEB90E] rounded-full text-[#1A4189] hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 flex items-center justify-center flex-shrink-0 shadow-sm hover:shadow-md"
                                 aria-label="View Cart"
                             >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <svg class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
                                 <path d="M16 10a4 4 0 0 1-8 0"></path>
@@ -67,29 +67,91 @@
 
                     <!-- Filter Options -->
                     <div class="filter-options">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 font-['Unbounded'] tracking-tight">Filter Options</h3>
-                        <div class="border-b border-gray-200 mb-6"></div>
-                        <div class="filter-checkbox flex flex-col gap-4">
-                            <label 
-                                v-for="category in filterCategories" 
-                                :key="category.id"
-                                class="flex items-center gap-3 cursor-pointer group py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors"
+                        <!-- Mobile Filter Dropdown Toggle -->
+                        <button
+                            @click="mobileFilterOpen = !mobileFilterOpen"
+                            class="lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-[#1A4189] hover:bg-gray-50 transition-all duration-200 mb-4"
+                        >
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-[#1A4189]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                                </svg>
+                                <span class="font-['Unbounded'] font-semibold text-gray-800">
+                                    Filters {{ selectedFilters.length > 0 ? `(${selectedFilters.length})` : '' }}
+                                </span>
+                            </div>
+                            <svg 
+                                :class="['w-5 h-5 text-[#1A4189] transition-transform duration-300', { 'rotate-180': mobileFilterOpen }]"
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
                             >
-                                <input 
-                                    type="checkbox" 
-                                    :value="category.id"
-                                    v-model="selectedFilters"
-                                    class="w-5 h-5 cursor-pointer text-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/30 rounded border-gray-300 transition-all"
-                                />
-                                <span class="text-gray-700 font-normal font-['Unbounded'] group-hover:text-[#1A4189] transition-colors">{{ category.name }}</span>
-                            </label>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Mobile Filter Dropdown Content -->
+                        <transition
+                            enter-active-class="transition-all duration-300 ease-out"
+                            leave-active-class="transition-all duration-300 ease-in"
+                            enter-from-class="opacity-0 max-h-0"
+                            leave-to-class="opacity-0 max-h-0"
+                        >
+                            <div 
+                                v-if="mobileFilterOpen"
+                                class="lg:hidden bg-white border-2 border-t-0 border-gray-200 rounded-b-lg overflow-hidden mb-4"
+                            >
+                                <div class="p-4 space-y-3">
+                                    <label 
+                                        v-for="category in filterCategories" 
+                                        :key="category.id"
+                                        class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors group"
+                                    >
+                                        <input 
+                                            type="checkbox" 
+                                            :value="category.id"
+                                            v-model="selectedFilters"
+                                            class="w-5 h-5 cursor-pointer text-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/30 rounded border-gray-300 transition-all flex-shrink-0"
+                                        />
+                                        <span class="text-sm font-['Unbounded'] text-gray-700 group-hover:text-[#1A4189] transition-colors">{{ category.name }}</span>
+                                    </label>
+                                    <button
+                                        @click="selectedFilters = []; mobileFilterOpen = false"
+                                        v-if="selectedFilters.length > 0"
+                                        class="w-full mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-['Unbounded'] font-semibold rounded-lg transition-colors text-sm"
+                                    >
+                                        Clear Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </transition>
+
+                        <!-- Desktop Filter Options (hidden on mobile) -->
+                        <div class="hidden lg:block">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 font-['Unbounded'] tracking-tight">Filter Options</h3>
+                            <div class="border-b border-gray-200 mb-4 sm:mb-6"></div>
+                            <div class="filter-checkbox flex flex-col gap-2 sm:gap-4">
+                                <label 
+                                    v-for="category in filterCategories" 
+                                    :key="category.id"
+                                    class="flex items-center gap-2 sm:gap-3 cursor-pointer group py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    <input 
+                                        type="checkbox" 
+                                        :value="category.id"
+                                        v-model="selectedFilters"
+                                        class="w-4 sm:w-5 h-4 sm:h-5 cursor-pointer text-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/30 rounded border-gray-300 transition-all flex-shrink-0"
+                                    />
+                                    <span class="text-sm sm:text-base text-gray-700 font-normal font-['Unbounded'] group-hover:text-[#1A4189] transition-colors">{{ category.name }}</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Main Content (70-75% width) -->
-                <div class="flex-1 w-full lg:w-[72%] xl:w-[75%] pb-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8">
+                <!-- Right Main Content (Full width on mobile/tablet, 75% on desktop) -->
+                <div class="flex-1 w-full lg:w-[75%] pb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-7 menu-grid">
                         <MenuCard
                             v-for="item in filteredMenuItems"
                             :key="item.id"
@@ -143,6 +205,7 @@ export default {
         title: '',
         message: ''
       },
+      mobileFilterOpen: false,
       // Pagination properties
       currentPage: 1,
       pageSize: 12,
@@ -375,6 +438,50 @@ export default {
 .toast-fade-leave-to {
     opacity: 0;
     transform: translateX(100%);
+}
+
+/* Mobile Filter Dropdown Animation */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.duration-300 {
+    transition-duration: 300ms;
+}
+
+.ease-out {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ease-in {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.opacity-0 {
+    opacity: 0;
+}
+
+.max-h-0 {
+    max-height: 0;
+}
+
+/* ============ TABLET (md breakpoint - 768px) - 2 COLUMNS ============ */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+/* ============ LARGE DESKTOP (lg breakpoint - 1024px) - 3 COLUMNS ============ */
+@media (min-width: 1024px) and (max-width: 1369px) {
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
 }
 
 /* ============ MENU CARD STYLES - SHORTENED ============ */

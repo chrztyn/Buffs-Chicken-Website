@@ -177,7 +177,17 @@
 
           <!-- OTP Content -->
           <div class="modal-content otp-modal-content">
-            <div class="otp-section">
+            <!-- Loading Overlay for OTP Verification -->
+            <div v-if="isVerifying" class="loading-overlay">
+              <div class="loading-spinner">
+                <svg class="spinner-icon" viewBox="0 0 50 50">
+                  <circle class="spinner-circle" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
+                </svg>
+                <p class="loading-text">Verifying your code...</p>
+              </div>
+            </div>
+
+            <div class="otp-section" :class="{ 'opacity-50 pointer-events-none': isVerifying }">
               <!-- Header Icon -->
               <div class="otp-header">
                 <svg class="otp-check-icon" fill="currentColor" viewBox="0 0 20 20">
@@ -203,6 +213,7 @@
                     pattern="\d{6}"
                     required
                     class="form-input otp-input"
+                    :disabled="isVerifying"
                   />
                   <p class="otp-timer">
                     OTP expires in <span class="timer-number">{{ otpTimer }}</span>s
@@ -223,6 +234,7 @@
                     type="button"
                     @click="goBackToDelivery"
                     class="btn-cancel"
+                    :disabled="isVerifying"
                   >
                     Back
                   </button>
@@ -243,7 +255,7 @@
                   type="button"
                   @click="resendOTP"
                   class="resend-button"
-                  :disabled="isLoading"
+                  :disabled="isLoading || isVerifying"
                 >
                   {{ isLoading ? 'Sending...' : 'Resend' }}
                 </button>
@@ -860,6 +872,67 @@ onUnmounted(() => {
   height: 20px;
   flex-shrink: 0;
   color: #dc2626;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  z-index: 50;
+  backdrop-filter: blur(2px);
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spinner-icon {
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-circle {
+  stroke: #FE601C;
+  stroke-dasharray: 31.4;
+  stroke-dashoffset: 0;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-weight: 600;
+  font-family: 'Unbounded', sans-serif;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dashoffset: 31.4;
+  }
+  50% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -31.4;
+  }
 }
 
 </style>

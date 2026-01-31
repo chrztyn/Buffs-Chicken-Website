@@ -510,6 +510,11 @@ const handleOrderStatusUpdate = (data) => {
     if (data.status === 'delivered') {
       setTimeout(() => {
         showThankYouModal.value = true
+        // Clear order from localStorage after delivery
+        setTimeout(() => {
+          localStorage.removeItem('buffs_order')
+          localStorage.removeItem('buffs_cart')
+        }, 2000)
       }, 1000)
     }
   }
@@ -542,20 +547,30 @@ const cancelOrder = async () => {
 
 const closeThankYouModal = () => {
   showThankYouModal.value = false
-  // Auto-redirect to menu after 3 seconds
+  // Redirect to home page after closing modal
   setTimeout(() => {
-    router.push('/menu')
-  }, 3000)
+    router.push('/')
+  }, 500)
 }
 
 const goToBlogs = () => {
   showThankYouModal.value = false
-  router.push('/blogs')
+  // Redirect to blogs page
+  setTimeout(() => {
+    router.push('/blogs')
+  }, 500)
 }
 
 onMounted(() => {
   console.log('=== ORDER STATUS PAGE MOUNTED ===')
   loadOrder()
+  
+  // If order is already delivered, redirect to home
+  if (hasOrder.value && currentStatus.value === 'delivered') {
+    console.log('Order already delivered, redirecting...')
+    router.push('/')
+    return
+  }
   
   if (hasOrder.value) {
     console.log('Has order, connecting to Socket.io...')
@@ -618,17 +633,85 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   background: linear-gradient(135deg, #1A4189 0%, #2356b4 100%);
+  padding: 1.5rem 1rem;
+  border-radius: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .status-header {
+    padding: 1.75rem 1.5rem;
+    min-height: 5.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .status-header {
+    padding: 2rem 2rem;
+    min-height: 6rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .status-header {
+    padding: 2.5rem 2rem;
+    min-height: 6rem;
+  }
 }
 
 .content-wrapper {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 2rem;
-  margin-top: 4rem;
+  padding: 0 1rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 640px) {
+  .content-wrapper {
+    padding: 0 1.5rem;
+    margin-top: 2.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .content-wrapper {
+    padding: 0 2rem;
+    margin-top: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content-wrapper {
+    padding: 0 2rem;
+    margin-top: 4rem;
+  }
 }
 
 .order-status {
   margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(12px);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 10px 40px rgba(26, 65, 137, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@media (min-width: 640px) {
+  .order-status {
+    padding: 1.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .order-status {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .order-status {
+    padding: 2rem;
+  }
 }
 
 .button-checkmark {
@@ -637,17 +720,61 @@ onUnmounted(() => {
 
 /* Section Title */
 .section-title {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
   color: #1f2937;
   text-transform: uppercase;
   letter-spacing: 1.5px;
 }
 
+@media (min-width: 640px) {
+  .section-title {
+    font-size: 0.7rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .section-title {
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-title {
+    font-size: 0.8rem;
+  }
+}
+
 /* Status Label */
 .status-label {
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .status-label {
+    margin-top: 0.6rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.7rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .status-label {
+    margin-top: 0.75rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .status-label {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+  }
 }
 
 /* Completed Status Circle - Smaller */
@@ -692,7 +819,7 @@ onUnmounted(() => {
 }
 
 .summary-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #4b5563;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -700,11 +827,35 @@ onUnmounted(() => {
   align-items: center;
 }
 
+@media (min-width: 640px) {
+  .summary-label {
+    font-size: 0.72rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .summary-label {
+    font-size: 0.75rem;
+  }
+}
+
 .summary-value {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #1f2937;
   font-family: 'Unbounded', sans-serif;
+}
+
+@media (min-width: 640px) {
+  .summary-value {
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .summary-value {
+    font-size: 0.875rem;
+  }
 }
 
 .summary-divider {
@@ -717,32 +868,68 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.85rem;
   background: linear-gradient(135deg, #FE601C 60%, #f47c49 100%);
   border-radius: 1rem;
   margin-top: 0.25rem;
 }
 
+@media (min-width: 640px) {
+  .summary-item-total {
+    padding: 0.95rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .summary-item-total {
+    padding: 1rem;
+  }
+}
+
 .summary-label-total {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: white;
   letter-spacing: 0.5px;
 }
 
+@media (min-width: 640px) {
+  .summary-label-total {
+    font-size: 0.82rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .summary-label-total {
+    font-size: 0.875rem;
+  }
+}
+
 .summary-total-amount {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: white;
   letter-spacing: 0.5px;
+}
+
+@media (min-width: 640px) {
+  .summary-total-amount {
+    font-size: 1.35rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .summary-total-amount {
+    font-size: 1.5rem;
+  }
 }
 
 /* Status Alerts */
 .status-alert {
   display: flex;
   align-items: flex-start;
-  gap: 1.5rem;
-  padding: 1.25rem;
+  gap: 1rem;
+  padding: 1.1rem;
   border-radius: 0.75rem;
   border: 2px solid;
   backdrop-filter: blur(10px);
@@ -751,20 +938,55 @@ onUnmounted(() => {
   margin-top: 1rem;
 }
 
+@media (min-width: 640px) {
+  .status-alert {
+    gap: 1.2rem;
+    padding: 1.2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .status-alert {
+    gap: 1.5rem;
+    padding: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .status-alert {
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
 .status-alert:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .status-icon-wrapper {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 640px) {
+  .status-icon-wrapper {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .status-icon-wrapper {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
 }
 
 .status-icon-blue {
@@ -808,17 +1030,43 @@ onUnmounted(() => {
 }
 
 .status-alert-icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1rem;
+  height: 1rem;
   color: white;
 }
 
+@media (min-width: 640px) {
+  .status-alert-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .status-alert-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
 .status-alert-title {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 800;
   margin-bottom: 0.25rem;
   letter-spacing: 0.3px;
   font-family: 'Unbounded', sans-serif;
+}
+
+@media (min-width: 640px) {
+  .status-alert-title {
+    font-size: 0.82rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .status-alert-title {
+    font-size: 0.85rem;
+  }
 }
 
 .status-alert-blue .status-alert-title {
@@ -851,10 +1099,23 @@ onUnmounted(() => {
 }
 
 .status-alert-description {
-  font-size: 0.8rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.5;
   letter-spacing: 0.2px;
   color: #4b5563;
+}
+
+@media (min-width: 640px) {
+  .status-alert-description {
+    font-size: 0.78rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .status-alert-description {
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
 }
 
 /* Info Card */
@@ -869,14 +1130,44 @@ onUnmounted(() => {
   margin-bottom: 2rem;
 }
 
+@media (min-width: 768px) {
+  .info-card {
+    margin-bottom: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .info-card {
+    margin-bottom: 3rem;
+  }
+}
+
 .info-items {
   display: flex;
   flex-direction: column;
 }
 
 .info-item {
-  padding: 0.85rem 1.25rem;
+  padding: 0.75rem 1rem;
   transition: all 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .info-item {
+    padding: 0.8rem 1.1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .info-item {
+    padding: 0.85rem 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .info-item {
+    padding: 1rem 1.5rem;
+  }
 }
 
 .info-item:hover {
@@ -890,19 +1181,45 @@ onUnmounted(() => {
 
 .info-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #6b7280;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .info-label {
+    font-size: 0.72rem;
+    margin-bottom: 0.45rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .info-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 .info-value {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #1f2937;
+}
+
+@media (min-width: 640px) {
+  .info-value {
+    font-size: 0.82rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .info-value {
+    font-size: 0.85rem;
+  }
 }
 
 /* Animations */
@@ -973,33 +1290,24 @@ onUnmounted(() => {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .content-wrapper {
-    padding: 0 1.25rem;
+@media (max-width: 640px) {
+  .order-status-container {
+    padding-bottom: 2rem;
   }
   
-  .summary-card,
-  .info-card {
-    padding: 1.5rem;
+  .status-header h1 {
+    font-size: 1.2rem;
   }
   
-  .status-alert {
-    padding: 1.5rem;
-    gap: 1rem;
+  .status-header p {
+    font-size: 0.75rem;
   }
-  
-  .status-icon-wrapper {
-    width: 3rem;
-    height: 3rem;
-  }
-  
-  .status-alert-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-  
-  .summary-total-amount {
-    font-size: 1.5rem;
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  /* Tablet optimizations */
+  .order-status {
+    margin-top: 1.5rem;
   }
 }
 

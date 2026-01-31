@@ -21,7 +21,7 @@
         <p class="text-gray-600 text-center empty-cart-text mb-10 max-w-md" v-if="!hasActiveOrder">Add some delicious items from our menu to get started!</p>
         <p class="text-gray-600 text-center empty-cart-text mb-10 max-w-md" v-else>You have an active order. Track it or continue shopping!</p>
         
-        <div v-if="hasActiveOrder" class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <div v-if="hasActiveOrder && !isOrderDelivered" class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <NuxtLink 
                 to="/menu" 
                 class="flex items-center justify-center px-8 py-3.5 bg-[#FE601C] text-white rounded-lg font-['Unbounded'] font-semibold text-base transition-all duration-300 hover:bg-[#e5540a] hover:shadow-lg active:scale-95"
@@ -46,20 +46,20 @@
         </div>
 
         <!-- Cart Content -->
-        <div v-else class="content-wrapper max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-20">
-        <div class="content-grid grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div v-else class="content-wrapper w-full px-4 sm:px-5 md:px-6 lg:px-8 py-6 sm:py-7 md:py-10 lg:py-12 mt-20 sm:mt-24 md:mt-28 lg:mt-32">
+        <div class="content-grid grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-8 max-w-7xl mx-auto">
             <!-- Cart Items Section -->
             <div class="lg:col-span-2">
-            <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <div class="bg-white rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-3xl shadow-lg overflow-hidden">
                 <!-- Cart Items List -->
-                <div class="divide-y divide-gray-200 px-6 py-6">
+                <div class="divide-y divide-gray-200 px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
                 <div 
                     v-for="(item, index) in cartItems" 
                     :key="index"
-                    class="py-6 px-4 hover:bg-gray-50 transition-colors duration-200 flex items-center gap-6 border-b last:border-b-0"
+                    class="py-4 sm:py-5 md:py-6 px-0 hover:bg-gray-50 transition-colors duration-200 flex flex-col sm:flex-row gap-4 sm:gap-5 md:gap-6 border-b last:border-b-0"
                 >
                     <!-- Item Image -->
-                    <div class="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-2xl overflow-hidden">
+                    <div class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-gray-100 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden">
                     <NuxtImg 
                         :src="item.image" 
                         :alt="item.name"
@@ -67,65 +67,74 @@
                     />
                     </div>
 
-                    <!-- Item Details -->
-                    <div class="flex-grow">
-                    <h3 class="text-lg sm:text-xl font-['Unbounded'] font-bold text-gray-900 mb-1">
-                        {{ item.name }}
-                    </h3>
-                    
-                    <!-- Order Description (Variant, Sauces, Add-ons, Notes) -->
-                    <div v-if="getOrderDescription(item).length > 0" class="text-xs text-gray-600 mb-3 space-y-1">
-                        <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2">
-                            <span class="text-gray-400 mt-0.5">•</span>
-                            <span>{{ description }}</span>
-                        </div>
+                    <!-- Item Details - Flex Column for Mobile -->
+                    <div class="flex-grow min-w-0 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base sm:text-lg md:text-lg lg:text-xl font-['Unbounded'] font-bold text-gray-900 mb-2 sm:mb-2 md:mb-2 lg:mb-2 line-clamp-2">
+                            {{ item.name }}
+                        </h3>
+                        
+                        <p class="text-[#FE601C] font-bold text-base sm:text-lg md:text-lg lg:text-lg mb-2 sm:mb-3 md:mb-3">₱{{ ((item.basePrice || item.price) + (item.addonsCost || 0)).toFixed(2) }}</p>
                     </div>
                     
-                    <p class="text-[#FE601C] font-bold text-lg mb-4">₱{{ ((item.basePrice || item.price) + (item.addonsCost || 0)).toFixed(2) }}</p>
-                    
-                    <!-- Quantity Controls -->
-                    <div class="flex items-center gap-3">
-                        <button
-                        @click="decreaseQuantity(index)"
-                        class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-                        aria-label="Decrease quantity"
-                        >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                        </svg>
-                        </button>
-                        <span class="w-8 text-center font-bold text-gray-900">{{ item.quantity }}</span>
-                        <button
-                        @click="increaseQuantity(index)"
-                        class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-                        aria-label="Increase quantity"
-                        >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        </button>
-                        <span class="ml-auto text-gray-500 text-sm font-semibold">₱{{ (((item.basePrice || item.price) + (item.addonsCost || 0)) * item.quantity).toFixed(2) }}</span>
+                    <!-- Order Description -->
+                    <div v-if="getOrderDescription(item).length > 0" class="text-xs sm:text-xs md:text-sm text-gray-600 space-y-1">
+                        <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2">
+                            <span class="text-gray-400 mt-0.5 flex-shrink-0">•</span>
+                            <span class="line-clamp-2">{{ description }}</span>
+                        </div>
                     </div>
                     </div>
 
-                    <!-- Remove Button -->
-                    <button
-                    @click="removeItem(index)"
-                    class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-all duration-200 hover:scale-110"
-                    aria-label="Remove item"
-                    >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                    </button>
+                    <!-- Right Column: Quantity and Controls -->
+                    <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-between gap-2 sm:gap-3 mt-3 sm:mt-0">
+                        <!-- Quantity Controls -->
+                        <div class="flex items-center gap-2 sm:gap-2 md:gap-3">
+                            <button
+                            @click="decreaseQuantity(index)"
+                            class="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors min-h-8 min-w-8 sm:min-h-8 sm:min-w-8 md:min-h-9 md:min-w-9"
+                            aria-label="Decrease quantity"
+                            >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                            </svg>
+                            </button>
+                            <span class="w-6 sm:w-6 md:w-7 text-center font-bold text-gray-900 text-sm sm:text-sm md:text-base">{{ item.quantity }}</span>
+                            <button
+                            @click="increaseQuantity(index)"
+                            class="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors min-h-8 min-w-8 sm:min-h-8 sm:min-w-8 md:min-h-9 md:min-w-9"
+                            aria-label="Increase quantity"
+                            >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            </button>
+                        </div>
+
+                        <!-- Item Total (Mobile) / Remove Button (Desktop positioning) -->
+                        <div class="text-right sm:text-right">
+                            <p class="text-gray-500 text-xs sm:text-xs md:text-sm mb-1">₱{{ (((item.basePrice || item.price) + (item.addonsCost || 0)) * item.quantity).toFixed(2) }}</p>
+                        </div>
+                        
+                        <!-- Remove Button -->
+                        <button
+                        @click="removeItem(index)"
+                        class="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-all duration-200 hover:scale-110 min-h-8 min-w-8 sm:min-h-8 sm:min-w-8 md:min-h-9 md:min-w-9"
+                        aria-label="Remove item"
+                        >
+                        <svg class="w-4 h-4 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        </button>
+                    </div>
                 </div>
                 </div>
 
                 <!-- Continue Shopping Button -->
-                <div class="px-8 py-8 bg-gray-50 border-t border-gray-200">
+                <div class="px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6 bg-gray-50 border-t border-gray-200">
                 <NuxtLink 
                     to="/menu"
-                    class="inline-flex items-center gap-2 text-[#FE601C] font-['Unbounded'] font-semibold hover:text-[#e5540a] transition-colors text-sm"
+                    class="inline-flex items-center gap-2 text-[#FE601C] font-['Unbounded'] font-semibold hover:text-[#e5540a] transition-colors text-sm sm:text-sm md:text-base"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -138,65 +147,63 @@
 
             <!-- Order Summary Section -->
             <div class="lg:col-span-1">
-            <div class="bg-gradient-to-br from-[#1A4189] to-[#0f2a5f] rounded-3xl shadow-lg p-8 text-white sticky top-32">
+            <div class="bg-gradient-to-br from-[#1A4189] to-[#0f2a5f] rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-3xl shadow-lg p-5 sm:p-6 md:p-7 lg:p-8 text-white lg:sticky lg:top-32">
                 <!-- Summary Header -->
-                <h2 class="text-1xl font-['Unbounded'] mb-2 px-2">Order Summary</h2>
+                <h2 class="text-lg sm:text-lg md:text-xl lg:text-xl font-['Unbounded'] font-bold mb-5 sm:mb-6 md:mb-6 lg:mb-6">Order Summary</h2>
 
                 <!-- Price Breakdown -->
-                <div class="space-y-2 mb-8 pb-8 border-b border-white border-opacity-20 px-2">
-                <div class="flex justify-between text-sm">
+                <div class="space-y-2 sm:space-y-2.5 md:space-y-3 mb-5 sm:mb-6 md:mb-6 pb-5 sm:pb-6 md:pb-6 border-b border-white border-opacity-20">
+                <div class="flex justify-between text-xs sm:text-sm md:text-sm lg:text-sm">
                     <span>Subtotal</span>
                     <span class="font-semibold">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
-                <div class="flex justify-between text-sm">
+                <div class="flex justify-between text-xs sm:text-sm md:text-sm lg:text-sm">
                     <span>Delivery Fee</span>
                     <span class="font-semibold">₱{{ deliveryFee.toFixed(2) }}</span>
                 </div>
                 </div>
 
                 <!-- Total -->
-                <div class="mb-8 pb-8 border-b border-white border-opacity-20 px-2">
-                <div class="flex justify-between text-lg">
-                    <span class="font-bold">Total</span>
-                    <span class="font-['Unbounded'] font-bold text-2xl text-[#FEB90E]">₱{{ total.toFixed(2) }}</span>
+                <div class="mb-5 sm:mb-6 md:mb-6 pb-5 sm:pb-6 md:pb-6 border-b border-white border-opacity-20">
+                <div class="flex justify-between items-baseline gap-3">
+                    <span class="text-sm sm:text-sm md:text-base font-bold font-['Unbounded']">Total</span>
+                    <span class="font-['Unbounded'] font-bold text-xl sm:text-2xl md:text-2xl lg:text-3xl text-[#FEB90E]">₱{{ total.toFixed(2) }}</span>
                 </div>
                 </div>
 
                 <!-- Payment Method -->
-                <div class="mb-8 pb-8 border-b border-white border-opacity-10 px-2">
-                    <div class="payment-method flex items-center gap-3">
-                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-                        <span class="text-sm font-medium">Cash on Delivery</span>
+                <div class="mb-5 sm:my-6 md:my-6 pb-5 sm:pb-6 md:pb-6 border-b border-white border-opacity-10">
+                    <div class="payment-method flex items-center gap-2 sm:gap-3">
+                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full flex-shrink-0"></div>
+                        <span class="text-xs sm:text-sm md:text-sm font-medium">Cash on Delivery</span>
                     </div>
                 </div>
 
-                <!-- Place Order / View Order Status Buttons -->
-                <div class="flex gap-3 mx-2">
+                <!-- Buttons -->
+                <div class="flex flex-col gap-3 sm:gap-3 md:gap-3">
                   <button
                   @click="openOrderConfirmModal"
-                  class="flex-1 px-4 bg-[#FEB90E] text-gray-900 font-['Unbounded'] font-bold py-2 text-sm rounded-lg hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 transform"
+                  class="w-full px-4 sm:px-4 md:px-5 bg-[#FEB90E] text-gray-900 font-['Unbounded'] font-bold py-3 sm:py-3 md:py-3 text-sm sm:text-sm md:text-base rounded-lg hover:bg-[#e5a70d] transition-all duration-200 hover:shadow-lg min-h-11 sm:min-h-11 md:min-h-12 flex items-center justify-center"
                   >
                   Place Order
                   </button>
 
-                  <!-- View Order Status Button -->
                   <button
                   @click="goToOrderStatus"
-                  :disabled="!hasActiveOrder"
+                  :disabled="!hasActiveOrder || isOrderCancelled"
                   :class="[
-                    'flex-1 px-4 font-bold py-2 text-sm rounded-lg transition-all duration-200 hover:scale-105 transform',
-                    hasActiveOrder
+                    'w-full px-4 sm:px-4 md:px-5 font-bold py-3 sm:py-3 md:py-3 text-sm sm:text-sm md:text-base rounded-lg transition-all duration-200 min-h-11 sm:min-h-11 md:min-h-12 flex items-center justify-center font-[\'Unbounded\']',
+                    hasActiveOrder && !isOrderCancelled
                       ? 'bg-gradient-to-r from-[#FE601C] to-[#FEB90E] text-gray-900 hover:shadow-lg cursor-pointer'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60'
                   ]"
-                  style="font-family: 'Unbounded', sans-serif;"
                   >
                   View Status
                   </button>
                 </div>
 
                 <!-- Info Text -->
-                <p class="text-xs text-white text-center mt-2 px-2">
+                <p class="text-xs sm:text-xs md:text-xs text-white text-center mt-4 sm:mt-4 md:mt-5 px-2">
                 Secure checkout powered by Buffs Chicken
                 </p>
             </div>
@@ -220,9 +227,22 @@
         deliveryFee: 40,
         hasActiveOrder: false,
         showOrderConfirmModal: false,
+        orderStatus: ''
         };
     },
     computed: {
+        isOrderDelivered() {
+            const order = localStorage.getItem('buffs_order');
+            if (!order) return false;
+            const parsedOrder = JSON.parse(order);
+            return parsedOrder.status === 'delivered';
+        },
+        isOrderCancelled() {
+            const order = localStorage.getItem('buffs_order');
+            if (!order) return false;
+            const parsedOrder = JSON.parse(order);
+            return parsedOrder.status === 'cancelled';
+        },
         subtotal() {
         return this.cartItems.reduce((sum, item) => {
             // Use totalPrice if available (which includes basePrice + addonsCost for 1 quantity)
@@ -636,10 +656,6 @@
         margin: 0.5rem 0 0 0 ;
         padding: 0 ;
         letter-spacing: 0.5px;
-    }
-
-    .payment-method {
-        margin-top: -1.2rem;
     }
     </style>
 

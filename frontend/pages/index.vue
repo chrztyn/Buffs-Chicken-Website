@@ -5,33 +5,33 @@
       <Navbar />
 
     <!-- Hero Section -->
-    <section class="w-full h-[calc(100vh-7rem)] px-4 lg:px-8 py-12 lg:py-40 overflow-x-hidden overflow-y-hidden flex flex-col justify-center max-w-[100vw] !p-0 lg:!pt-[300px] lg:!pl-[100px] max-[1023px]:!p-[1.5rem_2rem] max-[1023px]:!pb-8 max-[1023px]:!pt-16 max-[639px]:!p-4 max-[639px]:!pb-10 max-[639px]:!pt-12">
-      <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4 max-[1023px]:gap-0.5 max-[639px]:gap-0.5 lg:gap-4">
+    <section class="w-full h-[calc(100vh-7rem)] px-4 sm:px-6 lg:px-8 py-12 lg:py-40 overflow-x-hidden overflow-y-hidden flex flex-col justify-center !p-4 sm:!p-6 lg:!p-0 lg:!pt-[300px] lg:!pl-[100px]">
+      <div class="max-w-7xl mx-auto w-full">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center gap-0.5 sm:gap-2 lg:gap-4">
 
           <!-- Hero Image Component -->
           <HeroImages />
 
           <!-- Text Content -->
-          <div class="text-content-container flex-1 max-w-xl lg:max-w-5xl space-y-6 relative order-2 lg:order-1 [&>*+*]:!mt-2 max-[639px]:[&>*+*]:!mt-6 lg:!mt-40 max-[1023px]:!-mt-[10rem] max-[1023px]:!z-40 max-[639px]:!-mt-[8rem] max-[639px]:!z-30">
+          <div class="text-content-container flex-1 max-w-xl lg:max-w-5xl space-y-2 sm:space-y-3 lg:space-y-6 relative order-2 lg:order-1 lg:mt-40 -mt-20 sm:-mt-24 lg:-mt-0 z-20 sm:z-30 lg:z-0 mx-auto text-center">
 
             <!-- Hero Buffs Chicken Image -->
-            <div class="hero-buffs-chicken absolute -top-32 lg:-top-93 left-[-12rem] z-10 lg:!block lg:!opacity-100 lg:!visible max-[1023px]:!hidden">
-              <NuxtImg src="/hero-buffs-chicken.png" alt="Buffs Chicken" class="w-50 h-50 lg:w-115 lg:h-115 object-contain max-[1023px]:!w-[clamp(200px,32vw,300px)] max-[1023px]:!h-auto" />
+            <div class="hero-buffs-chicken absolute -top-32 lg:-top-93 left-[-12rem] z-10 hidden lg:block lg:opacity-100">
+              <NuxtImg src="/hero-buffs-chicken.png" alt="Buffs Chicken" class="w-50 h-50 lg:w-115 lg:h-115 object-contain" />
             </div>
 
             <!-- Main Heading -->
-            <h1 class="font-['Caprasimo'] text-5xl sm:text-5xl lg:text-7xl text-[#1A4189] leading-tight !leading-none max-[1023px]:!text-[clamp(3.5rem,10vw,4.5rem)] max-[1023px]:!leading-[1.05] max-[1023px]:tracking-[-0.02em] max-[1023px]:!text-center max-[1023px]:!z-41 max-[1023px]:!relative max-[1023px]:!mt-8 max-[639px]:!text-[3rem] max-[639px]:!text-center max-[639px]:!z-31 max-[639px]:!relative">
+            <h1 class="font-['Caprasimo'] !text-7xl sm:text-10xl md:text-6xl lg:text-7xl text-[#1A4189] leading-none z-20 sm:z-30 lg:z-0 relative lg:text-left">
               Buffs<br />Chicken
             </h1>
             
             <!-- Subheading -->
-            <h2 class="font-['Unbounded'] text-2xl sm:text-2xl lg:text-3xl font-bold text-[#FE601C] leading-tight max-[1023px]:!text-[1.75rem] max-[1023px]:!text-center max-[1023px]:!font-bold max-[1023px]:!mb-4 max-[1023px]:!mt-6 max-[1023px]:!z-41 max-[1023px]:!relative max-[639px]:!text-[1.5rem] max-[639px]:!text-center max-[639px]:!mb-5 max-[639px]:!mt-1 max-[639px]:!z-31 max-[639px]:!relative">
+            <h2 class="font-['Unbounded'] text-lg sm:text-2xl lg:text-3xl font-bold text-[#FE601C] leading-tight mt-2 sm:mt-4 lg:mt-6 lg:text-left">
               your go-to comfort
             </h2>
             
             <!-- Description Paragraph -->
-            <p class="description-paragraph font-['Unbounded'] text-xs lg:text-sm text-gray-500 leading-relaxed w-full max-w-full max-[1023px]:!text-[0.95rem] max-[1023px]:!text-center max-[1023px]:!leading-[1.7] max-[1023px]:!text-[#4B5563] max-[1023px]:!pb-2 max-[1023px]:!font-normal max-[1023px]:!mt-0 max-[1023px]:!z-41 max-[1023px]:!relative max-[639px]:!text-[0.8rem] max-[639px]:!text-center max-[639px]:!leading-[1.7] max-[639px]:!text-[#4B5563] max-[639px]:!pb-1 max-[639px]:!font-normal max-[639px]:!mt-0 max-[639px]:!z-31 max-[639px]:!relative">
+            <p class="description-paragraph font-['Unbounded'] text-sm sm:text-base lg:text-lg text-gray-500 lg:text-gray-700 leading-relaxed w-full max-w-2xl mx-auto lg:mx-0 lg:text-left">
               Welcome to Buffs Chicken, your go-to spot at The Hood, Angeles City for the crispiest and juiciest chicken around. From signature OG Buffs wings to cheesy pastas and loaded combos, every meal is cooked fresh and packed with flavor.
             </p>
           </div>
@@ -43,7 +43,7 @@
     <PopularPicks />
 
     <!-- Blog Section -->
-    <h2 class="blog-title text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-12 font-['Unbounded'] px-4">
+    <h2 class="blog-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-8 sm:mb-10 lg:mb-12 font-['Unbounded'] px-4 sm:px-6 lg:px-8">
       The latest from Buffs
     </h2>
     <Blog />

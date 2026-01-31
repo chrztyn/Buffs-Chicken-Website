@@ -123,12 +123,12 @@
                 </div>
                 <div v-if="item.selectedSauces && item.selectedSauces.length > 0" class="text-xs text-gray-600 mt-1">
                   <span class="inline-block bg-orange-50 text-orange-700 px-2 py-0.5 rounded mr-2 mb-1">
-                    Sauces: {{ item.selectedSauces.map(s => s.name || s).filter(Boolean).join(', ') }}
+                    Sauces: {{ item.selectedSauces.map((s: any) => s.name || s).filter(Boolean).join(', ') }}
                   </span>
                 </div>
                 <div v-if="item.selectedAddons && item.selectedAddons.length > 0" class="text-xs text-gray-600 mt-1">
                   <span class="inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded mr-2 mb-1">
-                    Add-ons: {{ item.selectedAddons.map(a => a.name).join(', ') }}
+                    Add-ons: {{ item.selectedAddons.map((a: any) => a.name).join(', ') }}
                   </span>
                 </div>
               </div>
@@ -302,10 +302,10 @@
       :is-open="showStatusModal"
       title="Update Order Status"
       submit-text="Update"
-      @close="showStatusModal = false"
+      @close="!isUpdating && (showStatusModal = false)"
       @submit="submitStatusUpdate"
     >
-      <div class="space-y-4">
+      <div class="space-y-4 relative">
         <p class="font-['Unbounded'] text-gray-700">
           Update status for order <span class="font-bold text-[#1A4189]">#{{ selectedOrder?.orderNumber }}</span>
         </p>
@@ -319,14 +319,23 @@
               v-for="status in ['pending', 'preparing', 'out for delivery', 'delivered', 'cancelled']"
               :key="status"
               @click="newStatus = status"
+              :disabled="isUpdating"
               :class="newStatus === status
                 ? 'bg-gradient-to-r from-[#FE601C] to-[#f47c49] text-white shadow-lg'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               "
-              class="w-full px-4 py-3 rounded-lg font-['Unbounded'] font-bold transition-all capitalize"
+              class="w-full px-4 py-3 rounded-lg font-['Unbounded'] font-bold transition-all capitalize disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {{ status }}
             </button>
+          </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div v-if="isUpdating" class="absolute inset-0 bg-white/50 rounded-lg flex items-center justify-center">
+          <div class="flex flex-col items-center gap-3">
+            <div class="w-8 h-8 border-4 border-[#FE601C] border-t-transparent rounded-full animate-spin"></div>
+            <p class="font-['Unbounded'] font-semibold text-[#1A4189]">Updating...</p>
           </div>
         </div>
       </div>
@@ -354,6 +363,7 @@ const showStatusModal = ref(false)
 const selectedOrder = ref<any>(null)
 const newStatus = ref('')
 const showToast = ref(false)
+const isUpdating = ref(false)
 const toastMessage = ref({ title: '', message: '' })
 
 const filteredOrders = computed(() => {
@@ -368,7 +378,7 @@ const filteredOrders = computed(() => {
 const loadOrders = async () => {
   try {
     const response = await getAllOrders()
-    orders.value = response.data.map(order => ({
+    orders.value = response.data.map((order: any) => ({
       ...order,
       inProgress: false
     }))
@@ -483,6 +493,7 @@ const submitStatusUpdate = async () => {
   if (!selectedOrder.value || !newStatus.value) return
 
   try {
+    isUpdating.value = true
     await updateOrderStatus(selectedOrder.value._id, newStatus.value)
     
     // Update the order in the list
@@ -496,6 +507,8 @@ const submitStatusUpdate = async () => {
     showNotification('Success', `Order #${selectedOrder.value.orderNumber} status updated to ${newStatus.value}`)
   } catch (error: any) {
     showNotification('Error', error.response?.data?.message || 'Failed to update order status')
+  } finally {
+    isUpdating.value = false
   }
 }
 

@@ -13,18 +13,18 @@
         <transition name="slide-scale">
             <div 
                 v-if="isOpen"
-                class="fixed inset-0 z-150 flex items-center justify-center p-4 pointer-events-none"
+                class="fixed inset-0 z-150 flex items-center justify-center p-3 sm:p-4 md:p-6 pointer-events-none"
             >
                 <div 
                     @click.stop
-                    class="bg-white rounded-2xl shadow-xl w-full max-w-2xl pointer-events-auto overflow-y-auto max-h-[85vh]"
+                    class="bg-white rounded-xl sm:rounded-2xl shadow-xl w-full max-w-2xl pointer-events-auto overflow-y-auto max-h-[95vh] sm:max-h-[90vh]"
                 >
                     <!-- Close Button -->
                     <button
                         @click="closeModal"
-                        class="absolute top-6 right-6 z-10 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110"
+                        class="absolute top-3 sm:top-6 right-3 sm:right-6 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110 min-h-9 min-w-9 sm:min-h-10 sm:min-w-10"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
@@ -430,67 +430,123 @@ export default {
 <style scoped>
 /* Modal Container Spacing */
 .modal-content {
-    padding: 1.5rem 2rem;
+    padding: 1rem;
     max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
+@media (min-width: 640px) {
+    .modal-content {
+        padding: 1.5rem;
+        gap: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .modal-content {
+        padding: 2rem;
+        gap: 1.5rem;
+    }
+}
+
 /* Header Section */
 .modal-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .modal-header {
+        flex-direction: row;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
 }
 
 .modal-image {
-    width: 160px;
-    height: 160px;
-    margin-top: 0.5rem;
-    margin-bottom: -0.5rem;
+    width: 100%;
+    height: 180px;
     border-radius: 12px;
     background: linear-gradient(135deg, #FBF4E5 0%, #f5ead9 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 6px;
+    flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+    .modal-image {
+        width: 45%;
+        height: 220px;
+        border-radius: 16px;
+    }
 }
 
 .modal-title {
     font-size: 1.25rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     color: #1A4189;
+    line-height: 1.3;
+    text-align: left;
+}
+
+@media (min-width: 640px) {
+    .modal-title {
+        font-size: 1.5rem;
+    }
 }
 
 .modal-description {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     margin-bottom: 0.75rem;
-    color: #666;
-    line-height: 1.4;
+    color: #6b7280;
+    text-align: left;
+    line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+    .modal-description {
+        font-size: 0.875rem;
+    }
 }
 
 .modal-price {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.375rem;
     margin-bottom: 0;
+    margin-top: 0.5rem;
 }
 
 .modal-price-amount {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: bold;
     color: #FE601C;
 }
 
+@media (min-width: 640px) {
+    .modal-price-amount {
+        font-size: 1.5rem;
+    }
+}
+
 .modal-price-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     background: #f3f4f6;
     color: #999;
     padding: 2px 8px;
     border-radius: 9999px;
+}
+
+@media (min-width: 640px) {
+    .modal-price-label {
+        font-size: 0.75rem;
+    }
 }
 
 /* Divider */
@@ -500,35 +556,68 @@ export default {
     margin: 0.75rem 0;
 }
 
+@media (min-width: 640px) {
+    .modal-divider {
+        margin: 1rem 0;
+    }
+}
+
 /* Customize Section */
 .customize-section {
     margin-bottom: 0.75rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+
+@media (min-width: 640px) {
+    .customize-section {
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
 }
 
 .customize-title {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: bold;
     color: #1f2937;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
     text-transform: uppercase;
     letter-spacing: 0.25em;
 }
 
+@media (min-width: 640px) {
+    .customize-title {
+        font-size: 0.75rem;
+    }
+}
+
 /* Variants Section */
 .variant-group {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .variant-group {
+        margin-bottom: 2rem;
+    }
 }
 
 .variant-label {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     display: block;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+@media (min-width: 640px) {
+    .variant-label {
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
 }
 
 .variant-buttons-container {
@@ -628,11 +717,20 @@ export default {
     align-items: center;
     gap: 0.65rem;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #374151;
     transition: all 0.2s;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.625rem;
     border-radius: 6px;
+    min-height: 36px;
+}
+
+@media (min-width: 640px) {
+    .addon-option {
+        font-size: 0.85rem;
+        padding: 0.625rem 0.75rem;
+        min-height: 40px;
+    }
 }
 
 .addon-option:hover {
@@ -649,12 +747,30 @@ export default {
     height: 18px;
     accent-color: #FE601C;
     flex-shrink: 0;
+    min-width: 18px;
+    min-height: 18px;
+}
+
+@media (min-width: 640px) {
+    .addon-checkbox {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+    }
 }
 
 .addon-price {
     color: #FE601C;
     font-weight: 600;
     margin-left: auto;
+    font-size: 0.65rem;
+}
+
+@media (min-width: 640px) {
+    .addon-price {
+        font-size: 0.75rem;
+    }
 }
 
 /* Sauces Section */
@@ -690,11 +806,20 @@ export default {
     align-items: center;
     gap: 0.65rem;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #374151;
     transition: all 0.2s;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.625rem;
     border-radius: 6px;
+    min-height: 36px;
+}
+
+@media (min-width: 640px) {
+    .sauce-option {
+        font-size: 0.85rem;
+        padding: 0.625rem 0.75rem;
+        min-height: 40px;
+    }
 }
 
 .sauce-option:hover {
@@ -711,6 +836,17 @@ export default {
     height: 18px;
     accent-color: #FE601C;
     flex-shrink: 0;
+    min-width: 18px;
+    min-height: 18px;
+}
+
+@media (min-width: 640px) {
+    .sauce-checkbox {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+    }
 }
 
 .sauce-checkbox:disabled {
@@ -759,16 +895,29 @@ export default {
 
 /* Quantity Section */
 .quantity-group {
-    margin-bottom: 0.5rem;
-    margin-top: -2rem;
+    margin-bottom: 0.75rem;
+    margin-top: -1.5rem;
+}
+
+@media (min-width: 640px) {
+    .quantity-group {
+        margin-bottom: 1rem;
+        margin-top: -2rem;
+    }
 }
 
 .quantity-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: #374151;
     margin-bottom: 0.5rem;
     display: block;
+}
+
+@media (min-width: 640px) {
+    .quantity-label {
+        font-size: 0.7rem;
+    }
 }
 
 .quantity-controls {
@@ -789,8 +938,22 @@ export default {
     cursor: pointer;
     color: #FE601C;
     font-weight: bold;
-    font-size: 0.875rem;
+    font-size: 1rem;
     transition: all 0.2s;
+    min-height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .quantity-btn {
+        width: 36px;
+        height: 36px;
+        min-height: 36px;
+        min-width: 36px;
+    }
 }
 
 .quantity-btn:hover {
@@ -805,16 +968,35 @@ export default {
     color: #1f2937;
 }
 
+@media (min-width: 640px) {
+    .quantity-display {
+        width: 36px;
+    }
+}
+
 .notes-group {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .notes-group {
+        margin-bottom: 0.75rem;
+    }
 }
 
 .notes-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     display: block;
+}
+
+@media (min-width: 640px) {
+    .notes-label {
+        font-size: 0.7rem;
+        margin-bottom: 0.5rem;
+    }
 }
 
 .notes-textarea {
@@ -826,6 +1008,15 @@ export default {
     font-family: 'Unbounded', sans-serif;
     resize: none;
     transition: all 0.2s;
+    min-height: 60px;
+}
+
+@media (min-width: 640px) {
+    .notes-textarea {
+        font-size: 0.75rem;
+        padding: 0.625rem;
+        min-height: 70px;
+    }
 }
 
 .notes-textarea:focus {
@@ -837,35 +1028,67 @@ export default {
 .price-summary {
     background: #f9fafb;
     border-radius: 8px;
-    padding: 1rem;
+    padding: 0.75rem;
     margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .price-summary {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
 }
 
 .price-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .price-row {
+        font-size: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
 }
 
 .price-total-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .price-total-row {
+        margin-top: 1rem;
+    }
 }
 
 .price-total-label {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: bold;
     color: #1f2937;
 }
 
+@media (min-width: 640px) {
+    .price-total-label {
+        font-size: 1rem;
+    }
+}
+
 .price-total-amount {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: bold;
     color: #FE601C;
+}
+
+@media (min-width: 640px) {
+    .price-total-amount {
+        font-size: 1.5rem;
+    }
 }
 
 .price-divider {
@@ -874,13 +1097,28 @@ export default {
     margin: 0.5rem 0;
 }
 
+@media (min-width: 640px) {
+    .price-divider {
+        margin: 0.75rem 0;
+    }
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;
     gap: 0.5rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
     margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .action-buttons {
+        gap: 0.75rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        margin-bottom: 1rem;
+    }
 }
 
 .btn-cancel {
@@ -890,10 +1128,22 @@ export default {
     background: white;
     color: #374151;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .btn-cancel {
+        font-size: 0.8rem;
+        padding: 0.625rem 1rem;
+        min-height: 44px;
+    }
 }
 
 .btn-cancel:hover {
@@ -906,7 +1156,7 @@ export default {
     background: linear-gradient(to right, #FE601C, #ff7d3a);
     color: white;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -916,6 +1166,15 @@ export default {
     align-items: center;
     justify-content: center;
     gap: 0.25rem;
+    min-height: 40px;
+}
+
+@media (min-width: 640px) {
+    .btn-add {
+        font-size: 0.8rem;
+        padding: 0.625rem 1rem;
+        min-height: 44px;
+    }
 }
 
 .btn-add:hover {
