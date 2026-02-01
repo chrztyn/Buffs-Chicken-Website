@@ -124,6 +124,12 @@
 import { ref, onMounted } from 'vue'
 import { useAdmin } from '~/composables/useAdmin'
 
+declare global {
+  interface Window {
+    gtag: Function
+  }
+}
+
 definePageMeta({
   middleware: 'admin-auth'
 })
