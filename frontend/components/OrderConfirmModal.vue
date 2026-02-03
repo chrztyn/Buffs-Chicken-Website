@@ -318,6 +318,8 @@ const isVerifying = ref(false)
 const otpTimer = ref(600) // 10 minutes
 const otpTimerInterval = ref(null)
 const userId = ref(null)
+const isReturningCustomer = ref(false)
+const requiresOTP = ref(false)
 
 // Start OTP timer
 const startOTPTimer = () => {
@@ -331,15 +333,71 @@ const startOTPTimer = () => {
   }, 1000)
 }
 
-// Send OTP
-const sendOTP = async () => {
+// Check if user exists and get their info
+const checkEmailExists = async () => {
   try {
-    console.log('🔵 Starting sendOTP with data:', {
-      name: formData.value.name,
+    console.log('🔵 Checking if email exists:', formData.value.email)
+    console.log('📝 Sending form data:', {
       email: formData.value.email,
+      name: formData.value.name,
       phone: formData.value.phone,
       location: formData.value.address
     })
+    
+    const response = await fetch(`${API_BASE_URL}/users/check-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: formData.value.email,
+        name: formData.value.name,
+        phone: formData.value.phone,
+        location: formData.value.address
+      })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Failed to check email')
+    }
+
+    const data = await response.json()
+    console.log('✅ Email check result:', data)
+    
+    if (data.exists) {
+      // Returning customer - update their info and proceed without OTP
+      isReturningCustomer.value = true
+      requiresOTP.value = false
+      userId.value = data.userId
+      
+      // Use the updated info from backend
+      formData.value.name = data.name || formData.value.name
+      formData.value.phone = data.phone || formData.value.phone
+      formData.value.address = data.location || formData.value.address
+      
+      // Proceed directly to order confirmation
+      await proceedToCheckout()
+    } else {
+      // New customer - requires OTP
+      isReturningCustomer.value = false
+      requiresOTP.value = true
+      
+      // Send OTP for new user
+      await sendOTPForNewUser()
+    }
+  } catch (error) {
+    console.error('❌ Error checking email:', error)
+    otpError.value = error.message || 'Failed to verify email. Please try again.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Send OTP for new users
+const sendOTPForNewUser = async () => {
+  try {
+    console.log('🔵 Sending OTP for new user:', formData.value.email)
     
     // Validate form
     if (!formData.value.name || !formData.value.email || !formData.value.phone || !formData.value.address) {
@@ -378,9 +436,8 @@ const sendOTP = async () => {
   } catch (error) {
     console.error('❌ Error sending OTP:', error)
     otpError.value = error.message || 'Failed to send OTP. Please try again.'
-    console.error('Error details:', {
-      message: error.message
-    })
+    isReturningCustomer.value = false
+    requiresOTP.value = false
   } finally {
     isLoading.value = false
   }
@@ -419,23 +476,35 @@ const verifyOTP = async () => {
     // OTP verified successfully, create the order
     clearInterval(otpTimerInterval.value)
     
+    // Proceed to checkout with verified user
+    await proceedToCheckout()
+  } catch (error) {
+    otpError.value = error.message || 'Invalid OTP. Please try again.'
+  } finally {
+    isVerifying.value = false
+  }
+}
+
+// Proceed to checkout
+const proceedToCheckout = async () => {
+  try {
     // Emit order data with user verification
     emit('confirm', {
       ...formData.value,
-      userId: data.user.id,
+      userId: userId.value,
       verificationStatus: 'verified',
       cartItems: props.cartItems,
       subtotal: props.subtotal,
       deliveryFee: props.deliveryFee,
-      total: props.total
+      total: props.total,
+      isReturningCustomer: isReturningCustomer.value
     })
     
     resetModal()
     closeModal()
   } catch (error) {
-    otpError.value = error.message || 'Invalid OTP. Please try again.'
-  } finally {
-    isVerifying.value = false
+    console.error('Error proceeding to checkout:', error)
+    otpError.value = error.message || 'Failed to proceed. Please try again.'
   }
 }
 
@@ -454,6 +523,8 @@ const goBackToDelivery = () => {
 const resetModal = () => {
   formData.value = { name: '', email: '', phone: '', address: '' }
   otpSent.value = false
+  isReturningCustomer.value = false
+  requiresOTP.value = false
   resetOTP()
 }
 
@@ -462,22 +533,22 @@ const closeModal = () => {
   emit('close')
 }
 
-// Handle form submission - just send OTP first
+// Handle form submission - check email first
 const confirmOrder = () => {
   console.log('📝 confirmOrder called')
-  sendOTP()
+  checkEmailExists()
 }
 
 const handleSendOTP = () => {
   console.log('🔘 handleSendOTP clicked')
-  sendOTP()
+  confirmOrder()
 }
 
 // Resend OTP
 const resendOTP = async () => {
   console.log('🔄 Resending OTP')
   resetOTP()
-  await sendOTP()
+  await sendOTPForNewUser()
 }
 
 // Cleanup on component unmount

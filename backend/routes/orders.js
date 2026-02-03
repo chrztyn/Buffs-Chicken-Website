@@ -54,9 +54,12 @@ router.post('/', async (req, res) => {
     // Clear cart
     await Cart.findByIdAndUpdate(cartId, { items: [], cartTotal: 0 });
 
+    // Re-fetch user to ensure latest data is available
+    const freshUser = await User.findById(userId);
+
     // Send notification to user via email
     try {
-      await sendOrderNotification(user.email, order.orderNumber, 'pending');
+      await sendOrderNotification(freshUser.email, order.orderNumber, 'pending');
     } catch (error) {
       console.log('User email notification failed, but order created:', error);
     }
@@ -64,9 +67,9 @@ router.post('/', async (req, res) => {
     // Send admin notification email
     try {
       await sendAdminOrderNotification(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, order, {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
+        name: freshUser.name,
+        email: freshUser.email,
+        phone: freshUser.phone,
         address: order.deliveryAddress
       });
     } catch (error) {
@@ -87,15 +90,24 @@ router.post('/', async (req, res) => {
       type: 'new_order',
       order: order._id,
       title: 'New Order Received',
-      message: `New order ${order.orderNumber} from ${user.name}`
+      message: `New order ${order.orderNumber} from ${freshUser.name}`
     });
 
-    // Emit real-time notification to admin
+    // Emit real-time notification to admin with complete order data
     req.io.to('admin-orders').emit('new-order', {
       orderId: order._id,
       orderNumber: order.orderNumber,
-      customerName: user.name,
+      userId: freshUser._id,
+      customerName: freshUser.name || 'Unknown Customer',
+      customerEmail: freshUser.email,
+      customerPhone: freshUser.phone,
+      items: orderItems,
+      subtotal: order.subtotal,
+      tax: order.tax,
+      deliveryFee: order.deliveryFee,
       totalAmount: order.totalAmount,
+      deliveryAddress: order.deliveryAddress,
+      status: order.status,
       timestamp: new Date()
     });
 
@@ -279,6 +291,9 @@ router.post('/submit', async (req, res) => {
 
     await order.save();
 
+    // Re-fetch user to ensure latest data is available
+    const freshUser = await User.findById(userId);
+
     // Create database notification for user
     await Notification.create({
       user: userId,
@@ -293,12 +308,12 @@ router.post('/submit', async (req, res) => {
       type: 'new_order',
       order: order._id,
       title: 'New Order Received',
-      message: `New order ${order.orderNumber} from ${user.name}`
+      message: `New order ${order.orderNumber} from ${freshUser.name}`
     });
 
     // Send notification to user via email
     try {
-      await sendOrderNotification(email, order.orderNumber, 'pending');
+      await sendOrderNotification(freshUser.email, order.orderNumber, 'pending');
     } catch (error) {
       console.log('User email notification failed, but order created:', error);
     }
@@ -306,9 +321,9 @@ router.post('/submit', async (req, res) => {
     // Send admin notification email
     try {
       await sendAdminOrderNotification(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, order, {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
+        name: freshUser.name,
+        email: freshUser.email,
+        phone: freshUser.phone,
         address: order.deliveryAddress
       });
     } catch (error) {
@@ -320,10 +335,18 @@ router.post('/submit', async (req, res) => {
       req.io.to('admin-orders').emit('new-order', {
         orderId: order._id,
         orderNumber: order.orderNumber,
-        customerName: user.name,
+        userId: freshUser._id,
+        customerName: freshUser.name || 'Unknown Customer',
+        customerEmail: freshUser.email,
+        customerPhone: freshUser.phone,
+        items: orderItems,
+        subtotal: order.subtotal,
+        tax: order.tax,
+        deliveryFee: order.deliveryFee,
         totalAmount: order.totalAmount,
-        timestamp: new Date(),
-        status: 'pending'
+        deliveryAddress: order.deliveryAddress,
+        status: 'pending',
+        timestamp: new Date()
       });
 
       // Emit to specific user

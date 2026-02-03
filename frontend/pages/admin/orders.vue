@@ -82,6 +82,7 @@
               <p class="text-gray-600 font-['Unbounded'] text-xs font-bold uppercase tracking-wider">Customer</p>
               <p class="font-['Unbounded'] font-bold text-[#1A4189] text-sm">{{ order.user?.name || 'Guest' }}</p>
               <p class="text-xs text-gray-600">{{ order.user?.phone }}</p>
+              <p class="text-xs text-gray-600">{{ order.deliveryAddress }}</p>
             </div>
 
             <!-- Amount -->
@@ -519,16 +520,25 @@ onMounted(async () => {
   // Listen for new orders via socket
   if (socket.value) {
     socket.value.on('new-order', (data) => {
-      // Add new order to the top of the list
+      // Add new order to the top of the list with complete details
       const newOrder = {
         _id: data.orderId,
         orderNumber: data.orderNumber,
-        user: { name: data.customerName },
+        user: {
+          _id: data.userId,
+          name: data.customerName,
+          email: data.customerEmail,
+          phone: data.customerPhone
+        },
+        items: data.items || [],
+        subtotal: data.subtotal || 0,
+        tax: data.tax || 0,
+        deliveryFee: data.deliveryFee || 0,
         totalAmount: data.totalAmount,
         status: data.status || 'pending',
+        deliveryAddress: data.deliveryAddress,
         createdAt: data.timestamp,
-        inProgress: false,
-        items: []
+        inProgress: false
       }
       
       orders.value.unshift(newOrder)
@@ -536,9 +546,6 @@ onMounted(async () => {
         `New Order Received!`,
         `Order #${data.orderNumber} from ${data.customerName} - ₱${data.totalAmount}`
       )
-      
-      // Reload full order details
-      loadOrders()
     })
 
     socket.value.on('order-updated', (data) => {

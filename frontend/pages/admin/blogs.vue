@@ -249,15 +249,17 @@ const showDeleteConfirm = ref(false)
 const deletingBlog = ref<any>(null)
 
 const publishedBlogs = computed(() => {
-  return blogs.value.filter((blog) => blog.isPublished)
+  return Array.isArray(blogs.value) ? blogs.value.filter((blog) => blog.isPublished) : []
 })
 
 const loadBlogs = async () => {
   try {
     const response = await getBlogs()
-    blogs.value = response.data
+    // Extract the blogs array from the response data
+    blogs.value = Array.isArray(response.data) ? response.data : response.data?.data || []
   } catch (error) {
     console.error('Failed to load blogs:', error)
+    blogs.value = []
   }
 }
 

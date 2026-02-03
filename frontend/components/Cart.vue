@@ -74,14 +74,14 @@
                             {{ item.name }}
                         </h3>
                         
-                        <p class="text-[#FE601C] font-bold text-base sm:text-lg md:text-lg lg:text-lg mb-2 sm:mb-3 md:mb-3">₱{{ ((item.basePrice || item.price) + (item.addonsCost || 0)).toFixed(2) }}</p>
+                        <p class="text-[#FE601C] font-bold text-base sm:text-lg md:text-lg lg:text-lg mb-3 sm:mb-4 md:mb-4">₱{{ ((item.basePrice || item.price) + (item.addonsCost || 0)).toFixed(2) }}</p>
                     </div>
                     
-                    <!-- Order Description -->
-                    <div v-if="getOrderDescription(item).length > 0" class="text-xs sm:text-xs md:text-sm text-gray-600 space-y-1">
-                        <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2">
-                            <span class="text-gray-400 mt-0.5 flex-shrink-0">•</span>
-                            <span class="line-clamp-2">{{ description }}</span>
+                    <!-- Order Description with Spacing -->
+                    <div v-if="getOrderDescription(item).length > 0" class="text-xs sm:text-xs md:text-sm text-gray-600 space-y-2 sm:space-y-2.5 md:space-y-2.5 bg-gray-50 rounded-md p-2.5 sm:p-3 md:p-3 border border-gray-100">
+                        <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2 sm:gap-2.5">
+                            <span class="text-[#FE601C] mt-0.5 flex-shrink-0 font-bold">•</span>
+                            <span class="text-gray-700 leading-relaxed break-words">{{ description }}</span>
                         </div>
                     </div>
                     </div>
@@ -270,13 +270,32 @@
                 });
             }
             
-            // Add sauces if selected
-            if (item.selectedSauces && Object.keys(item.selectedSauces).length > 0) {
-                Object.values(item.selectedSauces).forEach(sauceArray => {
-                    if (Array.isArray(sauceArray) && sauceArray.length > 0) {
-                        descriptions.push(sauceArray.join(', '));
-                    }
-                });
+            // Add sauces if selected - handle both object and array formats
+            if (item.selectedSauces) {
+                let sauceNames = [];
+                
+                // Check if it's an array (direct format from database)
+                if (Array.isArray(item.selectedSauces)) {
+                    sauceNames = item.selectedSauces
+                        .map(sauce => typeof sauce === 'string' ? sauce : sauce.name)
+                        .filter(Boolean);
+                } else if (typeof item.selectedSauces === 'object' && Object.keys(item.selectedSauces).length > 0) {
+                    // Handle object format {sauceName: [options]}
+                    Object.entries(item.selectedSauces).forEach(([sauceName, selectedOptions]) => {
+                        if (Array.isArray(selectedOptions) && selectedOptions.length > 0) {
+                            selectedOptions.forEach(option => {
+                                const optionName = typeof option === 'string' ? option : option.name;
+                                if (optionName) {
+                                    sauceNames.push(optionName);
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                if (sauceNames.length > 0) {
+                    descriptions.push(`Sauces: ${sauceNames.join(', ')}`);
+                }
             }
             
             // Add add-ons if selected
@@ -285,7 +304,7 @@
                     typeof addon === 'string' ? addon : addon.name
                 ).join(', ');
                 if (addonNames) {
-                    descriptions.push(addonNames);
+                    descriptions.push(`Add-ons: ${addonNames}`);
                 }
             }
             

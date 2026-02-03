@@ -280,7 +280,7 @@
                     </div>
                     <div>
                       <span class="info-label">Delivery Address</span>
-                      <span class="info-value">Your Location</span>
+                      <span class="info-value">{{ userAddress }}</span>
                     </div>
                   </div>
                 </div>
@@ -364,6 +364,8 @@ const router = useRouter()
 const orderId = ref('')
 const currentStatus = ref('pending')
 const hasOrder = ref(false)
+const userEmail = ref('')
+const userAddress = ref('Loading address...')
 
 const subtotal = ref(0)
 const deliveryFee = ref(40)
@@ -461,6 +463,35 @@ const showNotification = (title, message, type = 'success') => {
   playNotificationSound()
 }
 
+const fetchUserAddress = async (email) => {
+  try {
+    const response = await fetch(
+      `${useRuntimeConfig().public.apiBase}/users/check-email`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      }
+    )
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data.exists && data.location) {
+        userAddress.value = data.location
+      } else {
+        userAddress.value = 'Address not found'
+      }
+    } else {
+      userAddress.value = 'Unable to load address'
+    }
+  } catch (error) {
+    console.error('Error fetching user address:', error)
+    userAddress.value = 'Error loading address'
+  }
+}
+
 const loadOrder = () => {
   const saved = localStorage.getItem('buffs_order')
   if (saved) {
@@ -470,12 +501,20 @@ const loadOrder = () => {
     subtotal.value = order.subtotal
     deliveryFee.value = order.deliveryFee
     itemsCount.value = order.itemsCount
+    userEmail.value = order.customerEmail || ''
     hasOrder.value = true
+    
+    // Use the delivery address from the order if available
+    if (order.deliveryAddress) {
+      userAddress.value = order.deliveryAddress
+    }
     
     console.log('Order loaded from localStorage:', {
       orderId: orderId.value,
       status: currentStatus.value,
-      type: typeof orderId.value
+      type: typeof orderId.value,
+      email: userEmail.value,
+      address: userAddress.value
     })
   }
 }
