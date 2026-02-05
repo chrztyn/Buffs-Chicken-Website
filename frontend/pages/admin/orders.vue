@@ -495,18 +495,29 @@ const submitStatusUpdate = async () => {
 
   try {
     isUpdating.value = true
-    await updateOrderStatus(selectedOrder.value._id, newStatus.value)
+    const response = await updateOrderStatus(selectedOrder.value._id, newStatus.value)
+    
+    // Update from the response to ensure consistency with backend
+    const updatedOrder = response.data.order
     
     // Update the order in the list
     const index = orders.value.findIndex(o => o._id === selectedOrder.value._id)
     if (index !== -1) {
-      orders.value[index].status = newStatus.value
+      orders.value[index].status = updatedOrder.status
       orders.value[index].inProgress = false
+      
+      // Verify the update was successful
+      if (updatedOrder.status !== newStatus.value) {
+        console.warn(`Status mismatch: Expected ${newStatus.value}, got ${updatedOrder.status}`)
+        showNotification('Warning', 'Status update may not have been saved correctly')
+        return
+      }
     }
     
     showStatusModal.value = false
     showNotification('Success', `Order #${selectedOrder.value.orderNumber} status updated to ${newStatus.value}`)
   } catch (error: any) {
+    console.error('Status update error:', error)
     showNotification('Error', error.response?.data?.message || 'Failed to update order status')
   } finally {
     isUpdating.value = false

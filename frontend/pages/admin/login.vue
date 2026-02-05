@@ -20,14 +20,13 @@
         <form @submit.prevent="handleLogin" class="space-y-4">
           <div>
             <label class="block font-['Unbounded'] text-sm font-semibold text-[#1A4189] mb-2">
-              Email
+              Username
             </label>
             <input
-              v-model="form.email"
-              type="email"
+              v-model="form.username"
+              type="text"
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] transition"
-              placeholder="admin@example.com"
             />
           </div>
 
@@ -40,7 +39,6 @@
               type="password"
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] transition"
-              placeholder="••••••••"
             />
           </div>
 
@@ -52,14 +50,6 @@
             {{ isLoading ? 'Logging in...' : 'Login' }}
           </button>
         </form>
-
-        <!-- Forgot Password -->
-        <div class="mt-6 text-center">
-          <p class="text-gray-600 text-sm font-['Unbounded']">
-            Don't have an account?
-            <a href="#" class="text-[#FE601C] font-bold hover:underline">Contact admin</a>
-          </p>
-        </div>
       </div>
 
       <!-- Footer -->
@@ -86,7 +76,7 @@ const { saveToken, admin: adminRef, initToken, isAuthenticated } = useAdmin()
 const { adminLogin } = useApi()
 
 const form = ref({
-  email: '',
+  username: '',
   password: ''
 })
 
@@ -94,7 +84,7 @@ const isLoading = ref(false)
 const error = ref('')
 
 const handleLogin = async () => {
-  if (!form.value.email || !form.value.password) {
+  if (!form.value.username || !form.value.password) {
     error.value = 'Please fill in all fields'
     return
   }
@@ -103,7 +93,7 @@ const handleLogin = async () => {
   error.value = ''
 
   try {
-    const response = await adminLogin(form.value.email, form.value.password)
+    const response = await adminLogin(form.value.username, form.value.password)
     const { token, admin } = response.data
 
     // Save token and admin info

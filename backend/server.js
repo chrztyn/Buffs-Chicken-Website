@@ -51,11 +51,15 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // HTTP Caching Middleware
 app.use((req, res, next) => {
+  // Don't cache admin API endpoints - they need real-time updates
+  if (req.url.startsWith('/api/admin')) {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
   // Cache static assets for 1 week (immutable - never changes)
-  if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+  else if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
     res.set('Cache-Control', 'public, max-age=604800, immutable');
   }
-  // Cache API responses for 5 minutes
+  // Cache other API responses for 5 minutes
   else if (req.url.startsWith('/api/')) {
     res.set('Cache-Control', 'public, max-age=300');
   }

@@ -42,11 +42,11 @@ export const useApi = () => {
   )
 
   // Admin endpoints
-  const adminLogin = (email: string, password: string) =>
-    api.post('/admin/login', { email, password })
+  const adminLogin = (username: string, password: string) =>
+    api.post('/admin/login', { username, password })
 
-  const adminRegister = (name: string, email: string, password: string) =>
-    api.post('/admin/register', { name, email, password })
+  const adminRegister = (name: string, username: string, password: string) =>
+    api.post('/admin/register', { name, username, password })
 
   // Product endpoints
   const getProducts = (params?: { page?: number; limit?: number }) => 
@@ -75,6 +75,8 @@ export const useApi = () => {
   const getOrder = (id: string) => api.get(`/orders/${id}`)
   const updateOrderStatus = (id: string, status: string) =>
     api.put(`/admin/orders/${id}/status`, { status })
+  const verifyOrderStatus = (id: string) =>
+    api.get(`/admin/orders/${id}/verify`)
   const cancelOrder = (id: string) => api.put(`/orders/${id}/cancel`, {})
 
   // Blog endpoints
@@ -119,6 +121,7 @@ export const useApi = () => {
     getUserOrders,
     getOrder,
     updateOrderStatus,
+    verifyOrderStatus,
     cancelOrder,
     getBlogs,
     getBlogBySlug,
