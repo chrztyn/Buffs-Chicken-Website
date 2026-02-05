@@ -106,25 +106,39 @@ const sendContactFormEmail = async (name, email, message) => {
 
 const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
   try {
-    // Format order items for email
+    // Format order items for email - as clean bulleted list
     const itemsList = order.items
       .map(item => {
-        let itemDetails = `<li><strong>${item.productName}</strong> x${item.quantity} - ₱${item.itemTotal.toFixed(2)}`;
+        // Extract only the fields we need
+        const productName = item.productName || 'Unknown Product';
+        const quantity = item.quantity || 1;
+        const itemTotal = item.itemTotal || 0;
+        const selectedVariants = item.selectedVariants || {};
+        const selectedSauces = item.selectedSauces || [];
+        const selectedAddons = item.selectedAddons || [];
+
+        let itemHTML = `<li style="margin-bottom: 15px; line-height: 1.6;">
+          <strong>${productName}</strong> x${quantity} - <strong style="color: #FE601C;">₱${parseFloat(itemTotal).toFixed(2)}</strong>`;
         
-        if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0) {
-          const variants = Object.entries(item.selectedVariants)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(', ');
-          itemDetails += `<br><span style="color: #666; font-size: 12px;">Variants: ${variants}</span>`;
+        // if (selectedVariants && Object.keys(selectedVariants).length > 0) {
+        //   const variants = Object.entries(selectedVariants)
+        //     .map(([key, value]) => `${key}: ${value}`)
+        //     .join(', ');
+        //   itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• ${variants}</span>`;
+        // }
+        
+        if (selectedSauces && selectedSauces.length > 0) {
+          const sauces = selectedSauces.map(s => s.name || s).join(', ');
+          itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• Sauces: ${sauces}</span>`;
         }
         
-        if (item.selectedAddons && item.selectedAddons.length > 0) {
-          const addons = item.selectedAddons.map(a => a.name).join(', ');
-          itemDetails += `<br><span style="color: #666; font-size: 12px;">Add-ons: ${addons}</span>`;
+        if (selectedAddons && selectedAddons.length > 0) {
+          const addons = selectedAddons.map(a => a.name).join(', ');
+          itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• Add-ons: ${addons}</span>`;
         }
         
-        itemDetails += '</li>';
-        return itemDetails;
+        itemHTML += '</li>';
+        return itemHTML;
       })
       .join('');
 
@@ -152,7 +166,7 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
             <!-- Order Items -->
             <div style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h2 style="margin-top: 0; color: #1A4189;">Order Items</h2>
-              <ul style="list-style: none; padding: 0; margin: 0;">
+              <ul style="list-style: disc; padding-left: 20px; margin: 0;">
                 ${itemsList}
               </ul>
             </div>

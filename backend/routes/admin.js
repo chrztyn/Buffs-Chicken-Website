@@ -342,6 +342,7 @@ router.get('/orders', authenticateAdmin, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
+    console.error('Error fetching orders:', error);
     res.status(500).json({ message: error.message });
   }
 });

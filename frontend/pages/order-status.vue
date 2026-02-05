@@ -492,6 +492,29 @@ const fetchUserAddress = async (email) => {
   }
 }
 
+const fetchOrderFromBackend = async (orderId) => {
+  try {
+    const response = await fetch(`${useRuntimeConfig().public.apiBase}/orders/${orderId}`)
+    if (response.ok) {
+      const order = await response.json()
+      console.log('Order fetched from backend:', order)
+      
+      // Update address from database
+      if (order.deliveryAddress) {
+        userAddress.value = order.deliveryAddress
+        console.log('Updated address from database:', userAddress.value)
+      }
+      
+      // Update other order details
+      currentStatus.value = order.status || 'pending'
+      subtotal.value = order.subtotal || 0
+      deliveryFee.value = order.deliveryFee || 40
+    }
+  } catch (error) {
+    console.error('Error fetching order from backend:', error)
+  }
+}
+
 const loadOrder = () => {
   const saved = localStorage.getItem('buffs_order')
   if (saved) {
@@ -516,6 +539,9 @@ const loadOrder = () => {
       email: userEmail.value,
       address: userAddress.value
     })
+    
+    // Fetch latest order details from backend to get updated address
+    fetchOrderFromBackend(orderId.value)
   }
 }
 

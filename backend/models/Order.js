@@ -12,7 +12,6 @@ const orderItemSchema = new mongoose.Schema({
   selectedVariants: Map,
   selectedSauces: [
     {
-      _id: mongoose.Schema.Types.ObjectId,
       name: String,
       price: Number
     }
