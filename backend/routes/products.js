@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 
+// Admin: Get all products (including unavailable) - MUST BE BEFORE /:id ROUTE
+router.get('/admin/all', async (req, res) => {
+  try {
+    const products = await Product.find()
+      .sort({ createdAt: -1 });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get popular picks (must be BEFORE /:id route)
 router.get('/popular', async (req, res) => {
   try {
@@ -135,17 +146,6 @@ router.delete('/admin/:id', async (req, res) => {
     }
 
     res.json({ message: 'Product deleted successfully', product });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Admin: Get all products (including unavailable)
-router.get('/admin/all', async (req, res) => {
-  try {
-    const products = await Product.find()
-      .sort({ createdAt: -1 });
-    res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

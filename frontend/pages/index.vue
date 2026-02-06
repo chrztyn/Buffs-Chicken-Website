@@ -38,7 +38,7 @@
     <PopularPicks />
 
     <!-- Blog Section -->
-    <h2 class="blog-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-8 sm:mb-10 lg:mb-12 font-['Unbounded'] px-4 sm:px-6 lg:px-8">
+    <h2 class="blog-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-8 sm:mb-10 lg:mb-12 font-['Unbounded'] px-20 sm:px-6 md:px-10 lg:pl-20">
       The latest from Buffs
     </h2>
     <Blog />

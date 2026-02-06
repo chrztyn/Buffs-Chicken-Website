@@ -201,7 +201,7 @@ body,
   /* ============ FOOD CARDS ============ */
   .food-card {
     width: 100%;
-    max-width: 280px;
+    max-width: 320px;
     overflow: hidden;
     box-sizing: border-box;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
@@ -210,14 +210,14 @@ body,
   }
 
   /* Switch to 2 columns at 1249px to prevent card cropping */
-  @media (max-width: 1249px) {
+  @media (max-width: 1450px) {
     .popular-picks-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 1.25rem;
     }
 
     .food-card {
-      max-width: 320px;
+      max-width: 360px;
       padding: 1rem;
     }
   }
@@ -339,7 +339,6 @@ body,
   .faq-item {
     border: none;
     padding: 2rem 5rem;
-    margin-bottom: 1.2rem;
   }
 
   .faq-item:hover {
@@ -349,7 +348,13 @@ body,
   .faq-contact-box {
     border: none;
     margin-top: 215px;
-    padding: 3rem;
+    padding: 2rem;
+  }
+
+  .faq-contact-box-bottom {
+    border: none;
+    margin-top: 215px;
+    padding: 2rem;
   }
 
   .faq-contact-box h3 {
@@ -359,7 +364,21 @@ body,
     line-height: 1.3;
   }
 
+  .faq-contact-box-bottom h3 {
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
   .faq-contact-box p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    max-width: 100%;
+  }
+
+  .faq-contact-box-bottom p {
     font-size: 1rem;
     margin-bottom: 1.5rem;
     line-height: 1.6;
@@ -379,7 +398,24 @@ body,
     line-height: 1;
   }
 
+  .faq-contact-box-bottom button {
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.875rem 2rem;
+    width: auto;
+    max-width: none;
+    min-width: 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
   .faq-contact-box:hover {
+    transform: translateY(-2px);
+  }
+
+  .faq-contact-box-bottom:hover {
     transform: translateY(-2px);
   }
 
@@ -581,7 +617,7 @@ body,
   /* ============ FOOD CARDS ============ */
   .food-card {
     width: 100%;
-    max-width: 320px;
+    max-width: 360px;
     overflow: hidden;
     box-sizing: border-box;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
@@ -708,6 +744,12 @@ body,
     padding: 2.5rem;
   }
 
+  .faq-contact-box-bottom {
+    border: none;
+    margin-top: 0;
+    padding: 2.5rem;
+  }
+
   .faq-contact-box h3 {
     font-weight: 400;
     margin-bottom: 1.25rem;
@@ -715,7 +757,21 @@ body,
     line-height: 1.3;
   }
 
+  .faq-contact-box-bottom h3 {
+    font-weight: 400;
+    margin-bottom: 1.25rem;
+    font-size: 1.375rem;
+    line-height: 1.3;
+  }
+
   .faq-contact-box p {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+    max-width: 100%;
+  }
+
+  .faq-contact-box-bottom p {
     font-size: 0.95rem;
     margin-bottom: 1.25rem;
     line-height: 1.6;
@@ -959,7 +1015,7 @@ body,
   /* ============ FOOD CARDS ============ */
   .food-card {
     width: 100%;
-    max-width: 350px;
+    max-width: 390px;
     overflow: hidden;
     box-sizing: border-box;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
@@ -1083,6 +1139,14 @@ body,
     box-sizing: border-box;
   }
 
+  .faq-contact-box-bottom {
+    border: none;
+    margin-top: 2rem;
+    padding: 2rem 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .faq-contact-box h3 {
     font-weight: 400;
     margin-bottom: 1rem;
@@ -1090,7 +1154,21 @@ body,
     line-height: 1.4;
   }
 
+  .faq-contact-box-bottom h3 {
+    font-weight: 400;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
   .faq-contact-box p {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+    max-width: 100%;
+  }
+
+  .faq-contact-box-bottom p {
     font-size: 0.9rem;
     margin-bottom: 1.25rem;
     line-height: 1.6;
@@ -1379,31 +1457,6 @@ body,
   margin: 0 auto;
   margin-left: auto;
 }
-
-@media (min-width: 768px) {
-  .max-w-7xl > div.grid {
-    max-width: 1200px;
-    gap: 1rem !important;
-    margin-right: -2rem;
-  }
-  
-  .max-w-7xl > div.grid > div:first-child {
-    margin-left: -5px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .max-w-7xl > div.grid {
-    gap: 1rem !important;
-  }
-}
-
-@media (min-width: 1280px) {
-  .max-w-7xl > div.grid {
-    gap: 1.5rem !important;
-  }
-}
-
 /* ============ CONTACT SPACING ============ */
 .contact-details > div {
   margin-bottom: 1rem;
