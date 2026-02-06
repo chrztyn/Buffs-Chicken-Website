@@ -54,7 +54,9 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: true,
       routes: ['/sitemap.xml', '/robots.txt']
-    }
+    },
+    host: '0.0.0.0',  // Listen on all interfaces, not just localhost
+    port: 3000
   },
   components: {
     dirs: [ {
@@ -199,8 +201,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.API_BASE || 'https://buffschicken.com/api',
-      socketUrl: process.env.SOCKET_URL || 'https://buffschicken.com',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://buffschicken.com/api',
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'https://buffschicken.com',
     }
   },
     image: {
