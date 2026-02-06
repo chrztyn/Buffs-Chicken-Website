@@ -199,8 +199,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:5001/api',
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:5001'
+      apiBase: process.env.API_BASE || 'https://buffschicken.com/api',
+      socketUrl: process.env.SOCKET_URL || 'https://buffschicken.com',
     }
   },
     image: {
