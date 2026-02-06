@@ -4,11 +4,6 @@ import { useRuntimeConfig } from '#app'
 import { useAdmin } from './useAdmin'
 
 export const useApi = () => {
-  // Only run on client side
-  if (process.server) {
-    return {} as any
-  }
-
   const config = useRuntimeConfig()
   const { token, getAuthHeader } = useAdmin()
 
