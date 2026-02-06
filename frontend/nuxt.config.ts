@@ -11,8 +11,14 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV === 'development',
   },
     routeRules: {
-    // All routes are rendered on-demand (SPA mode)
-    '/**': { prerender: false }
+    // Prerender these routes
+    '/': { prerender: true },
+    '/about': { prerender: true },
+    '/contact': { prerender: true },
+    '/menu': { prerender: true },
+    '/blogs': { prerender: true },
+    '/blogs/**': { prerender: true },
+    '/**': { swr: 3600 }  // Cache other routes for 1 hour
   },
   build: {
     transpile: ['@nuxt/image'],
