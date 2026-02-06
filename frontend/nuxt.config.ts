@@ -9,6 +9,10 @@ export default defineNuxtConfig({
   devtools: {
     enabled: process.env.NODE_ENV === 'development',
   },
+    routeRules: {
+    // All routes are rendered on-demand (SPA mode)
+    '/**': { prerender: false }
+  },
   build: {
     transpile: ['@nuxt/image'],
   },
