@@ -7,13 +7,14 @@ export const useApi = () => {
   const config = useRuntimeConfig()
   const { token, getAuthHeader } = useAdmin()
 
-  // Create axios instance with runtime config
   const api: any = axios.create({
     baseURL: config.public.apiBase,
     headers: {
       'Content-Type': 'application/json'
     }
   })
+
+  console.log('[useApi] axios baseURL =', api.defaults.baseURL)
 
   // Add token to requests
   api.interceptors.request.use((config: any) => {

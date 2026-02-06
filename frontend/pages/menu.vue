@@ -215,9 +215,14 @@ export default {
     }
   },
   async mounted() {
-    // Load initial products
-    await this.loadProducts(1)
-    
+    console.log('[Menu] mounted')
+    try {
+      await this.loadProducts(1)
+      console.log('[Menu] after loadProducts, items =', this.menuItems.length)
+    } catch (e) {
+      console.error('[Menu] mounted -> loadProducts threw', e)
+    }
+
     // Load cart count on page load
     const savedCart = localStorage.getItem('buffs_cart');
     if (savedCart) {
@@ -256,6 +261,7 @@ export default {
   },
   methods: {
     async loadProducts(page = 1) {
+      console.log('[Menu] loadProducts start, page =', page)
       try {
         const isInitialLoad = page === 1
         if (isInitialLoad) {
@@ -265,11 +271,15 @@ export default {
         }
 
         const { getProducts } = useApi()
+        console.log('[Menu] calling getProducts')
+
         const response = await getProducts({
           page,
           limit: this.pageSize
         })
-        
+
+        console.log('[Menu] getProducts response:', response.data)
+
         const newProducts = response.data.data.map(product => ({
           id: product._id,
           name: product.name,
