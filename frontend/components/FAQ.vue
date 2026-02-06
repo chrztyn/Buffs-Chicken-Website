@@ -20,7 +20,7 @@
                         <p class="text-sm text-gray-600 mb-6 leading-relaxed font-['Unbounded'] break-words">
                             Can't find the answer to your question? Send us an email and we'll get back to you as soon as possible!
                         </p>
-                        <NuxtLink to="/contact" class="inline-block w-30 h-10 bg-[#2B5B9E] text-white px-6 py-3.5 rounded-sm font-['Unbounded'] font-semibold text-sm hover:bg-[#1A4189] transition-colors shadow-md text-center leading-3">
+                        <NuxtLink to="/contact" class="inline-block w-full h-10 bg-[#2B5B9E] text-white px-6 py-3.5 rounded-sm font-['Unbounded'] font-semibold text-sm hover:bg-[#1A4189] transition-colors shadow-md text-center leading-3">
                             Send Email
                         </NuxtLink>
                     </div>
