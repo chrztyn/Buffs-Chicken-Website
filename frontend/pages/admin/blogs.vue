@@ -148,7 +148,7 @@
                 class="max-h-40 rounded-lg"
               />
               <button
-                @click.stop="blogForm.imagePreview = blogForm.image"
+                @click.stop="blogForm.imagePreview = ''; blogForm.image = ''"
                 class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
               >
                 ✕
@@ -227,7 +227,7 @@ definePageMeta({
   layout: 'admin'
 })
 
-const { getBlogs, createBlog, updateBlog, deleteBlog: deleteBlogApi } = useApi()
+const { getBlogs, createBlog, updateBlog, deleteBlog: deleteBlogApi, uploadImage } = useApi()
 const { token, getAuthHeader } = useAdmin()
 
 const blogs = ref<any[]>([])
@@ -254,9 +254,14 @@ const publishedBlogs = computed(() => {
 
 const loadBlogs = async () => {
   try {
+    console.log('Loading blogs from API...')
     const response = await getBlogs()
+    console.log('API Response:', response.data)
+    
     // Extract the blogs array from the response data
-    blogs.value = Array.isArray(response.data) ? response.data : response.data?.data || []
+    const blogsData = Array.isArray(response.data) ? response.data : response.data?.data || []
+    blogs.value = blogsData
+    console.log('Blogs loaded successfully:', blogs.value.length, 'blogs')
   } catch (error) {
     console.error('Failed to load blogs:', error)
     blogs.value = []
@@ -315,28 +320,11 @@ const handleImageUpload = async (event: any) => {
   reader.readAsDataURL(file)
 
   // Upload to backend
-  const formData = new FormData()
-  formData.append('image', file)
-
   try {
     console.log('Uploading to backend...')
-    const authHeader = getAuthHeader()
-    console.log('Auth header:', authHeader)
-    
-    const response = await fetch('http://localhost:5001/api/admin/upload', {
-      method: 'POST',
-      body: formData,
-      headers: authHeader
-    })
-    
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(`Upload failed: ${errorData.message || response.status}`)
-    }
-    
-    const data = await response.json()
-    console.log('Backend upload successful:', data.url)
-    blogForm.value.image = data.url
+    const response = await uploadImage(file)
+    console.log('Backend upload successful:', response.data.url)
+    blogForm.value.image = response.data.url
     console.log('Image URL set in form:', blogForm.value.image)
   } catch (error) {
     console.error('Image upload failed:', error)
@@ -374,17 +362,37 @@ const saveBlog = async () => {
 }
 
 const deleteBlog = (blogId: string) => {
+  console.log('Delete button clicked for blog:', blogId)
   deletingBlog.value = blogs.value.find((b) => b._id === blogId)
+  console.log('Blog to delete:', deletingBlog.value)
   showDeleteConfirm.value = true
 }
 
 const confirmDelete = async () => {
   try {
-    await deleteBlogApi(deletingBlog.value._id)
+    console.log('Confirming delete for blog:', deletingBlog.value._id)
+    const response = await deleteBlogApi(deletingBlog.value._id)
+    console.log('Delete response:', response)
+    
+    // Immediately remove from local state before reloading
+    const index = blogs.value.findIndex(b => b._id === deletingBlog.value._id)
+    if (index !== -1) {
+      blogs.value.splice(index, 1)
+      console.log('Blog removed from local state')
+    }
+    
     showDeleteConfirm.value = false
+    
+    // Reload all blogs from server to ensure sync
+    console.log('Reloading blogs from server...')
     await loadBlogs()
+    console.log('Blogs reloaded:', blogs.value.length, 'blogs')
+    
+    alert('Blog deleted successfully!')
   } catch (error: any) {
-    alert(error.response?.data?.message || 'Failed to delete blog')
+    console.error('Delete error response:', error.response?.data)
+    console.error('Delete error:', error.message)
+    alert(error.response?.data?.message || 'Failed to delete blog: ' + error.message)
   }
 }
 

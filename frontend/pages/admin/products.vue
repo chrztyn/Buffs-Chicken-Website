@@ -203,7 +203,7 @@
                 class="max-h-48 rounded-lg"
               />
               <button
-                @click.stop="productForm.imagePreview = ''"
+                @click.stop="productForm.imagePreview = ''; productForm.image = ''"
                 class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
               >
                 ✕
@@ -463,7 +463,7 @@ definePageMeta({
   layout: 'admin'
 })
 
-const { getProducts, getCategories, createProduct, updateProduct, deleteProduct: deleteProductApi, getAllProductsAdmin } = useApi()
+const { getProducts, getCategories, createProduct, updateProduct, deleteProduct: deleteProductApi, getAllProductsAdmin, uploadImage } = useApi()
 
 const products = ref<any[]>([])
 const categories = ref<any[]>([])
@@ -588,44 +588,37 @@ const handleDrop = (event: DragEvent) => {
 
 const handleImageUpload = async (event: any) => {
   const file = event.target.files?.[0]
-  if (!file) return
+  if (!file) {
+    console.warn('No file selected')
+    return
+  }
+
+  console.log('Starting image upload for file:', file.name, 'Size:', file.size)
 
   // Create preview
   const reader = new FileReader()
   reader.onload = (e) => {
     productForm.value.imagePreview = e.target?.result
+    console.log('Image preview created')
   }
   reader.readAsDataURL(file)
 
-  // Upload to backend (saves locally + Cloudinary backup)
-  const formData = new FormData()
-  formData.append('image', file)
-
   try {
-    const token = localStorage.getItem('admin_token')
-    if (!token) {
-      throw new Error('Admin token not found. Please log in again.')
-    }
-
-    const response = await fetch('http://localhost:5001/api/admin/upload', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    })
+    console.log('Uploading image...')
+    const response = await uploadImage(file)
     
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || 'Upload failed')
+    if (!response.data?.url) {
+      throw new Error('No URL returned from upload')
     }
     
-    const data = await response.json()
-    productForm.value.image = data.url
-    console.log('Image uploaded:', { local: data.url, cloudinary: data.cloudinaryUrl })
-  } catch (error) {
+    productForm.value.image = response.data.url
+    console.log('Image uploaded successfully:', response.data.url)
+  } catch (error: any) {
     console.error('Image upload failed:', error)
-    alert('Failed to upload image: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    console.error('Error details:', error.response?.data || error.message)
+    alert('Failed to upload image: ' + (error.response?.data?.message || error.message))
+    // Clear the preview if upload failed
+    productForm.value.imagePreview = ''
   }
 }
 
@@ -683,15 +676,23 @@ const saveProduct = async () => {
   }
 
   try {
+    console.log('Saving product with data:', JSON.stringify(productForm.value, null, 2))
+    
     if (editingProduct.value) {
+      console.log('Updating product:', editingProduct.value._id)
       await updateProduct(editingProduct.value._id, productForm.value)
     } else {
+      console.log('Creating new product')
       await createProduct(productForm.value)
     }
+    
     closeProductModal()
     await loadProducts()
+    alert('Product saved successfully!')
   } catch (error: any) {
-    alert(error.response?.data?.message || 'Failed to save product')
+    console.error('Save error response:', error.response?.data)
+    console.error('Save error:', error.message)
+    alert(error.response?.data?.message || 'Failed to save product: ' + error.message)
   }
 }
 

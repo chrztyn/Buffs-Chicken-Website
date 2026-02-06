@@ -101,6 +101,18 @@ export const useApi = () => {
   // Contact endpoints
   const submitContactForm = (data: any) => api.post('/contact/submit', data)
 
+  // Upload endpoints
+  const uploadImage = (file: File) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    
+    return api.post('/admin/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  }
+
   return {
     api,
     adminLogin,
@@ -134,6 +146,7 @@ export const useApi = () => {
     markNotificationRead,
     deleteNotification,
     submitContactForm,
+    uploadImage,
     getPopularPicks
   }
 }

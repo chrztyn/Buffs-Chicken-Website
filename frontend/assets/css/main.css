@@ -17,6 +17,9 @@ body,
   section:has(h1) {
     padding-top: 480px;
     padding-left: 100px;
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 
   h1 {
@@ -191,8 +194,17 @@ body,
     margin-right: auto;
     justify-items: center;
     align-items: start;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+  }
+}
+
+/* ============================================ */
+/* LARGE DESKTOP (1400px and above) */
+/* ============================================ */
+@media (min-width: 1400px) {
+  .popular-picks-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 
   /* ============ FOOD CARDS ============ */

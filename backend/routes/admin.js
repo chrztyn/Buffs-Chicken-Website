@@ -314,9 +314,19 @@ router.put('/blogs/:id', authenticateAdmin, async (req, res) => {
 // Delete blog
 router.delete('/blogs/:id', authenticateAdmin, async (req, res) => {
   try {
-    await Blog.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Blog deleted' });
+    console.log(`[BLOG DELETE] Attempting to delete blog with ID: ${req.params.id}`);
+    
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+    
+    if (!deletedBlog) {
+      console.log(`[BLOG DELETE] Blog not found with ID: ${req.params.id}`);
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+    
+    console.log(`[BLOG DELETE] Successfully deleted blog: ${deletedBlog.title}`);
+    res.json({ message: 'Blog deleted', blogId: req.params.id });
   } catch (error) {
+    console.error(`[BLOG DELETE ERROR] ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 });

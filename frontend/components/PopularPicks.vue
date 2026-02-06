@@ -17,7 +17,7 @@
         </NuxtLink>
         </header>
 
-        <div class="popular-picks-grid grid grid-cols-1 md:grid-cols-4 gap-8 max-w-7xl mx-auto justify-items-center relative z-10">
+        <div class="popular-picks-grid grid grid-cols-1 md:grid-cols-2 min-[1400px]:grid-cols-4 gap-8 max-w-7xl mx-auto justify-items-center relative z-10">
         <div
             v-for="item in popularItems"
             :key="item._id"
