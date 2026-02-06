@@ -1,6 +1,6 @@
 <template>
-    <section class="blog-section bg-[#F5F1E8] pb-8 sm:pb-12 md:pb-16 lg:pb-20 pt-8 sm:pt-16 md:pt-20 lg:pt-28 px-4 sm:px-6 md:px-8 lg:px-10">
-        <div class="max-w-6xl mx-auto">
+    <section class="blog-section bg-[#FBF4E5] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-8 lg:px-10">
             <!-- Loading State -->
             <div v-if="loading" class="text-center py-12">
                 <p class="text-gray-600">Loading blog posts...</p>
@@ -23,7 +23,7 @@
                     :key="post._id || post.id"
                     class="blog-post-item"
                 >
-                    <div class="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 pb-12 sm:pb-16 md:pb-16 lg:pb-32">
+                    <div class="flex flex-col md:flex-row gap-6 md:gap-8">
                         <!-- Blog Image -->
                         <div class="w-full md:w-[300px] h-[200px] md:h-[280px] bg-[#D1D5DB] rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
                             <NuxtImg 
@@ -62,46 +62,12 @@
                     <!-- Divider -->
                     <hr 
                         v-if="index < blogPosts.length - 1"
-                        class="border-t border-gray-300 !mt-1 sm:mt-16 md:mt-16 lg:mt-28"
+                        class="blog-divider border-t border-gray-300"
                     />
                 </article>
             </div>
-
-            <!-- Pagination Controls -->
-            <div v-if="!loading && blogPosts.length > 0" class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-12 sm:mt-16 pb-4 sm:pb-8">
-                <button
-                    @click="previousPage"
-                    :disabled="currentPage === 1 || loading"
-                    class="w-full sm:w-auto px-4 sm:px-6 py-2 rounded-full font-['Unbounded'] font-semibold text-sm sm:text-base transition-all duration-200"
-                    :class="currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#1A4189] text-white hover:bg-[#15306d] active:scale-95'"
-                >
-                    Previous
-                </button>
-                
-                <div class="flex items-center gap-1 sm:gap-2">
-                    <span class="text-gray-600 font-['Unbounded'] font-semibold text-sm sm:text-base">Page</span>
-                    <input
-                        v-model.number="currentPage"
-                        type="number"
-                        min="1"
-                        :max="totalPages"
-                        class="w-10 sm:w-12 px-2 py-1 text-center text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#1A4189]"
-                    />
-                    <span class="text-gray-600 font-['Unbounded'] font-semibold text-sm sm:text-base">of {{ totalPages }}</span>
-                </div>
-                
-                <button
-                    @click="nextPage"
-                    :disabled="currentPage >= totalPages || loading"
-                    class="w-full sm:w-auto px-4 sm:px-6 py-2 rounded-full font-['Unbounded'] font-semibold text-sm sm:text-base transition-all duration-200"
-                    :class="currentPage >= totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#FE601C] text-white hover:bg-[#e5540a] active:scale-95'"
-                >
-                    Next
-                </button>
-            </div>
-            
             <!-- Divider after Blog Section -->
-            <hr class="border-t border-gray-300 mt-12 sm:mt-16 md:mt-24 lg:mt-28" />
+            <hr class="blog-divider border-t border-gray-300" />
         </div>
     </section>
 </template>
@@ -110,28 +76,42 @@
     import { ref, computed, onMounted, watch } from 'vue';
     import { useApi } from '~/composables/useApi';
 
+    const props = defineProps({
+      currentPage: {
+        type: Number,
+        default: 1
+      },
+      itemsPerPage: {
+        type: Number,
+        default: 5
+      }
+    });
+
+    const emit = defineEmits(['update-total']);
+
     const blogPosts = ref([]);
     const loading = ref(true);
     const error = ref(null);
-    const currentPage = ref(1);
-    const pageSize = ref(10);
-    const totalBlogs = ref(0);
+    const allBlogPosts = ref([]);
 
     const { getBlogs } = useApi();
 
-    // Compute total pages
-    const totalPages = computed(() => {
-      return Math.ceil(totalBlogs.value / pageSize.value);
+    // Calculate paginated posts based on currentPage and itemsPerPage
+    const paginatedPosts = computed(() => {
+      const startIndex = (props.currentPage - 1) * props.itemsPerPage;
+      const endIndex = startIndex + props.itemsPerPage;
+      return allBlogPosts.value.slice(startIndex, endIndex);
     });
 
-    const loadBlogs = async (page = 1) => {
+    const loadBlogs = async () => {
       try {
         loading.value = true;
         error.value = null;
-        const response = await getBlogs({ page, limit: pageSize.value });
-        blogPosts.value = response.data.data || [];
-        totalBlogs.value = response.data.total || 0;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const response = await getBlogs();
+        allBlogPosts.value = response.data.data || [];
+        blogPosts.value = paginatedPosts.value;
+        // Emit total blogs count to parent
+        emit('update-total', allBlogPosts.value.length);
       } catch (err) {
         console.error('Failed to load blogs:', err);
         error.value = 'Failed to load blog posts';
@@ -140,24 +120,13 @@
       }
     };
 
-    const nextPage = () => {
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-      }
-    };
-
-    const previousPage = () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
-    };
-
-    // Watch for page changes and load new data
-    watch(currentPage, (newPage) => {
-      loadBlogs(newPage);
+    // Watch for page changes and update displayed posts
+    watch(() => props.currentPage, () => {
+      blogPosts.value = paginatedPosts.value;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     onMounted(() => {
-      loadBlogs(1);
+      loadBlogs();
     });
     </script>

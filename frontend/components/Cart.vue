@@ -147,67 +147,85 @@
 
             <!-- Order Summary Section -->
             <div class="lg:col-span-1">
-            <div class="bg-gradient-to-br from-[#1A4189] to-[#0f2a5f] rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-3xl shadow-lg p-5 sm:p-6 md:p-7 lg:p-8 text-white lg:sticky lg:top-32">
+            <div class="bg-[#1e3a8a] text-white rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-3xl shadow-lg p-5 sm:p-6 md:p-7 lg:p-8 lg:sticky lg:top-32">
+                
                 <!-- Summary Header -->
-                <h2 class="text-lg sm:text-lg md:text-xl lg:text-xl font-['Unbounded'] font-bold mb-5 sm:mb-6 md:mb-6 lg:mb-6">Order Summary</h2>
+                <h2 class="order-summary-title font-['Unbounded'] font-bold mb-5 sm:mb-6 text-white">
+                Order Summary
+                </h2>
 
                 <!-- Price Breakdown -->
-                <div class="space-y-2 sm:space-y-2.5 md:space-y-3 mb-5 sm:mb-6 md:mb-6 pb-5 sm:pb-6 md:pb-6 border-b border-white border-opacity-20">
-                <div class="flex justify-between text-xs sm:text-sm md:text-sm lg:text-sm">
+                <div class="space-y-2 sm:space-y-2.5 md:space-y-3 mb-5 pb-5 border-b border-white/20">
+                <div class="flex justify-between text-xs sm:text-sm text-white/90">
                     <span>Subtotal</span>
                     <span class="font-semibold">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
-                <div class="flex justify-between text-xs sm:text-sm md:text-sm lg:text-sm">
+                <div class="flex justify-between text-xs sm:text-sm text-white/90">
                     <span>Delivery Fee</span>
                     <span class="font-semibold">₱{{ deliveryFee.toFixed(2) }}</span>
                 </div>
                 </div>
 
                 <!-- Total -->
-                <div class="mb-5 sm:mb-6 md:mb-6 pb-5 sm:pb-6 md:pb-6 border-b border-white border-opacity-20">
+                <div class="mb-5 pb-5 border-b border-white/20">
                 <div class="flex justify-between items-baseline gap-3">
-                    <span class="text-sm sm:text-sm md:text-base font-bold font-['Unbounded']">Total</span>
-                    <span class="font-['Unbounded'] font-bold text-xl sm:text-2xl md:text-2xl lg:text-3xl text-[#FEB90E]">₱{{ total.toFixed(2) }}</span>
+                    <span class="text-sm md:text-base font-bold font-['Unbounded'] text-white">
+                    Total
+                    </span>
+                    <span class="font-['Unbounded'] font-bold text-xl sm:text-2xl md:text-3xl text-[#FEB90E]">
+                    ₱{{ total.toFixed(2) }}
+                    </span>
                 </div>
                 </div>
 
                 <!-- Payment Method -->
-                <div class="mb-5 sm:my-6 md:my-6 pb-5 sm:pb-6 md:pb-6 border-b border-white border-opacity-10">
-                    <div class="payment-method flex items-center gap-2 sm:gap-3">
-                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full flex-shrink-0"></div>
-                        <span class="text-xs sm:text-sm md:text-sm font-medium">Cash on Delivery</span>
-                    </div>
+                <div class="mb-5 pb-5 border-b border-white/20">
+                <div class="payment-method flex items-center gap-2 sm:gap-3">
+                    <div class="w-2.5 h-2.5 bg-green-400 rounded-full flex-shrink-0"></div>
+                    <span class="text-xs sm:text-sm font-medium text-white/90">
+                    Cash on Delivery
+                    </span>
+                </div>
                 </div>
 
                 <!-- Buttons -->
-                <div class="flex flex-col gap-3 sm:gap-3 md:gap-3">
-                  <button
-                  @click="openOrderConfirmModal"
-                  class="w-full px-4 sm:px-4 md:px-5 bg-[#FEB90E] text-gray-900 font-['Unbounded'] font-bold py-3 sm:py-3 md:py-3 text-sm sm:text-sm md:text-base rounded-lg hover:bg-[#e5a70d] transition-all duration-200 hover:shadow-lg min-h-11 sm:min-h-11 md:min-h-12 flex items-center justify-center"
-                  >
-                  Place Order
-                  </button>
+                <div class="flex flex-col gap-3">
 
-                  <button
-                  @click="goToOrderStatus"
-                  :disabled="!hasActiveOrder || isOrderCancelled"
-                  :class="[
-                    'w-full px-4 sm:px-4 md:px-5 font-bold py-3 sm:py-3 md:py-3 text-sm sm:text-sm md:text-base rounded-lg transition-all duration-200 min-h-11 sm:min-h-11 md:min-h-12 flex items-center justify-center font-[\'Unbounded\']',
+                <!-- Place Order -->
+                <button
+                    @click="openOrderConfirmModal"
+                    class="w-full px-4 md:px-5 bg-gradient-to-r from-[#FEB90E] to-[#FFD86B]
+                        text-[#1e3a8a] font-['Unbounded'] font-bold py-3
+                        text-sm md:text-base rounded-lg transition-all duration-200
+                        hover:shadow-xl hover:brightness-105 min-h-11 flex items-center justify-center"
+                >
+                    Place Order
+                </button>
+
+                <!-- View Status -->
+                <button
+                    @click="goToOrderStatus"
+                    :disabled="!hasActiveOrder || isOrderCancelled"
+                    :class="[
+                    'w-full px-4 md:px-5 font-bold py-3 text-sm md:text-base rounded-lg transition-all duration-200 min-h-11 flex items-center justify-center font-[\'Unbounded\']',
                     hasActiveOrder && !isOrderCancelled
-                      ? 'bg-gradient-to-r from-[#FE601C] to-[#FEB90E] text-gray-900 hover:shadow-lg cursor-pointer'
-                      : 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60'
-                  ]"
-                  >
-                  View Status
-                  </button>
+                        ? 'bg-gradient-to-r from-[#FEB90E] to-[#FFD86B] text-[#1e3a8a] hover:shadow-xl'
+                        : 'bg-white/30 text-white/50 cursor-not-allowed opacity-60'
+                    ]"
+                >
+                    View Status
+                </button>
+
                 </div>
 
                 <!-- Info Text -->
-                <p class="text-xs sm:text-xs md:text-xs text-white text-center mt-4 sm:mt-4 md:mt-5 px-2">
+                <p class="text-xs text-white/70 text-center mt-4 px-2">
                 Secure checkout powered by Buffs Chicken
                 </p>
+
             </div>
             </div>
+
         </div>
         </div>
     </div>
@@ -590,14 +608,13 @@
         gap: 2rem ;
     }
 
-    /* Order Summary Header */
-    .bg-gradient-to-br.rounded-3xl h2 {
-        font-size: 1.5rem;
+    /* Order Summary Header - UPDATED */
+    .order-summary-title {
+        font-size: 1rem;
         font-weight: 700;
-        margin-bottom: -1rem;
-        padding: 0;
-        line-height: 1.2;
         text-align: center;
+        line-height: 1.2;
+        color: white;
     }
 
     /* Price Breakdown Container */
@@ -622,7 +639,7 @@
     /* Total Price Container */
     .bg-gradient-to-br.rounded-3xl .mb-8.pb-8.border-b {
         margin-top: -1rem;
-        padding: 1.5rem 0 2rem 0 ;
+        padding: 2rem 0 2rem 0 ;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2) ;
     }
 
@@ -651,14 +668,11 @@
         font-size: 1rem;
         font-weight: 700;
         border-radius: 0.75rem;
-        background: #FEB90E ;
-        color: #1f2937 ;
         transition: background-color 0.2s ease, transform 0.2s ease;
         min-width: 200px;
     }
 
     .bg-gradient-to-br.rounded-3xl button:hover {
-        background: #e5a70d ;
         transform: scale(1.02);
     }
 

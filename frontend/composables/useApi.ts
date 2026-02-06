@@ -59,7 +59,7 @@ export const useApi = () => {
   const updateProduct = (id: string, data: any) =>
     api.put(`/products/admin/${id}`, data)
   const deleteProduct = (id: string) => api.delete(`/products/admin/${id}`)
-  const getAllProductsAdmin = () => api.get('/products/admin/all')
+  const getAllProductsAdmin = () => api.get('/products/admin/all', { params: { _t: Date.now() } })
 
   // Category endpoints
   const getCategories = () => api.get('/categories')

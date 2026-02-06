@@ -13,12 +13,7 @@
           <HeroImages />
 
           <!-- Text Content -->
-          <div class="text-content-container flex-1 max-w-xl max-[1023px]:max-w-2xl lg:max-w-5xl space-y-2 sm:space-y-3 max-[1023px]:space-y-4 lg:space-y-6 relative order-2 lg:order-1 lg:mt-40 -mt-20 sm:-mt-24 max-[1023px]:-mt-16 lg:-mt-0 z-20 sm:z-30 lg:z-0 mx-auto text-center">
-
-            <!-- Hero Buffs Chicken Image -->
-            <div class="hero-buffs-chicken absolute -top-32 max-[1023px]:-top-48 lg:-top-93 left-[-12rem] max-[1023px]:left-[-8rem] z-10 hidden lg:block lg:opacity-100">
-              <NuxtImg src="/hero-buffs-chicken.png" alt="Buffs Chicken" class="w-50 max-[1023px]:w-60 h-50 max-[1023px]:h-60 lg:w-115 lg:h-115 object-contain" />
-            </div>
+          <div class="text-content-container flex-1 max-w-xl lg:max-w-5xl space-y-2 sm:space-y-3 lg:space-y-6 relative order-2 lg:order-1 lg:mt-40 -mt-20 sm:-mt-24 lg:-mt-0 z-20 sm:z-30 lg:z-0 mx-auto text-center">
 
             <!-- Main Heading -->
             <h1 class="font-['Caprasimo'] !text-7xl sm:text-10xl md:text-6xl max-[1023px]:text-7xl lg:text-7xl text-[#1A4189] leading-none z-20 sm:z-30 lg:z-0 relative lg:text-left">
@@ -43,7 +38,7 @@
     <PopularPicks />
 
     <!-- Blog Section -->
-    <h2 class="blog-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-8 sm:mb-10 lg:mb-12 font-['Unbounded'] px-4 sm:px-6 lg:px-8">
+    <h2 class="blog-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-8 sm:mb-10 lg:mb-12 font-['Unbounded'] px-20 sm:px-6 md:px-10 lg:pl-20">
       The latest from Buffs
     </h2>
     <Blog />

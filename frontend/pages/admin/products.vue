@@ -504,10 +504,13 @@ const filteredProducts = computed(() => {
 
 const loadProducts = async () => {
   try {
+    console.log('Loading products...')
     const response = await getAllProductsAdmin()
+    console.log('Products loaded:', response.data)
     products.value = response.data
   } catch (error) {
     console.error('Failed to load products:', error)
+    alert('Failed to load products. Please try refreshing the page.')
   }
 }
 
@@ -679,20 +682,21 @@ const saveProduct = async () => {
     console.log('Saving product with data:', JSON.stringify(productForm.value, null, 2))
     
     if (editingProduct.value) {
-      console.log('Updating product:', editingProduct.value._id)
+      // Update existing product
       await updateProduct(editingProduct.value._id, productForm.value)
     } else {
-      console.log('Creating new product')
+      // Create new product
       await createProduct(productForm.value)
     }
     
     closeProductModal()
+    
+    // Reload all products from database to get fresh data
     await loadProducts()
-    alert('Product saved successfully!')
+    
   } catch (error: any) {
-    console.error('Save error response:', error.response?.data)
-    console.error('Save error:', error.message)
-    alert(error.response?.data?.message || 'Failed to save product: ' + error.message)
+    console.error('Save error:', error)
+    alert(error.response?.data?.message || 'Failed to save product')
   }
 }
 

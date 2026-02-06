@@ -35,7 +35,7 @@
                 <!-- Left Sidebar (Full width on mobile/tablet, 25% on desktop) -->
                 <div class="w-full lg:w-[25%] lg:flex-shrink-0">
                     <!-- Title -->
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-['Caprasimo'] text-[#1A4189] mb-6 sm:mb-8 lg:mb-10 leading-tight">Grab your favorites</h2>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-['Unbounded'] text-[#1A4189] mb-6 sm:mb-8 lg:mb-10 leading-tight">Grab your favorites</h2>
 
                     <!-- Search Bar and Cart -->
                     <div class="flex flex-col gap-4 mb-8 sm:mb-10">
