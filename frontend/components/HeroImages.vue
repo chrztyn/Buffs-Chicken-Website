@@ -1,12 +1,12 @@
 <template>
-    <div class="flex-1 flex justify-center lg:justify-end items-center order-1 lg:order-2 mt-20 sm:mt-16 md:mt-12 lg:mt-0 lg:!mt-0 max-[1023px]:mb-0 max-[1023px]:!w-full max-[1023px]:px-4 max-[639px]:mb-0 max-[639px]:!mx-auto max-[639px]:!w-full">
+    <div class="flex-1 flex justify-center lg:justify-end items-center order-1 lg:order-2 mt-20 sm:mt-16 md:mt-12 lg:mt-0 lg:!mt-0 max-[1023px]:mb-0 max-[1023px]:!w-full max-[1023px]:px-4 max-[639px]:mb-0 max-[639px]:!mx-auto max-[639px]:!w-full max-h-[600px]:mt-2 max-h-[600px]:scale-75 max-h-[600px]:origin-top-right">
         <div class="hero-main w-full max-w-xs sm:max-w-sm md:max-w-md max-[1023px]:max-w-lg lg:max-w-lg aspect-square overflow-visible relative lg:!-mt-[12rem] lg:!translate-x-2 md:-mt-0 md:translate-x-0 md:mb-0 md:mx-auto max-[1023px]:!z-20 max-[1023px]:mx-auto max-[639px]:mx-auto max-[639px]:flex max-[639px]:justify-center max-[639px]:items-center max-[639px]:mb-0 max-[639px]:!z-20 max-[639px]:-mt-[6rem]">
         
         <!-- Main Chicken Image -->
         <NuxtImg 
             src="/hero-main.jpg" 
             alt="Buffs Chicken" 
-            class="w-80 sm:w-96 md:w-[620px] max-[1023px]:w-[480px] lg:w-110 h-80 sm:h-96 md:h-[620px] max-[1023px]:h-[480px] lg:h-110 object-cover rounded-2xl lg:rounded-none shadow-lg md:shadow-xl lg:shadow-none" 
+            class="hero-chicken-img w-80 sm:w-96 md:w-[620px] max-[1023px]:w-[480px] lg:w-110 h-80 sm:h-96 md:h-[620px] max-[1023px]:h-[480px] lg:h-110 object-cover rounded-2xl lg:rounded-none shadow-lg md:shadow-xl lg:shadow-none !max-h-[620px]:hidden" 
         />
         
         <!-- Hero Fries Image -->
