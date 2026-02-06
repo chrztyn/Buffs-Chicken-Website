@@ -3,18 +3,18 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 lg:items-start">
                 <!-- Left Column: Title and Contact Box -->
-                <div class="flex flex-col space-y-10">
+                <div class="flex flex-col space-y-10 w-full">
                     <!-- Main Title -->
-                    <h2 class="text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-12 font-['Unbounded']">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-12 font-['Unbounded'] break-words">
                         Frequently asked<br />questions
                     </h2>
 
                     <!-- Contact Box -->
-                    <div class="faq-contact-box bg-[#F8F4ED] rounded-xl p-6 lg:p-8 shadow-lg w-120 h-auto flex flex-col items-left text-left">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4 font-['Unbounded']">
+                    <div class="faq-contact-box bg-[#F8F4ED] rounded-xl p-6 lg:p-8 shadow-lg w-full h-auto flex flex-col items-left text-left box-border">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4 font-['Unbounded'] break-words">
                             Still have a questions?
                         </h3>
-                        <p class="text-sm text-gray-600 mb-6 leading-relaxed font-['Unbounded']">
+                        <p class="text-sm text-gray-600 mb-6 leading-relaxed font-['Unbounded'] break-words">
                             Can't find the answer to your question? Send us an email and we'll get back to you as soon as possible!
                         </p>
                         <button class="w-30 h-10 bg-[#2B5B9E] text-white px-6 py-3.5 rounded-sm font-['Unbounded'] font-semibold text-sm hover:bg-[#1A4189] transition-colors shadow-md">

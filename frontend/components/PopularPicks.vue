@@ -108,29 +108,39 @@
 <style scoped>
 .popular-picks-section {
   padding: 2rem 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 @media (min-width: 640px) {
   .popular-picks-section {
     padding: 3rem 1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 }
 
 @media (min-width: 768px) {
   .popular-picks-section {
     padding: 4rem 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
 @media (min-width: 1024px) {
   .popular-picks-section {
     padding: 5rem 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
 @media (min-width: 1280px) {
   .popular-picks-section {
     padding: 6rem 4rem;
+    padding-left: 4rem;
+    padding-right: 4rem;
   }
 }
 </style>

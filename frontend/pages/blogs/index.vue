@@ -62,7 +62,7 @@
 
     <!-- Blog Posts Section -->
     <div class="relative">
-        <Blog />
+        <Blog :current-page="currentPage" :items-per-page="5" @update-total="updateTotalBlogs" />
         
         <!-- Navigation Buttons -->
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 md:pb-24">
@@ -115,10 +115,15 @@
 import Navbar from '~/components/Navbar.vue'
 import Footer from '~/components/Footer.vue'
 import Blog from '~/components/Blog.vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const currentPage = ref(1)
-const totalPages = ref(5) // Update this based on your actual total pages
+const totalBlogs = ref(0)
+const itemsPerPage = 5
+
+const totalPages = computed(() => {
+  return Math.ceil(totalBlogs.value / itemsPerPage)
+})
 
 const handleNext = () => {
     if (currentPage.value < totalPages.value) {
@@ -132,6 +137,10 @@ const handlePrevious = () => {
         currentPage.value--
         console.log('Previous page:', currentPage.value)
     }
+}
+
+const updateTotalBlogs = (total) => {
+  totalBlogs.value = total
 }
 </script>
 
