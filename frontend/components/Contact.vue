@@ -1,10 +1,10 @@
 <template>
-    <section class="bg-[#FBF4E5] py-8 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+    <section class="bg-[#FBF4E5] contact-section-padding">
         <!-- Get In Touch Section -->
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-6 items-start lg:items-center">
+        <div class="max-w-[1400px] mx-auto px-8 sm:px-12 lg:px-16 xl:px-24">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 custom-grid-gap items-start">
                 <!-- Left Side - Contact Info -->
-                <div class="flex flex-col items-start text-left w-full order-1 lg:order-1 lg:col-span-3">
+                <div class="flex flex-col items-start text-left w-full order-1 lg:order-1">
                     <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1A4189] mb-3 sm:mb-4">Get In Touch</h2>
                     <p class="text-gray-600 mb-5 sm:mb-6 text-sm sm:text-base leading-relaxed max-w-lg">
                         Have a question or planning something? Drop us a message and we'll get back to you shortly.
@@ -81,7 +81,7 @@
                     </svg>
                 </a>
                 <a
-                    href="https://www.instagram.com/buffs.chicken"
+                    href="https://www.instagram.com/buffschickenph/"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="social-icon w-8 h-8 sm:w-9 sm:h-9 bg-[#1A4189] rounded-full flex items-center justify-center hover:bg-[#1A4189] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110"
@@ -92,7 +92,7 @@
                     </svg>
                 </a>
                 <a
-                    href="https://www.tiktok.com/@buffs.chicken"
+                    href="https://www.tiktok.com/@buffschickenph"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="social-icon w-8 h-8 sm:w-9 sm:h-9 bg-[#1A4189] rounded-full flex items-center justify-center hover:bg-[#1A4189] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110"
@@ -107,7 +107,7 @@
             </div>
 
             <!-- Right Side - Contact Form -->
-            <div class="contact-form-box w-full order-2 lg:order-2 lg:col-span-2">
+            <div class="contact-form-box w-full order-2 lg:order-2 lg:max-w-sm xl:max-w-md h-full">
                 <h3 class="contact-form-title">Send a Message</h3>
 
                 <form @submit.prevent="submitForm" class="contact-form">
@@ -138,7 +138,7 @@
                         <textarea
                             v-model="form.message"
                             placeholder="Message"
-                            rows="4"
+                            rows="13"
                             class="form-textarea"
                             required
                         ></textarea>
@@ -239,6 +239,49 @@
     </script>
 
     <style scoped>
+    /* ===== SECTION PADDING ===== */
+    .contact-section-padding {
+        padding-top: 1rem;
+        padding-bottom: 4rem;
+    }
+
+    @media (min-width: 640px) {
+        .contact-section-padding {
+            padding-top: 1.5rem;
+            padding-bottom: 5rem;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .contact-section-padding {
+            padding-top: 2rem;
+            padding-bottom: 6rem;
+        }
+    }
+
+    /* ===== CUSTOM GRID GAP ===== */
+    .custom-grid-gap {
+        gap: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+        .custom-grid-gap {
+            gap: 12rem;
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .custom-grid-gap {
+            gap: 16rem;
+        }
+    }
+
+    @media (min-width: 1536px) {
+        .custom-grid-gap {
+            gap: 20rem;
+        }
+    }
+
     /* ===== RESPONSIVE LAYOUT ===== */
     @media (max-width: 768px) {
         section {
@@ -348,12 +391,30 @@
     /* ===== CONTACT FORM STYLING ===== */
     .contact-form-box {
         background: linear-gradient(135deg, #ffffff 0%, #f9f5ed 100%);
-        padding: 1.5rem;
+        padding: 1.75rem;
         border-radius: 1.25rem;
         box-shadow: 0 10px 40px rgba(26, 65, 137, 0.08);
         border: 1px solid rgba(26, 65, 137, 0.05);
         transition: all 0.3s ease;
         max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+    }
+
+    @media (min-width: 1024px) {
+        .contact-form-box {
+            padding: 2rem 2.25rem;
+            max-width: 420px;
+            align-self: stretch;
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .contact-form-box {
+            max-width: 450px;
+            padding: 2.5rem 2.5rem;
+        }
     }
 
     .contact-form-box:hover {
@@ -365,19 +426,25 @@
         font-size: 1.25rem;
         font-weight: 700;
         color: #1A4189;
-        margin-bottom: 1rem;
+        margin-bottom: 1.25rem;
         letter-spacing: 0.5px;
     }
 
     /* ===== FORM FIELDS STYLING ===== */
+    .contact-form {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
     .form-field {
-        margin-bottom: 0.875rem;
+        margin-bottom: 1rem;
     }
 
     .form-input,
     .form-textarea {
         width: 100%;
-        padding: 0.625rem 0.875rem;
+        padding: 0.75rem 1rem;
         border: 2px solid #e5ddd0;
         border-radius: 0.625rem;
         font-size: 0.875rem;
@@ -409,9 +476,10 @@
 
     .form-textarea {
         resize: vertical;
-        min-height: 100px;
+        min-height: 120px;
         font-size: 0.875rem;
         line-height: 1.5;
+        flex: 1;
     }
 
     /* ===== FORM DISCLAIMER ===== */
@@ -419,8 +487,9 @@
         font-size: 0.75rem;
         color: #666;
         line-height: 1.5;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
+        margin-bottom: 1.25rem;
+        margin-top: auto;
+        padding: 0.875rem;
         background-color: rgba(26, 65, 137, 0.03);
         border-left: 3px solid #1A4189;
         border-radius: 0.5rem;
@@ -436,7 +505,7 @@
     .form-submit-btn {
         background: linear-gradient(135deg, #1A4189 0%, #2d5bb8 100%);
         color: white;
-        padding: 0.625rem 2rem;
+        padding: 0.75rem 2.25rem;
         border: none;
         border-radius: 0.625rem;
         font-size: 0.875rem;
@@ -511,7 +580,7 @@
     /* ===== RESPONSIVE ADJUSTMENTS ===== */
     @media (max-width: 1024px) {
         .contact-form-box {
-            padding: 1.25rem;
+            padding: 1.5rem;
         }
 
         .contact-form-title {
@@ -521,7 +590,7 @@
 
     @media (max-width: 768px) {
         .contact-form-box {
-            padding: 1.125rem;
+            padding: 1.25rem;
         }
 
         .contact-form-title {

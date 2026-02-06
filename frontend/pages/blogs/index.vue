@@ -18,7 +18,7 @@
 
             <!-- Content -->
             <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-['Caprasimo'] text-white mb-3 sm:mb-4 drop-shadow-lg leading-tight">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-5xl font-['Unbounded'] text-white mb-3 sm:mb-4 drop-shadow-lg leading-tight">
                 Fresh Off the Fryer
                 </h1>
                 <p class="text-white text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl drop-shadow-md px-2 sm:px-0">

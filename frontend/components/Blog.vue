@@ -1,5 +1,5 @@
 <template>
-    <section class="blog-section bg-[#F5F1E8] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
+    <section class="blog-section bg-[#FBF4E5] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
         <div class="max-w-6xl mx-auto px-4 sm:px-8 lg:px-10">
             <!-- Loading State -->
             <div v-if="loading" class="text-center py-12">

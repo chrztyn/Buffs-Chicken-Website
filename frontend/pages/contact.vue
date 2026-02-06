@@ -18,7 +18,7 @@
             <!-- Content -->
             <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 md:px-6 w-full">
                 <div class="max-w-4xl mx-auto">
-                    <h1 class="text-3xl md:text-5xl font-['Caprasimo'] text-[#1A4189] mb-4 drop-shadow-lg">
+                    <h1 class="text-3xl md:text-5xl font-['Unbounded'] text-[#1A4189] mb-4 drop-shadow-lg">
                     Contact Us
                     </h1>
                     <p class="text-gray-900 text-sm md:text-lg max-w-2xl mx-auto drop-shadow-md">

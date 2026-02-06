@@ -15,11 +15,6 @@
           <!-- Text Content -->
           <div class="text-content-container flex-1 max-w-xl lg:max-w-5xl space-y-2 sm:space-y-3 lg:space-y-6 relative order-2 lg:order-1 lg:mt-40 -mt-20 sm:-mt-24 lg:-mt-0 z-20 sm:z-30 lg:z-0 mx-auto text-center">
 
-            <!-- Hero Buffs Chicken Image -->
-            <div class="hero-buffs-chicken absolute -top-32 lg:-top-93 left-[-12rem] z-10 hidden lg:block lg:opacity-100">
-              <NuxtImg src="/hero-buffs-chicken.png" alt="Buffs Chicken" class="w-50 h-50 lg:w-115 lg:h-115 object-contain" />
-            </div>
-
             <!-- Main Heading -->
             <h1 class="font-['Caprasimo'] !text-7xl sm:text-10xl md:text-6xl lg:text-7xl text-[#1A4189] leading-none z-20 sm:z-30 lg:z-0 relative lg:text-left">
               Buffs<br />Chicken
