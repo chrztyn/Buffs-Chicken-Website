@@ -10,15 +10,14 @@ export default defineNuxtConfig({
   devtools: {
     enabled: process.env.NODE_ENV === 'development',
   },
-    routeRules: {
-    // Prerender these routes
+  routeRules: {
     '/': { prerender: true },
     '/about': { prerender: true },
     '/contact': { prerender: true },
     '/menu': { prerender: true },
     '/blogs': { prerender: true },
     '/blogs/**': { prerender: true },
-    '/**': { swr: 3600 }  // Cache other routes for 1 hour
+    '/**': { swr: 3600 }
   },
   build: {
     transpile: ['@nuxt/image'],
@@ -28,19 +27,16 @@ export default defineNuxtConfig({
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // Admin should be separate
             if (id.includes('pages/admin') || 
                 id.includes('layouts/admin.vue') || 
                 id.includes('middleware/admin-auth') ||
                 id.includes('composables/useAdmin')) {
               return 'admin'
             }
-            // Vue vendor chunks
             if (id.includes('node_modules/vue') || 
                 id.includes('node_modules/vue-router')) {
               return 'vue-vendor'
             }
-            // API vendor chunks
             if (id.includes('node_modules/axios') || 
                 id.includes('node_modules/socket.io-client')) {
               return 'api-vendor'
@@ -55,12 +51,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     prerender: {
-      crawlLinks: true,
-      routes: ['/sitemap.xml', '/robots.txt']
-    },
-    host: '0.0.0.0',  // Listen on all interfaces, not just localhost
-    port: 3000
-  },
+      crawlLinks: false,
+      routes: ['/', '/about', '/contact', '/menu', '/blogs', '/cart']
+    }
+  } as any,
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://buffschicken.com/api',
@@ -82,11 +76,7 @@ export default defineNuxtConfig({
       strict: false
     }
   },
-  // Progressive Web App (PWA) configuration
   pwa: {
-    icon: {
-      source: '/icon.png',
-    },
     manifest: {
       name: 'Buffs Restaurant',
       short_name: 'Buffs',
@@ -101,74 +91,55 @@ export default defineNuxtConfig({
           src: '/icon.png',
           sizes: '192x192',
           type: 'image/png',
-          purpose: 'any maskable',
         },
         {
           src: '/icon.png',
           sizes: '512x512',
           type: 'image/png',
-          purpose: 'any maskable',
         },
       ],
     },
     workbox: {
-      enabled: true,
       runtimeCaching: [
         {
           urlPattern: '^https://fonts\\.googleapis\\.com',
           handler: 'CacheFirst',
-          method: 'GET',
           options: {
             cacheName: 'google-fonts-stylesheets',
             expiration: {
               maxEntries: 10,
-              maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              maxAgeSeconds: 60 * 60 * 24 * 365,
             },
           },
         },
         {
           urlPattern: '^https://fonts\\.gstatic\\.com',
           handler: 'CacheFirst',
-          method: 'GET',
           options: {
             cacheName: 'google-fonts-webfonts',
             expiration: {
               maxEntries: 10,
-              maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              maxAgeSeconds: 60 * 60 * 24 * 365,
             },
           },
         },
         {
           urlPattern: '/api/.*',
           handler: 'NetworkFirst',
-          method: 'GET',
           options: {
             cacheName: 'api-responses',
             expiration: {
               maxEntries: 50,
-              maxAgeSeconds: 60 * 5, // 5 minutes
-            },
-          },
-        },
-        {
-          urlPattern: '.*\\.png|jpg|jpeg|svg|gif|webp$',
-          handler: 'CacheFirst',
-          method: 'GET',
-          options: {
-            cacheName: 'image-cache',
-            expiration: {
-              maxEntries: 100,
-              maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              maxAgeSeconds: 60 * 5,
             },
           },
         },
       ],
     },
-  },
+  } as any,
   postcss: {
     plugins: {
       '@tailwindcss/postcss': {},
-      // Add cssnano for minification in production
       cssnano:
         process.env.NODE_ENV === 'production'
           ? { preset: ['default', { discardComments: { removeAll: true } }] }
@@ -193,19 +164,18 @@ export default defineNuxtConfig({
           href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap',
         },
       ],
-            // Google Analytics Script (add your measurement ID)
-            script: [
-              {
-                src: `https://www.googletagmanager.com/gtag/js?id=${process.env.NUXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX'}`,
-                async: true,
-              },
-              {
-                innerHTML: `window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${process.env.NUXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX'}');`,
-              },
-            ],
+      script: [
+        {
+          src: `https://www.googletagmanager.com/gtag/js?id=${process.env.NUXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX'}`,
+          async: true,
+        },
+        {
+          innerHTML: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${process.env.NUXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX'}');`,
+        },
+      ],
     }
   },
 })
