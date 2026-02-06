@@ -14,10 +14,10 @@ export default defineNuxtConfig({
     '/': { prerender: true },
     '/about': { prerender: true },
     '/contact': { prerender: true },
-    '/menu': { prerender: true },
-    '/blogs': { prerender: true },
-    '/blogs/**': { prerender: true },
-    '/**': { swr: 3600 }
+    '/menu': { cache: { maxAge: 60 * 10 } }, 
+    '/blogs': { cache: { maxAge: 60 * 10 } },
+    '/blogs/**': { cache: { maxAge: 60 * 10 } },
+    '/**': { cache: { maxAge: 60 * 10 } }
   },
   build: {
     transpile: ['@nuxt/image'],
