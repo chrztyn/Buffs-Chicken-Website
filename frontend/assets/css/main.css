@@ -308,7 +308,7 @@ body,
   }
 
   .blog-section hr.border-t {
-    margin-top: 4rem;
+    margin-top: 0rem;
     margin-bottom: 0;
     border-top: 1px solid #D1D5DB;
     border-bottom: none;
@@ -631,7 +631,7 @@ body,
 /* ============================================ */
 /* TABLET (768px to 1023px) */
 /* ============================================ */
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1399px) {
   /* ============ HERO SECTION ============ */
   section:has(h1) {
     padding-top: 280px;
@@ -876,7 +876,7 @@ body,
 
   /* ============ BLOG SECTION ============ */
   .blog-section {
-    padding: 4rem 3rem 2.5rem 3rem;
+    /* Use Tailwind classes instead */
   }
 
   .blog-post-item {
@@ -887,36 +887,31 @@ body,
   }
 
   .blog-content {
-    padding-right: 100px;
+    /* Use Tailwind classes instead */
   }
 
   .blog-title {
     font-weight: 700;
-    margin: 3rem 2rem;
-    margin-bottom: -60px;
+    margin: 4rem;
+    margin-bottom: -80px;
   }
 
   .blog-content p,
   .blog-content h3,
   .blog-content .text-sm {
-    padding: 6px;
+    /* Use Tailwind classes instead */
   }
 
   .blog-content p {
-    margin-top: 30px;
-    font-size: 11px;
+    /* Use Tailwind classes instead */
   }
 
   .blog-content a.inline-block {
-    font-size: 11px;
+    /* Use Tailwind classes instead */
   }
 
   .blog-section hr.border-t {
-    margin-top: 3rem;
-    margin-bottom: 0;
-    border-top: 1px solid #D1D5DB;
-    border-bottom: none;
-    margin-right: -60px;
+    /* Use Tailwind classes instead */
   }
 
   /* ============ FAQ SECTION ============ */

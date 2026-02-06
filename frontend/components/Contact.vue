@@ -1,7 +1,7 @@
 <template>
     <section class="bg-[#FBF4E5] py-8 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8">
         <!-- Get In Touch Section -->
-        <div class="max-w-7xl mx-auto">
+        <div class="max-w-7xl mx-auto md:pr-8 lg:pr-8">
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-6 items-start lg:items-center">
                 <!-- Left Side - Contact Info -->
                 <div class="flex flex-col items-start text-left w-full order-1 lg:order-1 lg:col-span-3">
@@ -107,7 +107,7 @@
             </div>
 
             <!-- Right Side - Contact Form -->
-            <div class="contact-form-box w-full order-2 lg:order-2 lg:col-span-2">
+            <div class="contact-form-box w-full order-2 lg:order-2 lg:col-span-2 md:mr-4 md:pr-4 lg:pr-6">
                 <h3 class="contact-form-title">Send a Message</h3>
 
                 <form @submit.prevent="submitForm" class="contact-form">
@@ -509,6 +509,16 @@
     }
 
     /* ===== RESPONSIVE ADJUSTMENTS ===== */
+    @media (min-width: 1350px) {
+        .grid {
+            gap: 2rem !important;
+        }
+
+        .contact-form-box {
+            margin-right: 1rem;
+        }
+    }
+
     @media (max-width: 1024px) {
         .contact-form-box {
             padding: 1.25rem;

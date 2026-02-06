@@ -1,6 +1,6 @@
 <template>
-    <section class="blog-section bg-[#F5F1E8] pb-16 lg:pb-20 pt-24 lg:pt-28 pl-4 sm:pl-6 lg:pl-8">
-        <div class="max-w-6xl mx-auto px-4 sm:px-8 lg:px-10">
+    <section class="blog-section bg-[#F5F1E8] pb-8 sm:pb-12 md:pb-16 lg:pb-20 pt-8 sm:pt-16 md:pt-20 lg:pt-28 px-4 sm:px-6 md:px-8 lg:px-10">
+        <div class="max-w-6xl mx-auto">
             <!-- Loading State -->
             <div v-if="loading" class="text-center py-12">
                 <p class="text-gray-600">Loading blog posts...</p>
@@ -23,9 +23,9 @@
                     :key="post._id || post.id"
                     class="blog-post-item"
                 >
-                    <div class="flex flex-col md:flex-row gap-6 md:gap-8 pb-24 md:pb-32">
+                    <div class="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 pb-12 sm:pb-16 md:pb-16 lg:pb-32">
                         <!-- Blog Image -->
-                        <div class="w-full md:w-[250px] h-[250px] bg-[#D1D5DB] rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
+                        <div class="w-full md:w-[300px] h-[200px] md:h-[280px] bg-[#D1D5DB] rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
                             <NuxtImg 
                                 v-if="post.image"
                                 :src="post.image"
@@ -62,7 +62,7 @@
                     <!-- Divider -->
                     <hr 
                         v-if="index < blogPosts.length - 1"
-                        class="border-t border-gray-300 mt-24 md:mt-28"
+                        class="border-t border-gray-300 !mt-1 sm:mt-16 md:mt-16 lg:mt-28"
                     />
                 </article>
             </div>
@@ -101,7 +101,7 @@
             </div>
             
             <!-- Divider after Blog Section -->
-            <hr class="border-t border-gray-300 mt-24 md:mt-28" />
+            <hr class="border-t border-gray-300 mt-12 sm:mt-16 md:mt-24 lg:mt-28" />
         </div>
     </section>
 </template>
