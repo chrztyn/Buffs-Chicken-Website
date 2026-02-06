@@ -49,6 +49,9 @@ export default defineNuxtConfig({
         },
       },
     },
+    server: {
+      allowedHosts: ['buffschicken.com', 'www.buffschicken.com', 'localhost', '127.0.0.1']
+    }
   },
   nitro: {
     prerender: {
@@ -57,6 +60,12 @@ export default defineNuxtConfig({
     },
     host: '0.0.0.0',  // Listen on all interfaces, not just localhost
     port: 3000
+  },
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://buffschicken.com/api',
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'https://buffschicken.com',
+    }
   },
   components: {
     dirs: [ {
@@ -198,31 +207,5 @@ export default defineNuxtConfig({
               },
             ],
     }
-  },
-  runtimeConfig: {
-    public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://buffschicken.com/api',
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'https://buffschicken.com',
-    }
-  },
-    image: {
-    dir: 'public/',
-    domains: ['localhost', 'your-production-domain.com'],
-    providers: {
-      ipx: {
-        modifiers: {
-          quality: 80,
-          format: 'webp',
-        },
-      },
-    },
-    screens: {
-      xs: 320,
-      sm: 640,
-      md: 768,
-      lg: 1024,
-      xl: 1280,
-      xxl: 1536,
-    },
   },
 })
