@@ -6,11 +6,11 @@
         <img 
         src="/hero-main.jpg" 
         alt="Buffs Chicken" 
-        class="hero-chicken-img w-80 sm:w-96 md:w-[620px] max-[1023px]:w-[480px] lg:w-110 h-80 sm:h-96 md:h-[620px] max-[1023px]:h-[480px] lg:h-110 object-cover rounded-2xl lg:rounded-none shadow-lg md:shadow-xl lg:shadow-none !max-h-[620px]:hidden" 
+        class="hero-chicken-img w-80 sm:w-96 md:w-[620px] max-[1023px]:w-[480px] lg:w-110 h-80 sm:h-96 md:h-100 max-[1023px]:h-[480px] lg:h-110 object-cover rounded-2xl lg:rounded-none shadow-lg md:shadow-xl lg:shadow-none !max-h-[620px]:hidden md:scale-110 md:origin-top lg:top-0 lg:scale-100 lg:origin-center" 
     />
         
         <!-- Hero Fries Image -->
-        <div class="hero-fries absolute top-[-8rem] sm:top-[3rem] md:top-[-6rem] max-[1023px]:top-[-4rem] lg:top-[-5rem] left-[-8rem] sm:left-[-3.5rem] md:left-[-14rem] max-[1023px]:left-[-10rem] lg:left-[-16rem] z-20 drop-shadow-lg md:drop-shadow-xl">
+        <div class="hero-fries absolute top-[-8rem] sm:top-[3rem] md:top-[-5rem] max-[1023px]:top-[-4rem] lg:top-[-5rem] left-[-8rem] sm:left-[-3.5rem] md:left-[-14rem] max-[1023px]:left-[-10rem] lg:left-[-16rem] z-20 drop-shadow-lg md:drop-shadow-xl">
             <img 
         src="/hero-fries.png" 
         alt="Buffs Fries" 
@@ -19,14 +19,14 @@
         </div>
         
         <!-- Add Order Button -->
-        <div class="add-order-button absolute top-[6rem] sm:top-[7rem] md:top-[16rem] max-[1023px]:top-[12rem] lg:top-[15rem] left-[-0.5rem] sm:left-[-1rem] md:left-[-2rem] max-[1023px]:left-[-1.5rem] lg:left-[-5rem] z-20 -rotate-3 md:rotate-[-4deg] lg:rotate-[-3deg]">
+        <div class="add-order-button absolute top-[6rem] sm:top-[10rem] md:top-[18rem] max-[1023px]:top-[12rem] lg:top-[15rem] left-[-0.5rem] sm:left-[-1rem] md:left-[-2rem] max-[1023px]:left-[-1.5rem] lg:left-[-5rem] z-20 -rotate-3 md:rotate-[-4deg] lg:rotate-[-3deg]">
             <NuxtLink to="/menu" class="inline-block bg-[#FE601C] text-[#1A4189] px-3 sm:px-4 md:px-4 max-[1023px]:px-4 lg:px-5 py-1.5 sm:py-2 md:py-2 max-[1023px]:py-2 lg:py-2.5 rounded-full shadow-md hover:shadow-lg font-['Unbounded'] font-semibold text-xs sm:text-sm md:text-sm max-[1023px]:text-sm lg:text-base transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap">
                 Add Order
             </NuxtLink>
         </div>
         
         <!-- Phrase Buttons -->
-        <div class="add-order-button absolute top-[10rem] sm:top-[12rem] md:top-[24rem] max-[1023px]:top-[18rem] lg:top-[29rem] left-[-0.25rem] sm:left-[-0.5rem] md:left-[-1rem] max-[1023px]:left-[-0.75rem] lg:left-[-3rem] z-20 flex gap-1.5 sm:gap-2 md:gap-2 max-[1023px]:gap-2 lg:gap-2.5 flex-wrap">
+        <div class="phrase-button absolute top-[10rem] sm:top-[2rem] md:top-[23rem] max-[1023px]:top-[18rem] lg:top-[29rem] left-[-0.25rem] sm:left-[-0.5rem] md:left-[-1rem] max-[1023px]:left-[-0.75rem] lg:left-[-3rem] z-20 flex gap-1.5 sm:gap-2 md:gap-2 max-[1023px]:gap-2 lg:gap-2.5 flex-wrap">
             <button class="bg-[#FEB90E] text-[#FE601C] px-2.5 sm:px-3 md:px-3 max-[1023px]:px-3 lg:px-4 py-1 sm:py-1.5 md:py-1.5 max-[1023px]:py-1.5 lg:py-2 rounded-full shadow-md hover:shadow-lg font-['Unbounded'] font-semibold text-[10px] sm:text-xs md:text-xs max-[1023px]:text-xs lg:text-sm transition-all duration-200 hover:scale-105 active:scale-95">
                 Brined
             </button>
@@ -39,7 +39,7 @@
         </div>
         
         <!-- Hero Pesto Image -->
-        <div class="hero-pesto absolute top-[3rem] sm:top-[3rem] md:top-[8rem] max-[1023px]:top-[6rem] lg:top-[14rem] right-[-10rem] sm:right-[-3.5rem] md:right-[-14rem] max-[1023px]:right-[-10rem] lg:right-[-10rem] z-20 drop-shadow-lg md:drop-shadow-xl">
+        <div class="hero-pesto absolute top-[3rem] sm:top-[3rem] md:top-[6rem] max-[1023px]:top-[6rem] lg:top-[14rem] right-[-10rem] sm:right-[-3.5rem] md:right-[-14rem] max-[1023px]:right-[-10rem] lg:right-[-10rem] z-20 drop-shadow-lg md:drop-shadow-xl">
             <img 
         src="/hero-pesto.png" 
         alt="Buffs Pesto" 
@@ -66,5 +66,25 @@
     </script>
 
     <style scoped>
-    /* Component-specific styles if needed */
+    @media (min-width: 640px) and (max-width: 767px) {
+  .hero-fries {
+    top: -10rem;
+    left: -10rem;
+  }
+
+  .phrase-button {
+    top: 20rem;
+    left: -2rem;
+  }
+
+  .add-order-button {
+    top: 8rem;
+    left: -2rem;
+  }
+
+  .hero-pesto{
+    top: 8rem;
+    right: -13rem;
+  }
+}
     </style>

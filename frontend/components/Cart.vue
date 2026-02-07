@@ -61,10 +61,10 @@
                     <!-- Item Image -->
                     <div class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-gray-100 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden">
                     <img 
-                        :src="item.image" 
-                        :alt="item.name"
-                        class="w-full h-full object-contain p-2"
-                    />
+            :src="getImageUrl(item.image)" 
+            :alt="item.name"
+            class="w-full h-full object-contain p-2"
+            />
                     </div>
 
                     <!-- Item Details - Flex Column for Mobile -->
@@ -276,6 +276,16 @@
         }
     },
     methods: {
+        getImageUrl(image) {
+            if (!image) return '';
+
+            // Normalize any stored URL (localhost, full https, or Nuxt IPX) to a clean /backend-images/... path
+            const match = image.match(/\/backend-images\/[^^?"']+/);
+            if (match && match[0]) {
+                return match[0];
+            }
+            return image;
+        },
         getOrderDescription(item) {
             const descriptions = [];
             
