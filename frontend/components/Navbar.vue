@@ -6,7 +6,7 @@
         <!-- Logo -->
         <NuxtLink to="/" class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-[#1A4189] flex items-center justify-center overflow-hidden border-2 border-white shadow-lg hover:scale-105 transition-transform">
-            <NuxtImg src="/logo.png" alt="Buff's Chicken Logo" class="w-full h-full object-contain p-1.5" />
+            <img src="/logo.png" alt="Buff's Chicken Logo" class="w-full h-full object-contain p-1.5" />
           </div>
           <span class="font-['Unbounded'] font-semibold text-xl text-[#1A4189] hidden sm:block">Buff's Chicken</span>
         </NuxtLink>

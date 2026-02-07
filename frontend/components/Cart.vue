@@ -60,7 +60,7 @@
                 >
                     <!-- Item Image -->
                     <div class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-gray-100 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden">
-                    <NuxtImg 
+                    <img 
                         :src="item.image" 
                         :alt="item.name"
                         class="w-full h-full object-contain p-2"
