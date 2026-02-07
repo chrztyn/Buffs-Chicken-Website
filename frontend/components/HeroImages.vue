@@ -4,18 +4,18 @@
         
         <!-- Main Chicken Image -->
         <img 
-        src="/hero-main.jpg" 
-        alt="Buffs Chicken" 
-        class="hero-chicken-img w-80 sm:w-96 md:w-[620px] max-[1023px]:w-[480px] lg:w-110 h-80 sm:h-96 md:h-100 max-[1023px]:h-[480px] lg:h-110 object-cover rounded-2xl lg:rounded-none shadow-lg md:shadow-xl lg:shadow-none !max-h-[620px]:hidden md:scale-110 md:origin-top lg:top-0 lg:scale-100 lg:origin-center" 
+    src="/hero-main.jpg" 
+    alt="Buffs Chicken" 
+    class="hero-chicken-img w-64 sm:w-80 md:w-[620px] max-[1023px]:w-[480px] lg:w-110 h-64 sm:h-80 md:h-100 max-[1023px]:h-[420px] lg:h-110 object-cover rounded-2xl lg:rounded-none shadow-lg md:shadow-xl lg:shadow-none !max-h-[620px]:hidden md:scale-110 md:origin-top lg:top-0 lg:scale-100 lg:origin-center" 
     />
         
         <!-- Hero Fries Image -->
         <div class="hero-fries absolute top-[-8rem] sm:top-[3rem] md:top-[-5rem] max-[1023px]:top-[-4rem] lg:top-[-5rem] left-[-8rem] sm:left-[-3.5rem] md:left-[-14rem] max-[1023px]:left-[-10rem] lg:left-[-16rem] z-20 drop-shadow-lg md:drop-shadow-xl">
             <img 
-        src="/hero-fries.png" 
-        alt="Buffs Fries" 
-        class="w-80 sm:w-96 md:w-[500px] max-[1023px]:w-[400px] lg:w-110 h-80 sm:h-96 md:h-[500px] max-[1023px]:h-[400px] lg:h-110 object-contain -rotate-3"
-        />
+    src="/hero-fries.png" 
+    alt="Buffs Fries" 
+    class="w-56 sm:w-80 md:w-[500px] max-[1023px]:w-[380px] lg:w-110 h-56 sm:h-80 md:h-[500px] max-[1023px]:h-[360px] lg:h-110 object-contain -rotate-3"
+    />
         </div>
         
         <!-- Add Order Button -->
@@ -39,12 +39,12 @@
         </div>
         
         <!-- Hero Pesto Image -->
-        <div class="hero-pesto absolute top-[3rem] sm:top-[3rem] md:top-[6rem] max-[1023px]:top-[6rem] lg:top-[14rem] right-[-10rem] sm:right-[-3.5rem] md:right-[-14rem] max-[1023px]:right-[-10rem] lg:right-[-10rem] z-20 drop-shadow-lg md:drop-shadow-xl">
+        <div class="hero-pesto absolute top-[-30rem] sm:top-[10rem] md:top-[6rem] max-[1023px]:top-[13rem] lg:top-[14rem] right-[-10rem] sm:right-[-3.5rem] md:right-[-14rem] max-[1023px]:right-[-10rem] lg:right-[-10rem] z-20 drop-shadow-lg md:drop-shadow-xl">
             <img 
-        src="/hero-pesto.png" 
-        alt="Buffs Pesto" 
-        class="w-80 sm:w-96 md:w-[500px] max-[1023px]:w-[400px] lg:w-110 h-80 sm:h-96 md:h-[500px] max-[1023px]:h-[400px] lg:h-110 object-contain -rotate-3"
-        />
+            src="/hero-pesto.png" 
+            alt="Buffs Pesto" 
+            class="w-56 sm:w-80 md:w-[500px] max-[1023px]:w-[380px] lg:w-110 h-56 sm:h-80 md:h-[500px] max-[1023px]:h-[360px] lg:h-110 object-contain -rotate-3"
+            />
         </div>
         
         <!-- Hero Star Image -->
