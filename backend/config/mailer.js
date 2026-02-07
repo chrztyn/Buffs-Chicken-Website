@@ -1,13 +1,32 @@
 const nodemailer = require('nodemailer');
 
 // Create transporter
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
+// Prefer explicit host/port if provided (more reliable on some hosts),
+// otherwise fall back to nodemailer "service" shortcut.
+const useHostBasedConfig = !!process.env.EMAIL_HOST;
+
+const baseAuthConfig = {
+  user: process.env.EMAIL_USER,
+  pass: process.env.EMAIL_PASSWORD
+};
+
+const transporterOptions = useHostBasedConfig
+  ? {
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT) || 587,
+      secure: process.env.EMAIL_SECURE === 'true', // false for STARTTLS on 587
+      auth: baseAuthConfig
+    }
+  : {
+      service: process.env.EMAIL_SERVICE,
+      auth: baseAuthConfig
+    };
+
+// Add conservative timeouts so requests fail fast instead of hanging
+transporterOptions.connectionTimeout = Number(process.env.EMAIL_CONNECTION_TIMEOUT_MS) || 10000; // 10s
+transporterOptions.greetingTimeout = Number(process.env.EMAIL_GREETING_TIMEOUT_MS) || 10000; // 10s
+
+const transporter = nodemailer.createTransport(transporterOptions);
 
 const sendOTP = async (email, otp) => {
   try {
