@@ -92,13 +92,9 @@ router.post('/upload', authenticateAdmin, upload.single('image'), async (req, re
     const localUrl = await saveImageLocally(req.file);
     console.log('Image saved locally:', localUrl);
 
-    const protocol = req.protocol || 'http';
-    const host = req.get('host') || 'localhost:5001';
-    const fullUrl = `${protocol}://${host}${localUrl}`;
-
     res.json({ 
       message: 'Image uploaded successfully',
-      url: fullUrl
+      url: localUrl
     });
   } catch (error) {
     console.error('Image upload error:', error);
@@ -234,13 +230,9 @@ router.post('/blogs/upload', authenticateAdmin, upload.single('image'), async (r
     const localUrl = await saveImageLocally(req.file);
     console.log('Blog image saved locally:', localUrl);
 
-    const protocol = req.protocol || 'http';
-    const host = req.get('host') || 'localhost:5001';
-    const fullUrl = `${protocol}://${host}${localUrl}`;
-
     res.json({ 
       message: 'Blog image uploaded successfully',
-      url: fullUrl
+      url: localUrl
     });
   } catch (error) {
     console.error('Blog image upload error:', error);
