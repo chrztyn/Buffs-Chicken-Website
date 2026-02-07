@@ -26,7 +26,7 @@
                     <div class="flex flex-col md:flex-row gap-6 md:gap-8">
                         <!-- Blog Image -->
                         <div class="w-full md:w-[300px] h-[200px] md:h-[280px] bg-[#D1D5DB] rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
-                            <NuxtImg 
+                            <img 
                                 v-if="post.image"
                                 :src="post.image"
                                 :alt="post.title"

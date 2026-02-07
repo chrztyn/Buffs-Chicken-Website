@@ -19,11 +19,11 @@
         
         <!-- Image -->
         <div class="food-card-img-wrap">
-        <NuxtImg 
-            :src="image" 
-            :alt="name" 
-            class="w-full h-64 object-contain"
-        />
+        <img 
+    	    :src="image" 
+    	    :alt="name" 
+    	    class="w-full h-64 object-contain"
+    	/>
         </div>
         <!-- Pills below image: name left, price right, one line -->
         <div class="food-card-footer flex flex-nowrap gap-2 items-center justify-between">
