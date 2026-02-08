@@ -29,17 +29,17 @@
         v-if="blog.image"
         :src="blog.image"
         :alt="blog.title"
-        class="w-full h-full object-cover"
+        class="w-full h-full object-cover z-0"
       />
       <div v-else class="w-full h-full bg-gradient-to-r from-[#1A4189] to-[#FE601C]"></div>
       
       <!-- Gradient Overlay -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 pointer-events-none"></div>
 
       <!-- Back Button -->
       <button
         @click="goBack"
-        class="absolute top-6 left-6 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all duration-300 group"
+        class="absolute top-6 left-6 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all duration-300 group z-30"
       >
         <svg
           class="w-5 h-5 text-gray-800 group-hover:text-[#FE601C] transition-colors"
@@ -57,7 +57,7 @@
       </button>
 
       <!-- Title Overlay -->
-      <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-12 lg:p-16">
+      <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-12 lg:p-16 z-20">
         <div class="max-w-5xl mx-auto">
           <div class="flex items-center gap-3 mb-4">
             <span class="text-white/80 text-xs sm:text-sm font-['Unbounded']">
