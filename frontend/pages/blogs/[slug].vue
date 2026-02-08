@@ -23,15 +23,15 @@
     </div>
 
     <!-- Hero Section -->
-    <div v-else-if="blog" class="relative w-full h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
+    <div v-else-if="blog" class="relative w-full min-h-[40vh] sm:min-h-[50vh] md:min-h-[60vh] lg:min-h-[70vh] overflow-hidden">
       <!-- Hero Image -->
       <img
         v-if="blog.image"
         :src="blog.image"
         :alt="blog.title"
-        class="w-full h-full object-cover z-0"
+        class="absolute inset-0 w-full h-full object-cover z-0"
       />
-      <div v-else class="w-full h-full bg-gradient-to-r from-[#1A4189] to-[#FE601C]"></div>
+      <div v-else class="absolute inset-0 w-full h-full bg-gradient-to-r from-[#1A4189] to-[#FE601C]"></div>
       
       <!-- Gradient Overlay -->
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 pointer-events-none"></div>
@@ -57,7 +57,7 @@
       </button>
 
       <!-- Title Overlay -->
-      <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8 md:p-12 lg:p-16 z-20">
+      <div class="absolute bottom-0 left-0 right-0 pt-24 sm:pt-28 md:pt-32 lg:pt-36 pb-6 sm:pb-8 md:pb-12 lg:pb-16 px-6 sm:px-8 md:px-12 lg:px-16 z-20">
         <div class="max-w-5xl mx-auto">
           <div class="flex items-center gap-3 mb-4">
             <span class="text-white/80 text-xs sm:text-sm font-['Unbounded']">
