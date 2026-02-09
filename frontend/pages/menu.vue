@@ -186,6 +186,20 @@ import { useApi } from '~/composables/useApi'
 
 export default {
   name: 'MenuPage',
+  head() {
+    return {
+      title: 'Menu - Buffs Chicken | Order Wings, Combos & Pastas Online',
+      meta: [
+        {
+          name: 'description',
+          content: 'Browse our full menu of crispy wings, loaded combos, and cheesy pastas. Order online from Buffs Chicken at The Hood, Angeles City for fresh, flavorful comfort food.'
+        },
+        { name: 'keywords', content: 'menu, chicken wings, combos, pasta, food menu, order online, Angeles City' },
+        { property: 'og:title', content: 'Menu - Buffs Chicken' },
+        { property: 'og:type', content: 'website' }
+      ]
+    }
+  },
   components: {
     Navbar,
     Footer,

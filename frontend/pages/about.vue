@@ -16,6 +16,20 @@ import Footer from '~/components/Footer.vue'
 
 export default {
   name: 'AboutPage',
+  head() {
+    return {
+      title: 'About Us - Buffs Chicken | Your Go-To Comfort Food in Angeles City',
+      meta: [
+        {
+          name: 'description',
+          content: 'Learn about Buffs Chicken at The Hood, Angeles City. We serve fresh, crispy wings and comfort food with passion. Discover our story and what makes us special.'
+        },
+        { name: 'keywords', content: 'about us, Buffs Chicken, Angeles City, The Hood, restaurant story' },
+        { property: 'og:title', content: 'About Us - Buffs Chicken' },
+        { property: 'og:type', content: 'website' }
+      ]
+    }
+  },
   components: {
     Navbar,
     About,

@@ -42,6 +42,20 @@ import Contact from '~/components/Contact.vue'
 
 export default {
   name: 'ContactPage',
+  head() {
+    return {
+      title: 'Contact Us - Buffs Chicken | Get in Touch',
+      meta: [
+        {
+          name: 'description',
+          content: 'Contact Buffs Chicken at The Hood, Angeles City. Send us a message for inquiries, feedback, or orders. We love hearing from you!'
+        },
+        { name: 'keywords', content: 'contact, Buffs Chicken, Angeles City, customer support, inquiries' },
+        { property: 'og:title', content: 'Contact Us - Buffs Chicken' },
+        { property: 'og:type', content: 'website' }
+      ]
+    }
+  },
   components: {
     Navbar,
     Footer,

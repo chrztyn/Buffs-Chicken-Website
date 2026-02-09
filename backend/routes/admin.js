@@ -252,7 +252,7 @@ router.post('/blogs/upload', authenticateAdmin, upload.single('image'), async (r
 router.post('/blogs', authenticateAdmin, async (req, res) => {
   try {
     const { title, excerpt, content, metaDescription, image, isPublished } = req.body;
-    
+
     console.log('Blog creation request received:', {
       title,
       excerpt,
@@ -273,17 +273,19 @@ router.post('/blogs', authenticateAdmin, async (req, res) => {
       metaDescription,
       slug,
       author: req.admin.id,
-      isPublished: isPublished || false
+      isPublished: isPublished || false,
+      publishedAt: isPublished ? new Date() : null
     });
 
     await blog.save();
-    
+
     console.log('Blog created successfully:', {
       id: blog._id,
       title: blog.title,
-      image: blog.image ? 'YES' : 'NO'
+      image: blog.image ? 'YES' : 'NO',
+      publishedAt: blog.publishedAt
     })
-    
+
     res.status(201).json({ message: 'Blog created', blog });
   } catch (error) {
     console.error('Blog creation error:', error)
@@ -302,7 +304,14 @@ router.put('/blogs/:id', authenticateAdmin, async (req, res) => {
     }
 
     if (title) updateData.slug = title.toLowerCase().replace(/\s+/g, '-');
-    if (isPublished === true) updateData.publishedAt = new Date();
+
+    // Only set publishedAt if blog is being published and doesn't have a publishedAt date yet
+    const existingBlog = await Blog.findById(req.params.id);
+    if (isPublished === true && !existingBlog.publishedAt) {
+      updateData.publishedAt = new Date();
+    } else if (isPublished === false) {
+      updateData.publishedAt = null; // Clear publishedAt if unpublishing
+    }
 
     const blog = await Blog.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json({ message: 'Blog updated', blog });
