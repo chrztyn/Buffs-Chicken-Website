@@ -76,31 +76,7 @@ export default defineNuxtConfig({
   // Image optimization configuration
   image: {
     quality: 80,
-    format: ['webp', 'jpg'],
-    screens: {
-      xs: 320,
-      sm: 640,
-      md: 768,
-      lg: 1024,
-      xl: 1280,
-      xxl: 1536,
-    },
-    presets: {
-      avatar: {
-        modifiers: {
-          format: 'webp',
-          width: 50,
-          height: 50,
-        },
-      },
-      thumbnail: {
-        modifiers: {
-          format: 'webp',
-          width: 300,
-          height: 300,
-        },
-      },
-    },
+    format: ['webp'],
   },
 
   // Enable experimental features for better performance
