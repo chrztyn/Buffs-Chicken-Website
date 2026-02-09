@@ -25,29 +25,26 @@ export default defineNuxtConfig({
   vite: {
     build: {
       cssCodeSplit: true,
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: process.env.NODE_ENV === 'production',
-          drop_debugger: process.env.NODE_ENV === 'production',
-        },
-      },
+      minify: 'esbuild',
       rollupOptions: {
         output: {
           manualChunks: (id) => {
+            // Separate admin code
             if (id.includes('pages/admin') ||
                 id.includes('layouts/admin.vue') ||
                 id.includes('middleware/admin-auth') ||
                 id.includes('composables/useAdmin')) {
               return 'admin'
             }
-            if (id.includes('node_modules/vue') ||
-                id.includes('node_modules/vue-router')) {
-              return 'vue-vendor'
-            }
-            if (id.includes('node_modules/axios') ||
-                id.includes('node_modules/socket.io-client')) {
-              return 'api-vendor'
+            // Vendor chunking for better caching
+            if (id.includes('node_modules')) {
+              if (id.includes('vue') || id.includes('vue-router')) {
+                return 'vue-vendor'
+              }
+              if (id.includes('axios') || id.includes('socket.io-client')) {
+                return 'api-vendor'
+              }
+              return 'vendor'
             }
           },
         },
@@ -135,8 +132,8 @@ export default defineNuxtConfig({
 
   // Enable experimental features for better performance
   experimental: {
-    payloadExtraction: true,
-    renderJsonPayloads: true,
+    payloadExtraction: false,
+    renderJsonPayloads: false,
     typedPages: false,
   },
 
