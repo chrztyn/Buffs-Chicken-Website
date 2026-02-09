@@ -57,7 +57,8 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: false,
-      routes: ['/', '/about', '/contact', '/menu', '/blogs', '/cart']
+      routes: ['/', '/about', '/contact', '/menu', '/blogs', '/cart'],
+      failOnError: false,
     },
     compressPublicAssets: true,
     routeRules: {
