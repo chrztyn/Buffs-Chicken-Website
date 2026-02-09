@@ -5,7 +5,7 @@
       <Navbar />
 
     <!-- Hero Section -->
-    <section class="w-full min-h-[calc(100vh-7rem)] px-4 sm:px-6 lg:px-8 py-12 lg:py-40 overflow-x-hidden flex flex-col justify-center !p-4 sm:!p-6 max-[1023px]:!p-4 lg:!p-0 lg:!pt-[300px] lg:!pl-[100px]">
+    <section class="w-full h-[calc(100vh-7rem)] px-4 sm:px-6 md:px-8 lg:px-12 py-8 sm:py-12 md:py-16 lg:py-40 overflow-x-hidden overflow-y-hidden flex flex-col justify-center lg:!pt-[300px] lg:!pl-[100px]">
       <div class="max-w-7xl mx-auto w-full">
         <div class="flex flex-col lg:flex-row items-start lg:items-center gap-0.5 sm:gap-2 max-[1023px]:gap-2 lg:gap-4">
 
@@ -38,7 +38,7 @@
     <PopularPicks />
 
     <!-- Blog Section -->
-    <h2 class="blog-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-8 sm:mb-10 lg:mb-12 font-['Unbounded'] px-20 sm:px-6 md:px-10 lg:pl-20">
+    <h2 class="blog-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#2B5B9E] mb-8 sm:mb-10 lg:mb-12 font-['Unbounded'] px-6 sm:px-8 md:px-10 lg:pl-20">
       The latest from Buffs
     </h2>
     <Blog />
@@ -53,7 +53,7 @@
 </NuxtLayout>    
 </template>
 
-<script>
+<script setup>
 // Eager load (needed above fold)
 import Navbar from '~/components/Navbar.vue'
 import HeroImages from '~/components/HeroImages.vue'
@@ -64,16 +64,26 @@ const Blog = defineAsyncComponent(() => import('~/components/Blog.vue'))
 const FAQ = defineAsyncComponent(() => import('~/components/FAQ.vue'))
 const Footer = defineAsyncComponent(() => import('~/components/Footer.vue'))
 
-export default {
-  components: {
-    Navbar,
-    HeroImages,
-    PopularPicks,
-    Blog,
-    FAQ,
-    Footer
-  }
-};
+// SEO Meta Tags
+useHead({
+  title: 'Buffs Chicken - Crispy Wings & Comfort Food in Angeles City',
+  meta: [
+    {
+      name: 'description',
+      content: 'Buffs Chicken at The Hood, Angeles City serves crispy and juicy signature OG Buffs wings, cheesy pastas, and loaded combos. Fresh, flavorful comfort food delivered to your door.'
+    },
+    {
+      name: 'keywords',
+      content: 'Buffs Chicken, chicken wings, Angeles City, The Hood, comfort food, crispy chicken, OG Buffs, food delivery'
+    },
+    { property: 'og:title', content: 'Buffs Chicken - Crispy Wings & Comfort Food in Angeles City' },
+    { property: 'og:description', content: 'Crispy and juicy signature OG Buffs wings, cheesy pastas, and loaded combos at The Hood, Angeles City' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: 'https://buffschicken.com' },
+    { name: 'twitter:card', content: 'summary_large_image' }
+  ]
+})
+
 </script>
 
 <style scoped>

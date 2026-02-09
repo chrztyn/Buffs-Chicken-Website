@@ -27,42 +27,41 @@
             </div>
         </div>
 
-        <!-- Search and Topics Section -->
+        <!-- Search Section -->
         <div class="blogs-search max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-14 md:-mt-16 relative z-20 mb-12 sm:mb-14 md:mb-16">
             <div class="flex flex-col gap-4 sm:gap-6 md:gap-8">
                 <!-- Search Bar -->
                 <div class="h-12 sm:h-13 md:h-14 bg-white rounded-full shadow-lg sm:shadow-xl px-0 sm:px-0 md:px-0 flex items-center gap-1 sm:gap-2 w-full">
-                    <button class="h-full bg-[#1A4189] hover:bg-blue-700 active:scale-95 text-white font-['Unbounded'] font-semibold px-4 sm:px-5 md:px-7 rounded-full transition-all duration-200 hover:shadow-md text-xs sm:text-sm md:text-base flex items-center justify-center flex-shrink-0">
+                    <button
+                        @click="handleSearch"
+                        class="h-full bg-[#1A4189] hover:bg-blue-700 active:scale-95 text-white font-['Unbounded'] font-semibold px-4 sm:px-5 md:px-7 rounded-full transition-all duration-200 hover:shadow-md text-xs sm:text-sm md:text-base flex items-center justify-center flex-shrink-0"
+                    >
                         Search
                     </button>
-                    <input 
-                        type="text" 
+                    <input
+                        v-model="searchQuery"
+                        @keyup.enter="handleSearch"
+                        type="text"
                         placeholder="Search blog posts..."
                         class="flex-1 outline-none text-gray-700 placeholder-gray-400 text-xs sm:text-sm md:text-base bg-white h-full pr-4 sm:pr-5 rounded-full"
                     />
-                </div>
-
-                <!-- Explore Topics -->
-                <div class="blogs-explore flex flex-col gap-3 sm:gap-4">
-                    <span class="text-gray-800 text-xs sm:text-sm md:text-base font-['Unbounded'] font-semibold">Explore topics</span>
-                    <div class="flex flex-wrap gap-2 sm:gap-3">
-                        <button class="blogs-button bg-[#FEB90E] hover:bg-yellow-500 active:scale-95 text-gray-900 font-['Unbounded'] font-semibold px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full transition-all duration-200 hover:shadow-md text-xs sm:text-sm md:text-base">
-                            Chicken
-                        </button>
-                        <button class="blogs-button bg-[#FEB90E] hover:bg-yellow-500 active:scale-95 text-gray-900 font-['Unbounded'] font-semibold px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full transition-all duration-200 hover:shadow-md text-xs sm:text-sm md:text-base">
-                            Pop-up
-                        </button>
-                        <button class="blogs-button bg-[#FEB90E] hover:bg-yellow-500 active:scale-95 text-gray-900 font-['Unbounded'] font-semibold px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full transition-all duration-200 hover:shadow-md text-xs sm:text-sm md:text-base">
-                            Angeles
-                        </button>
-                    </div>
+                    <button
+                        v-if="searchQuery"
+                        @click="clearSearch"
+                        class="pr-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label="Clear search"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
 
     <!-- Blog Posts Section -->
     <div class="relative">
-        <Blog :current-page="currentPage" :items-per-page="5" @update-total="updateTotalBlogs" />
+        <Blog :current-page="currentPage" :items-per-page="5" :search-query="activeSearchQuery" @update-total="updateTotalBlogs" />
         
         <!-- Navigation Buttons -->
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 md:pb-24">
@@ -120,10 +119,23 @@ import { ref, computed } from 'vue'
 const currentPage = ref(1)
 const totalBlogs = ref(0)
 const itemsPerPage = 5
+const searchQuery = ref('')
+const activeSearchQuery = ref('')
 
 const totalPages = computed(() => {
   return Math.ceil(totalBlogs.value / itemsPerPage)
 })
+
+const handleSearch = () => {
+    activeSearchQuery.value = searchQuery.value
+    currentPage.value = 1 // Reset to first page on search
+}
+
+const clearSearch = () => {
+    searchQuery.value = ''
+    activeSearchQuery.value = ''
+    currentPage.value = 1
+}
 
 const handleNext = () => {
     if (currentPage.value < totalPages.value) {

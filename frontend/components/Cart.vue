@@ -87,42 +87,42 @@
                     </div>
 
                     <!-- Right Column: Quantity and Controls -->
-                    <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-between gap-2 sm:gap-3 mt-3 sm:mt-0">
+                    <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-between gap-3 sm:gap-4 mt-3 sm:mt-0 md:gap-4">
                         <!-- Quantity Controls -->
-                        <div class="flex items-center gap-2 sm:gap-2 md:gap-3">
+                        <div class="flex items-center gap-2 md:gap-3">
                             <button
                             @click="decreaseQuantity(index)"
-                            class="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors min-h-8 min-w-8 sm:min-h-8 sm:min-w-8 md:min-h-9 md:min-w-9"
+                            class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
                             aria-label="Decrease quantity"
                             >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                             </svg>
                             </button>
-                            <span class="w-6 sm:w-6 md:w-7 text-center font-bold text-gray-900 text-sm sm:text-sm md:text-base">{{ item.quantity }}</span>
+                            <span class="w-8 text-center font-bold text-gray-900 text-sm md:text-base">{{ item.quantity }}</span>
                             <button
                             @click="increaseQuantity(index)"
-                            class="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors min-h-8 min-w-8 sm:min-h-8 sm:min-w-8 md:min-h-9 md:min-w-9"
+                            class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
                             aria-label="Increase quantity"
                             >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             </button>
                         </div>
 
-                        <!-- Item Total (Mobile) / Remove Button (Desktop positioning) -->
+                        <!-- Item Total -->
                         <div class="text-right sm:text-right">
-                            <p class="text-gray-500 text-xs sm:text-xs md:text-sm mb-1">₱{{ (((item.basePrice || item.price) + (item.addonsCost || 0)) * item.quantity).toFixed(2) }}</p>
+                            <p class="text-gray-500 text-xs md:text-sm mb-1">₱{{ (((item.basePrice || item.price) + (item.addonsCost || 0)) * item.quantity).toFixed(2) }}</p>
                         </div>
-                        
+
                         <!-- Remove Button -->
                         <button
                         @click="removeItem(index)"
-                        class="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-all duration-200 hover:scale-110 min-h-8 min-w-8 sm:min-h-8 sm:min-w-8 md:min-h-9 md:min-w-9"
+                        class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-all duration-200 hover:scale-110 flex-shrink-0"
                         aria-label="Remove item"
                         >
-                        <svg class="w-4 h-4 sm:w-4 sm:h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                         </button>

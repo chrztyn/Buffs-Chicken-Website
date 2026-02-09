@@ -1,38 +1,16 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Create transporter
-// Prefer explicit host/port if provided (more reliable on some hosts),
-// otherwise fall back to nodemailer "service" shortcut.
-const useHostBasedConfig = !!process.env.EMAIL_HOST;
+// Initialize Resend with API key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const baseAuthConfig = {
-  user: process.env.EMAIL_USER,
-  pass: process.env.EMAIL_PASSWORD
-};
-
-const transporterOptions = useHostBasedConfig
-  ? {
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT) || 587,
-      secure: process.env.EMAIL_SECURE === 'true', // false for STARTTLS on 587
-      auth: baseAuthConfig
-    }
-  : {
-      service: process.env.EMAIL_SERVICE,
-      auth: baseAuthConfig
-    };
-
-// Add conservative timeouts so requests fail fast instead of hanging
-transporterOptions.connectionTimeout = Number(process.env.EMAIL_CONNECTION_TIMEOUT_MS) || 10000; // 10s
-transporterOptions.greetingTimeout = Number(process.env.EMAIL_GREETING_TIMEOUT_MS) || 10000; // 10s
-
-const transporter = nodemailer.createTransport(transporterOptions);
+// Default sender email (must be verified domain in Resend)
+const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
 const sendOTP = async (email, otp) => {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [email],
       subject: 'Your Order Verification OTP - Buffs Restaurant',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -48,9 +26,14 @@ const sendOTP = async (email, otp) => {
           <p>Best regards,<br><strong>Buffs Restaurant Team</strong></p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('Resend API error:', error);
+      throw new Error('Failed to send OTP');
+    }
+
+    console.log('OTP email sent successfully:', data);
     return true;
   } catch (error) {
     console.error('Email sending error:', error);
@@ -68,9 +51,9 @@ const sendOrderNotification = async (email, orderNumber, status) => {
       cancelled: 'Your order has been cancelled.'
     };
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [email],
       subject: `Order Update - ${orderNumber} - Buffs Restaurant`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -83,9 +66,14 @@ const sendOrderNotification = async (email, orderNumber, status) => {
           <p>Thank you for your order!<br><strong>Buffs Restaurant Team</strong></p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('Resend API error:', error);
+      throw new Error('Failed to send notification');
+    }
+
+    console.log('Order notification sent successfully:', data);
     return true;
   } catch (error) {
     console.error('Email sending error:', error);
@@ -95,10 +83,10 @@ const sendOrderNotification = async (email, orderNumber, status) => {
 
 const sendContactFormEmail = async (name, email, message) => {
   try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      replyTo: email,
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [process.env.EMAIL_USER || 'admin@buffschicken.com'],
+      replyTo: [email],
       subject: `New Contact Form Submission from ${name} - Buffs Restaurant`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -113,9 +101,14 @@ const sendContactFormEmail = async (name, email, message) => {
           <p style="color: #666; font-size: 12px;">This is an automated message from your Buffs Restaurant website.</p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('Resend API error:', error);
+      throw new Error('Failed to send contact form email');
+    }
+
+    console.log('Contact form email sent successfully:', data);
     return true;
   } catch (error) {
     console.error('Email sending error:', error);
@@ -138,32 +131,25 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
 
         let itemHTML = `<li style="margin-bottom: 15px; line-height: 1.6;">
           <strong>${productName}</strong> x${quantity} - <strong style="color: #FE601C;">₱${parseFloat(itemTotal).toFixed(2)}</strong>`;
-        
-        // if (selectedVariants && Object.keys(selectedVariants).length > 0) {
-        //   const variants = Object.entries(selectedVariants)
-        //     .map(([key, value]) => `${key}: ${value}`)
-        //     .join(', ');
-        //   itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• ${variants}</span>`;
-        // }
-        
+
         if (selectedSauces && selectedSauces.length > 0) {
           const sauces = selectedSauces.map(s => s.name || s).join(', ');
           itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• Sauces: ${sauces}</span>`;
         }
-        
+
         if (selectedAddons && selectedAddons.length > 0) {
           const addons = selectedAddons.map(a => a.name).join(', ');
           itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• Add-ons: ${addons}</span>`;
         }
-        
+
         itemHTML += '</li>';
         return itemHTML;
       })
       .join('');
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: adminEmail,
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [adminEmail],
       subject: `🔔 New Order #${order.orderNumber} - Buffs Restaurant`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto;">
@@ -235,9 +221,14 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
           </div>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('Resend API error:', error);
+      throw new Error('Failed to send admin notification');
+    }
+
+    console.log('Admin order notification sent successfully:', data);
     return true;
   } catch (error) {
     console.error('Admin email notification error:', error);
@@ -245,4 +236,4 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
   }
 };
 
-module.exports = { sendOTP, sendOrderNotification, sendContactFormEmail, sendAdminOrderNotification, transporter };
+module.exports = { sendOTP, sendOrderNotification, sendContactFormEmail, sendAdminOrderNotification, resend };

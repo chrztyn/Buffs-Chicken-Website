@@ -1,7 +1,7 @@
 <template>
     <section class="bg-[#FBF4E5] contact-section-padding">
         <!-- Get In Touch Section -->
-        <div class="max-w-[1400px] mx-auto px-8 sm:px-12 lg:px-16 xl:px-24">
+        <div class="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 custom-grid-gap items-start">
                 <!-- Left Side - Contact Info -->
                 <div class="flex flex-col items-start text-left w-full order-1 lg:order-1">

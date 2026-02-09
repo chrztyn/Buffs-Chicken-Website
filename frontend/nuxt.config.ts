@@ -70,7 +70,40 @@ export default defineNuxtConfig({
   },
   pages: true,
   css: ['~/assets/css/main.css'],
-  modules: ['@nuxt/image', '@nuxt/scripts', '@vite-pwa/nuxt'],
+  modules: ['@nuxt/image', '@nuxt/scripts', '@vite-pwa/nuxt', '@nuxtjs/sitemap'],
+
+  // Sitemap configuration
+  sitemap: {
+    hostname: 'https://buffschicken.com',
+    gzip: true,
+    exclude: [
+      '/admin/**',
+      '/cart',
+      '/checkout'
+    ],
+    routes: async () => {
+      // Fetch dynamic blog routes
+      const blogs = await fetch('https://buffschicken.com/api/blogs')
+        .then(res => res.json())
+        .catch(() => ({ data: [] }))
+
+      const blogRoutes = (blogs.data || []).map((blog: any) => ({
+        url: `/blogs/${blog.slug}`,
+        lastmod: blog.updatedAt || blog.createdAt,
+        changefreq: 'weekly',
+        priority: 0.8
+      }))
+
+      return [
+        { url: '/', changefreq: 'daily', priority: 1.0 },
+        { url: '/menu', changefreq: 'weekly', priority: 0.9 },
+        { url: '/blogs', changefreq: 'daily', priority: 0.9 },
+        { url: '/about', changefreq: 'monthly', priority: 0.7 },
+        { url: '/contact', changefreq: 'monthly', priority: 0.7 },
+        ...blogRoutes
+      ]
+    }
+  },
   router: {
     options: {
       strict: false
@@ -148,6 +181,9 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en'
+      },
       link: [
         {
           rel: 'preconnect',

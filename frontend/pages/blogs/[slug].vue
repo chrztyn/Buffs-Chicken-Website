@@ -96,7 +96,7 @@
         </div>
 
                 <!-- Meta Information -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
             <div class="w-10 h-10 bg-[#FE601C]/20 rounded-lg flex items-center justify-center">
               <svg
@@ -141,30 +141,6 @@
               <p class="text-xs text-gray-500 font-['Unbounded']">Reading Time</p>
               <p class="text-sm font-semibold text-gray-800 font-['Unbounded']">
                 {{ readTime }} min read
-              </p>
-            </div>
-          </div>
-
-          <div v-if="blog.category" class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-            <div class="w-10 h-10 bg-[#FBF4E5] rounded-lg flex items-center justify-center">
-              <svg
-                class="w-5 h-5 text-[#FE601C]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                ></path>
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs text-gray-500 font-['Unbounded']">Category</p>
-              <p class="text-sm font-semibold text-gray-800 font-['Unbounded']">
-                {{ blog.category }}
               </p>
             </div>
           </div>
@@ -363,6 +339,38 @@ const loadBlog = async () => {
         {
           property: 'article:published_time',
           content: blog.value.createdAt
+        }
+      ],
+      script: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: blog.value.title,
+            description: blog.value.metaDescription || blog.value.excerpt || '',
+            image: blog.value.image || '',
+            datePublished: blog.value.publishedAt || blog.value.createdAt,
+            dateModified: blog.value.updatedAt || blog.value.createdAt,
+            author: {
+              '@type': 'Organization',
+              name: 'Buffs Chicken',
+              url: 'https://buffschicken.com'
+            },
+            publisher: {
+              '@type': 'Organization',
+              name: 'Buffs Chicken',
+              url: 'https://buffschicken.com',
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://buffschicken.com/buffs-logo.png'
+              }
+            },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': `https://buffschicken.com/blogs/${route.params.slug}`
+            }
+          })
         }
       ]
     })

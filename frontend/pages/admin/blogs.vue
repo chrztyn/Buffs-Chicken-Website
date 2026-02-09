@@ -58,16 +58,16 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row gap-2">
               <button
                 @click="openEditBlog(blog)"
-                class="flex-1 px-3 py-2 bg-blue-100 text-blue-700 font-['Unbounded'] font-bold rounded-lg hover:bg-blue-200 transition"
+                class="flex-1 px-3 py-2.5 sm:py-2 bg-blue-100 text-blue-700 font-['Unbounded'] font-bold text-sm rounded-lg hover:bg-blue-200 transition"
               >
                 Edit
               </button>
               <button
                 @click="deleteBlog(blog._id)"
-                class="flex-1 px-3 py-2 bg-red-100 text-red-700 font-['Unbounded'] font-bold rounded-lg hover:bg-red-200 transition"
+                class="flex-1 px-3 py-2.5 sm:py-2 bg-red-100 text-red-700 font-['Unbounded'] font-bold text-sm rounded-lg hover:bg-red-200 transition"
               >
                 Delete
               </button>

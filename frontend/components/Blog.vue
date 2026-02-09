@@ -84,6 +84,10 @@
       itemsPerPage: {
         type: Number,
         default: 5
+      },
+      searchQuery: {
+        type: String,
+        default: ''
       }
     });
 
@@ -96,11 +100,28 @@
 
     const { getBlogs } = useApi();
 
+    // Filter blogs based on search query
+    const filteredBlogs = computed(() => {
+      if (!props.searchQuery || props.searchQuery.trim() === '') {
+        return allBlogPosts.value;
+      }
+
+      const query = props.searchQuery.toLowerCase().trim();
+      return allBlogPosts.value.filter(blog => {
+        const titleMatch = blog.title?.toLowerCase().includes(query);
+        const excerptMatch = blog.excerpt?.toLowerCase().includes(query);
+        const descriptionMatch = blog.metaDescription?.toLowerCase().includes(query);
+        const contentMatch = blog.content?.toLowerCase().includes(query);
+
+        return titleMatch || excerptMatch || descriptionMatch || contentMatch;
+      });
+    });
+
     // Calculate paginated posts based on currentPage and itemsPerPage
     const paginatedPosts = computed(() => {
       const startIndex = (props.currentPage - 1) * props.itemsPerPage;
       const endIndex = startIndex + props.itemsPerPage;
-      return allBlogPosts.value.slice(startIndex, endIndex);
+      return filteredBlogs.value.slice(startIndex, endIndex);
     });
 
     const loadBlogs = async () => {
@@ -110,8 +131,8 @@
         const response = await getBlogs();
         allBlogPosts.value = response.data.data || [];
         blogPosts.value = paginatedPosts.value;
-        // Emit total blogs count to parent
-        emit('update-total', allBlogPosts.value.length);
+        // Emit total filtered blogs count to parent
+        emit('update-total', filteredBlogs.value.length);
       } catch (err) {
         console.error('Failed to load blogs:', err);
         error.value = 'Failed to load blog posts';
@@ -124,6 +145,13 @@
     watch(() => props.currentPage, () => {
       blogPosts.value = paginatedPosts.value;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Watch for search query changes and update posts
+    watch(() => props.searchQuery, () => {
+      blogPosts.value = paginatedPosts.value;
+      // Emit updated total for filtered results
+      emit('update-total', filteredBlogs.value.length);
     });
 
     onMounted(() => {

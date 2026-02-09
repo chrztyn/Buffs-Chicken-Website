@@ -1,2 +1,10 @@
-User-Agent: *
-Disallow:
+# Buffs Chicken Restaurant - robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://buffschicken.com/sitemap.xml
