@@ -15,8 +15,8 @@ body,
 @media (min-width: 1024px) {
   /* ============ HERO SECTION ============ */
   section:has(h1) {
-    padding-top: 480px;
-    padding-left: 100px;
+    padding-top: 150px;
+    padding-left: 10px;
   }
 
   h1 {
@@ -131,7 +131,7 @@ body,
     box-sizing: border-box;
     min-height: 0;
     position: relative;
-    margin-top: 5vh;
+    margin-top: 0;
     padding: 2.5rem 100px 3rem 100px;
     width: 100%;
     overflow-x: hidden;
@@ -325,96 +325,21 @@ body,
 
   /* ============ FAQ SECTION ============ */
   .faq-section {
-    padding: 1rem 5rem 6.5rem 5rem;
-    margin-top: 2rem;
+    padding: 0rem 5rem 7rem 5rem;
+    margin-top: 0rem;
   }
 
   .faq-section h2 {
     font-weight: 700;
-    margin-top: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 3rem;
   }
 
   .faq-item {
     border: none;
-    padding: 2rem 5rem;
   }
 
   .faq-item:hover {
-    transform: translateY(-2px);
-  }
-
-  .faq-contact-box {
-    border: none;
-    margin-top: 215px;
-    padding: 2rem;
-  }
-
-  .faq-contact-box-bottom {
-    border: none;
-    margin-top: 215px;
-    padding: 2rem;
-  }
-
-  .faq-contact-box h3 {
-    font-weight: 400;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    line-height: 1.3;
-  }
-
-  .faq-contact-box-bottom h3 {
-    font-weight: 400;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    line-height: 1.3;
-  }
-
-  .faq-contact-box p {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-    max-width: 100%;
-  }
-
-  .faq-contact-box-bottom p {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-    max-width: 100%;
-  }
-
-  .faq-contact-box button {
-    font-size: 1rem;
-    cursor: pointer;
-    padding: 0.875rem 2rem;
-    width: auto;
-    max-width: none;
-    min-width: 140px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  .faq-contact-box-bottom button {
-    font-size: 1rem;
-    cursor: pointer;
-    padding: 0.875rem 2rem;
-    width: auto;
-    max-width: none;
-    min-width: 140px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  .faq-contact-box:hover {
-    transform: translateY(-2px);
-  }
-
-  .faq-contact-box-bottom:hover {
     transform: translateY(-2px);
   }
 
@@ -424,7 +349,7 @@ body,
   }
 
   .faq-accordion {
-    margin-right: 40px;
+    margin-right: 0;
   }
 
   /* ============ BLOGS PAGE ============ */
@@ -460,7 +385,7 @@ body,
 @media (min-width: 768px) and (max-width: 1023px) {
   /* ============ HERO SECTION ============ */
   section:has(h1) {
-    padding-top: 280px;
+    padding-top: 100px;
     padding-left: 50px;
     padding-right: 50px;
   }
@@ -549,7 +474,7 @@ body,
     box-sizing: border-box;
     min-height: 0;
     position: relative;
-    margin-top: 4vh;
+    margin-top: 0;
     padding: 2rem 1.25rem 2.5rem 1.25rem;
   }
 
@@ -716,80 +641,20 @@ body,
 
   /* ============ FAQ SECTION ============ */
   .faq-section {
-    padding: 1rem 3rem 5rem 3rem;
-    margin-top: 1.5rem;
+    padding: 0rem 3rem 7rem 3rem;
   }
 
   .faq-section h2 {
     font-weight: 700;
-    margin-top: 0.5rem;
-    margin-bottom: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 2.5rem;
   }
 
   .faq-item {
     border: none;
-    padding: 1.5rem 3rem;
-    margin-bottom: 1rem;
   }
 
   .faq-item:hover {
-    transform: translateY(-2px);
-  }
-
-  .faq-contact-box {
-    border: none;
-    margin-top: 0;
-    padding: 2.5rem;
-  }
-
-  .faq-contact-box-bottom {
-    border: none;
-    margin-top: 0;
-    padding: 2.5rem;
-  }
-
-  .faq-contact-box h3 {
-    font-weight: 400;
-    margin-bottom: 1.25rem;
-    font-size: 1.375rem;
-    line-height: 1.3;
-  }
-
-  .faq-contact-box-bottom h3 {
-    font-weight: 400;
-    margin-bottom: 1.25rem;
-    font-size: 1.375rem;
-    line-height: 1.3;
-  }
-
-  .faq-contact-box p {
-    font-size: 0.95rem;
-    margin-bottom: 1.25rem;
-    line-height: 1.6;
-    max-width: 100%;
-  }
-
-  .faq-contact-box-bottom p {
-    font-size: 0.95rem;
-    margin-bottom: 1.25rem;
-    line-height: 1.6;
-    max-width: 100%;
-  }
-
-  .faq-contact-box button {
-    font-size: 0.95rem;
-    cursor: pointer;
-    padding: 0.75rem 1.75rem;
-    width: auto;
-    max-width: none;
-    min-width: 130px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  .faq-contact-box:hover {
     transform: translateY(-2px);
   }
 
@@ -831,7 +696,7 @@ body,
 @media (max-width: 767px) {
   /* ============ HERO SECTION ============ */
   section:has(h1) {
-    padding-top: 180px;
+    padding-top: 50px;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
@@ -947,7 +812,7 @@ body,
     box-sizing: border-box;
     min-height: 0;
     position: relative;
-    margin-top: 3vh;
+    margin-top: 0;
     padding: 1.5rem 1rem 2rem 1rem;
   }
 
@@ -1109,84 +974,21 @@ body,
 
   /* ============ FAQ SECTION ============ */
   .faq-section {
-    padding: 1rem 1.5rem 4rem 1.5rem;
-    margin-top: 1rem;
+    padding: 0rem 3rem 7rem 3rem;
+    margin-top: 0rem;
   }
 
   .faq-section h2 {
     font-weight: 700;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    margin-top: 0;
+    margin-bottom: 2rem;
   }
 
   .faq-item {
     border: none;
-    padding: 1.5rem 1rem;
-    margin-bottom: 1rem;
   }
 
   .faq-item:active {
-    transform: translateY(-1px);
-  }
-
-  .faq-contact-box {
-    border: none;
-    margin-top: 2rem;
-    padding: 2rem 1.5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .faq-contact-box-bottom {
-    border: none;
-    margin-top: 2rem;
-    padding: 2rem 1.5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .faq-contact-box h3 {
-    font-weight: 400;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-    line-height: 1.4;
-  }
-
-  .faq-contact-box-bottom h3 {
-    font-weight: 400;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-    line-height: 1.4;
-  }
-
-  .faq-contact-box p {
-    font-size: 0.9rem;
-    margin-bottom: 1.25rem;
-    line-height: 1.6;
-    max-width: 100%;
-  }
-
-  .faq-contact-box-bottom p {
-    font-size: 0.9rem;
-    margin-bottom: 1.25rem;
-    line-height: 1.6;
-    max-width: 100%;
-  }
-
-  .faq-contact-box button {
-    font-size: 0.9rem;
-    cursor: pointer;
-    padding: 0.875rem 1.75rem;
-    width: 100%;
-    max-width: 100%;
-    min-width: unset;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  .faq-contact-box:active {
     transform: translateY(-1px);
   }
 
