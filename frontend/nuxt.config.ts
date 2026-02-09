@@ -11,13 +11,9 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV === 'development',
   },
   routeRules: {
-    '/': { prerender: true, swr: true },
-    '/about': { prerender: true, swr: 86400 },
-    '/contact': { prerender: true, swr: 86400 },
-    '/menu': { swr: 600 },
-    '/blogs': { swr: 600 },
-    '/blogs/**': { swr: 3600 },
-    '/api/**': { cors: true, headers: { 'cache-control': 's-maxage=60, stale-while-revalidate=300' } },
+    '/': { prerender: true },
+    '/about': { prerender: true },
+    '/contact': { prerender: true },
   },
   build: {
     transpile: ['@nuxt/image'],
@@ -25,30 +21,6 @@ export default defineNuxtConfig({
   vite: {
     build: {
       cssCodeSplit: true,
-      minify: 'esbuild',
-      rollupOptions: {
-        output: {
-          manualChunks: (id) => {
-            // Separate admin code
-            if (id.includes('pages/admin') ||
-                id.includes('layouts/admin.vue') ||
-                id.includes('middleware/admin-auth') ||
-                id.includes('composables/useAdmin')) {
-              return 'admin'
-            }
-            // Vendor chunking for better caching
-            if (id.includes('node_modules')) {
-              if (id.includes('vue') || id.includes('vue-router')) {
-                return 'vue-vendor'
-              }
-              if (id.includes('axios') || id.includes('socket.io-client')) {
-                return 'api-vendor'
-              }
-              return 'vendor'
-            }
-          },
-        },
-      },
     },
     server: {
       allowedHosts: ['buffschicken.com', 'www.buffschicken.com', 'localhost', '127.0.0.1']
