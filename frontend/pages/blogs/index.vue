@@ -33,7 +33,8 @@
                 <!-- Search Bar -->
                 <div class="h-12 sm:h-13 md:h-14 bg-white rounded-full shadow-lg sm:shadow-xl px-0 sm:px-0 md:px-0 flex items-center gap-1 sm:gap-2 w-full">
                     <button
-                        @click="handleSearch"
+                        type="button"
+                        @click.prevent="handleSearch"
                         class="h-full bg-[#1A4189] hover:bg-blue-700 active:scale-95 text-white font-['Unbounded'] font-semibold px-4 sm:px-5 md:px-7 rounded-full transition-all duration-200 hover:shadow-md text-xs sm:text-sm md:text-base flex items-center justify-center flex-shrink-0"
                     >
                         Search
@@ -47,7 +48,8 @@
                     />
                     <button
                         v-if="searchQuery"
-                        @click="clearSearch"
+                        type="button"
+                        @click.prevent="clearSearch"
                         class="pr-4 text-gray-400 hover:text-gray-600 transition-colors"
                         aria-label="Clear search"
                     >
