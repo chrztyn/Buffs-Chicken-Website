@@ -11,33 +11,41 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV === 'development',
   },
   routeRules: {
-    '/': { prerender: true },
-    '/about': { prerender: true },
-    '/contact': { prerender: true },
-    '/menu': { cache: { maxAge: 60 * 10 } }, 
-    '/blogs': { cache: { maxAge: 60 * 10 } },
-    '/blogs/**': { cache: { maxAge: 60 * 10 } },
-    '/**': { cache: { maxAge: 60 * 10 } }
+    '/': { prerender: true, swr: true },
+    '/about': { prerender: true, swr: 86400 },
+    '/contact': { prerender: true, swr: 86400 },
+    '/menu': { swr: 600 },
+    '/blogs': { swr: 600 },
+    '/blogs/**': { swr: 3600 },
+    '/api/**': { cors: true, headers: { 'cache-control': 's-maxage=60, stale-while-revalidate=300' } },
   },
   build: {
     transpile: ['@nuxt/image'],
   },
   vite: {
     build: {
+      cssCodeSplit: true,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: process.env.NODE_ENV === 'production',
+          drop_debugger: process.env.NODE_ENV === 'production',
+        },
+      },
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            if (id.includes('pages/admin') || 
-                id.includes('layouts/admin.vue') || 
+            if (id.includes('pages/admin') ||
+                id.includes('layouts/admin.vue') ||
                 id.includes('middleware/admin-auth') ||
                 id.includes('composables/useAdmin')) {
               return 'admin'
             }
-            if (id.includes('node_modules/vue') || 
+            if (id.includes('node_modules/vue') ||
                 id.includes('node_modules/vue-router')) {
               return 'vue-vendor'
             }
-            if (id.includes('node_modules/axios') || 
+            if (id.includes('node_modules/axios') ||
                 id.includes('node_modules/socket.io-client')) {
               return 'api-vendor'
             }
@@ -53,6 +61,29 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: false,
       routes: ['/', '/about', '/contact', '/menu', '/blogs', '/cart']
+    },
+    compressPublicAssets: true,
+    routeRules: {
+      '/_nuxt/**': {
+        headers: {
+          'cache-control': 'public, max-age=31536000, immutable'
+        }
+      },
+      '/backend-images/**': {
+        headers: {
+          'cache-control': 'public, max-age=2592000'
+        }
+      },
+      '/**/*.{jpg,jpeg,png,gif,webp,svg,ico}': {
+        headers: {
+          'cache-control': 'public, max-age=2592000'
+        }
+      },
+      '/**/*.{js,css,woff,woff2,ttf,eot}': {
+        headers: {
+          'cache-control': 'public, max-age=31536000, immutable'
+        }
+      }
     }
   } as any,
   runtimeConfig: {
@@ -71,6 +102,43 @@ export default defineNuxtConfig({
   pages: true,
   css: ['~/assets/css/main.css'],
   modules: ['@nuxt/image', '@nuxt/scripts', '@vite-pwa/nuxt', '@nuxtjs/sitemap'],
+
+  // Image optimization configuration
+  image: {
+    quality: 80,
+    format: ['webp', 'jpg'],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
+    },
+    presets: {
+      avatar: {
+        modifiers: {
+          format: 'webp',
+          width: 50,
+          height: 50,
+        },
+      },
+      thumbnail: {
+        modifiers: {
+          format: 'webp',
+          width: 300,
+          height: 300,
+        },
+      },
+    },
+  },
+
+  // Enable experimental features for better performance
+  experimental: {
+    payloadExtraction: true,
+    renderJsonPayloads: true,
+    typedPages: false,
+  },
 
   // Sitemap configuration
   sitemap: {
@@ -188,7 +256,6 @@ export default defineNuxtConfig({
         {
           rel: 'preconnect',
           href: 'https://fonts.googleapis.com',
-          crossorigin: 'anonymous',
         },
         {
           rel: 'preconnect',
@@ -198,18 +265,27 @@ export default defineNuxtConfig({
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap',
+          media: 'print',
+          onload: "this.media='all'",
         },
       ],
       script: [
         {
           src: `https://www.googletagmanager.com/gtag/js?id=${process.env.NUXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX'}`,
           async: true,
+          defer: true,
         },
         {
           innerHTML: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', '${process.env.NUXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX'}');`,
+          type: 'text/partytown',
+        },
+      ],
+      noscript: [
+        {
+          innerHTML: '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap">',
         },
       ],
     }

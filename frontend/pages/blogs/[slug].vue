@@ -344,7 +344,7 @@ const loadBlog = async () => {
       script: [
         {
           type: 'application/ld+json',
-          children: JSON.stringify({
+          innerHTML: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'BlogPosting',
             headline: blog.value.title,

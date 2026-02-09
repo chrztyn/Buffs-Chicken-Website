@@ -468,18 +468,18 @@ body,
 
   h1 {
     line-height: 1.1;
-    font-size: 2.5rem;
+    font-size: 4rem;
   }
 
   h2 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1.25rem;
     margin-top: 0.5rem;
   }
 
   .description-paragraph {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1.7;
     max-width: 100%;
     color: #374151;
@@ -840,11 +840,11 @@ body,
 
   h1 {
     line-height: 1.2;
-    font-size: 1.75rem;
+    font-size: 3rem;
   }
 
   h2 {
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: 700;
     margin-bottom: 1rem;
     margin-top: 0.5rem;
@@ -860,8 +860,9 @@ body,
   }
 
   .hero-main {
-    margin-top: -5rem;
+    margin-top: -9rem;
     transform: translateX(0);
+    height: 28rem;
   }
 
   .hero-buffs-chicken {

@@ -16,17 +16,17 @@
           <div class="text-content-container flex-1 max-w-xl lg:max-w-5xl space-y-2 sm:space-y-3 lg:space-y-6 relative order-2 lg:order-1 lg:mt-40 -mt-20 sm:-mt-24 lg:-mt-0 z-20 sm:z-30 lg:z-0 mx-auto text-center">
 
             <!-- Main Heading -->
-            <h1 class="font-['Caprasimo'] text-5xl sm:text-6xl md:text-7xl lg:text-7xl text-[#1A4189] leading-none z-20 sm:z-30 lg:z-0 relative lg:text-left">
+            <h1 class="font-['Caprasimo'] text-[#1A4189] leading-none z-20 sm:z-30 lg:z-0 relative lg:text-left" style="font-size: clamp(2.5rem, 10vw, 4.5rem);">
               Buffs<br />Chicken
             </h1>
-            
+
             <!-- Subheading -->
-            <h2 class="font-['Unbounded'] text-base sm:text-2xl max-[1023px]:text-2xl lg:text-3xl font-bold text-[#FE601C] leading-tight mt-2 sm:mt-4 max-[1023px]:mt-4 lg:mt-6 lg:text-left">
+            <h2 class="font-['Unbounded'] font-bold text-[#FE601C] leading-tight mt-2 sm:mt-4 max-[1023px]:mt-4 lg:mt-6 lg:text-left" style="font-size: clamp(1rem, 4.5vw, 1.875rem);">
               your go-to comfort
             </h2>
-            
+
             <!-- Description Paragraph -->
-            <p class="description-paragraph font-['Unbounded'] text-xs sm:text-base max-[1023px]:text-base lg:text-lg text-gray-500 max-[1023px]:text-gray-600 lg:text-gray-700 leading-relaxed w-full max-w-2xl max-[1023px]:max-w-3xl mx-auto lg:mx-0 lg:text-left">
+            <p class="description-paragraph font-['Unbounded'] text-gray-500 max-[1023px]:text-gray-600 lg:text-gray-700 leading-relaxed w-full max-w-2xl max-[1023px]:max-w-3xl mx-auto lg:mx-0 lg:text-left" style="font-size: clamp(0.875rem, 3.5vw, 1.125rem);">
               Welcome to Buffs Chicken, your go-to spot at The Hood, Angeles City for the crispiest and juiciest chicken around. From signature OG Buffs wings to cheesy pastas and loaded combos, every meal is cooked fresh and packed with flavor.
             </p>
           </div>

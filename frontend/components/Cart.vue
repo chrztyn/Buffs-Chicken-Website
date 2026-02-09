@@ -53,79 +53,92 @@
             <div class="bg-white rounded-2xl sm:rounded-2xl md:rounded-3xl lg:rounded-3xl shadow-lg overflow-hidden">
                 <!-- Cart Items List -->
                 <div class="divide-y divide-gray-200 px-4 sm:px-5 md:px-6 py-4 sm:py-5 md:py-6">
-                <div 
-                    v-for="(item, index) in cartItems" 
+                <div
+                    v-for="(item, index) in cartItems"
                     :key="index"
-                    class="py-4 sm:py-5 md:py-6 px-0 hover:bg-gray-50 transition-colors duration-200 flex flex-col sm:flex-row gap-4 sm:gap-5 md:gap-6 border-b last:border-b-0"
+                    class="relative py-4 sm:py-5 md:py-6 px-0 hover:bg-gray-50 transition-colors duration-200 border-b last:border-b-0"
                 >
-                    <!-- Item Image -->
-                    <div class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-gray-100 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden">
-                    <img 
-            :src="getImageUrl(item.image)" 
-            :alt="item.name"
-            class="w-full h-full object-contain p-2"
-            />
-                    </div>
-
-                    <!-- Item Details - Flex Column for Mobile -->
-                    <div class="flex-grow min-w-0 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-base sm:text-lg md:text-lg lg:text-xl font-['Unbounded'] font-bold text-gray-900 mb-2 sm:mb-2 md:mb-2 lg:mb-2 line-clamp-2">
-                            {{ item.name }}
-                        </h3>
-                        
-                        <p class="text-[#FE601C] font-bold text-base sm:text-lg md:text-lg lg:text-lg mb-3 sm:mb-4 md:mb-4">₱{{ ((item.basePrice || item.price) + (item.addonsCost || 0)).toFixed(2) }}</p>
-                    </div>
-                    
-                    <!-- Order Description with Spacing -->
-                    <div v-if="getOrderDescription(item).length > 0" class="text-xs sm:text-xs md:text-sm text-gray-600 space-y-2 sm:space-y-2.5 md:space-y-2.5 bg-gray-50 rounded-md p-2.5 sm:p-3 md:p-3 border border-gray-100">
-                        <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2 sm:gap-2.5">
-                            <span class="text-[#FE601C] mt-0.5 flex-shrink-0 font-bold">•</span>
-                            <span class="text-gray-700 leading-relaxed break-words">{{ description }}</span>
-                        </div>
-                    </div>
-                    </div>
-
-                    <!-- Right Column: Quantity and Controls -->
-                    <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-between gap-3 sm:gap-4 mt-3 sm:mt-0 md:gap-4">
-                        <!-- Quantity Controls -->
-                        <div class="flex items-center gap-2 md:gap-3">
-                            <button
-                            @click="decreaseQuantity(index)"
-                            class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-                            aria-label="Decrease quantity"
-                            >
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                            </svg>
-                            </button>
-                            <span class="w-8 text-center font-bold text-gray-900 text-sm md:text-base">{{ item.quantity }}</span>
-                            <button
-                            @click="increaseQuantity(index)"
-                            class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
-                            aria-label="Increase quantity"
-                            >
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            </button>
-                        </div>
-
-                        <!-- Item Total -->
-                        <div class="text-right sm:text-right">
-                            <p class="text-gray-500 text-xs md:text-sm mb-1">₱{{ (((item.basePrice || item.price) + (item.addonsCost || 0)) * item.quantity).toFixed(2) }}</p>
-                        </div>
-
-                        <!-- Remove Button -->
-                        <button
+                    <!-- Delete Button - Mobile: Top Right, Desktop: In Flow -->
+                    <button
                         @click="removeItem(index)"
-                        class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-all duration-200 hover:scale-110 flex-shrink-0"
+                        class="absolute top-2 right-2 sm:hidden w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
                         aria-label="Remove item"
-                        >
-                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
-                        </button>
+                    </button>
+
+                    <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 md:gap-6">
+                        <!-- Item Image -->
+                        <div class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-gray-100 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden">
+                            <img
+                                :src="getImageUrl(item.image)"
+                                :alt="item.name"
+                                class="w-full h-full object-contain p-2"
+                            />
+                        </div>
+
+                        <!-- Item Details - Flex Column for Mobile -->
+                        <div class="flex-grow min-w-0 flex flex-col justify-between pr-10 sm:pr-0">
+                            <div>
+                                <h3 class="text-base sm:text-lg md:text-lg lg:text-xl font-['Unbounded'] font-bold text-gray-900 mb-2 sm:mb-2 md:mb-2 lg:mb-2 line-clamp-2">
+                                    {{ item.name }}
+                                </h3>
+
+                                <p class="text-[#FE601C] font-bold text-base sm:text-lg md:text-lg lg:text-lg mb-3 sm:mb-4 md:mb-4">₱{{ ((item.basePrice || item.price) + (item.addonsCost || 0)).toFixed(2) }}</p>
+                            </div>
+
+                            <!-- Order Description with Spacing -->
+                            <div v-if="getOrderDescription(item).length > 0" class="text-xs sm:text-xs md:text-sm text-gray-600 space-y-2 sm:space-y-2.5 md:space-y-2.5 bg-gray-50 rounded-md p-2.5 sm:p-3 md:p-3 border border-gray-100">
+                                <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2 sm:gap-2.5">
+                                    <span class="text-[#FE601C] mt-0.5 flex-shrink-0 font-bold">•</span>
+                                    <span class="text-gray-700 leading-relaxed break-words">{{ description }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Quantity and Controls (Desktop Only for Delete Button) -->
+                        <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-between gap-3 sm:gap-4 mt-3 sm:mt-0 md:gap-4">
+                            <!-- Quantity Controls -->
+                            <div class="flex items-center gap-2 md:gap-3">
+                                <button
+                                    @click="decreaseQuantity(index)"
+                                    class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                                    aria-label="Decrease quantity"
+                                >
+                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                    </svg>
+                                </button>
+                                <span class="w-8 text-center font-bold text-gray-900 text-sm md:text-base">{{ item.quantity }}</span>
+                                <button
+                                    @click="increaseQuantity(index)"
+                                    class="w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                                    aria-label="Increase quantity"
+                                >
+                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Item Total -->
+                            <div class="text-right sm:text-right">
+                                <p class="text-gray-500 text-xs md:text-sm mb-1">₱{{ (((item.basePrice || item.price) + (item.addonsCost || 0)) * item.quantity).toFixed(2) }}</p>
+                            </div>
+
+                            <!-- Remove Button - Desktop Only -->
+                            <button
+                                @click="removeItem(index)"
+                                class="hidden sm:flex w-8 h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 rounded-full bg-red-100 hover:bg-red-200 text-red-600 items-center justify-center transition-all duration-200 hover:scale-110 flex-shrink-0"
+                                aria-label="Remove item"
+                            >
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 </div>
