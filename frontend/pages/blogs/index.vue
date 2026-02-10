@@ -3,60 +3,88 @@
         <!-- Navigation Bar -->
         <Navbar class="relative z-20" />
 
-        <!-- Blogs Top Section -->
-        <div class="blogs-hero-section relative h-96 sm:h-[450px] md:h-[500px] lg:h-[550px] w-full overflow-hidden -mt-16">
-        
-            <!-- Background Image with Blur -->
-            <img
-                src="/blogs-top-photo.jpg"
-                alt="Blog Top Photo"
-                class="absolute inset-0 w-full h-full object-cover filter blur-sm scale-105"
-            />
-
-            <!-- Overlay -->
-            <div class="about-overlay absolute inset-0 bg-[rgba(26,65,137,0.3)]"></div>
-
-            <!-- Content -->
-            <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-5xl font-['Unbounded'] text-white mb-3 sm:mb-4 drop-shadow-lg leading-tight">
-                Fresh Off the Fryer
-                </h1>
-                <p class="text-white text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl drop-shadow-md px-2 sm:px-0">
-                Bringing you fresh insights, stories, and updates from the Buffs team.
-                </p>
+        <!-- Top Section -->
+        <div class="blogs-hero-section relative bg-[#1A4189] overflow-hidden">
+            <div class="relative z-10 min-h-[35vh] flex items-center">
+                <div class="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                    <div class="max-w-6xl mx-auto">
+                        <div class="grid lg:grid-cols-[1.3fr_0.7fr] gap-8 items-center">
+                            <!-- Left: Text content -->
+                            <div class="hero-content">
+                                <!-- Super bold title -->
+                                <div class="mb-3">
+                                    <div class="hero-badge inline-block px-2 py-0.5 bg-[#FEB90E] text-[#1A4189] font-['Unbounded'] font-black text-[9px] uppercase tracking-widest mb-2 transform -rotate-2">
+                                        Blog Posts
+                                    </div>
+                                    <h1 class="font-['Unbounded'] font-black text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl leading-[0.85] text-white mb-0">
+                                        <span class="hero-title-line-1 inline-block">FRESH</span><br/>
+                                        <span class="hero-title-line-2 inline-block text-[#FEB90E]">OFF THE</span><br/>
+                                        <span class="hero-title-line-3 inline-block">FRYER</span>
+                                    </h1>
+                                </div>
+                                
+                                <div class="hero-line w-full h-1 bg-[#FEB90E] mb-3"></div>
+                                
+                                <p class="hero-description text-white/90 text-sm sm:text-base font-medium leading-relaxed mb-0">
+                                    Bringing you fresh insights, stories, and updates from the Buffs team.
+                                </p>
+                                
+                            </div>
+                            
+                            <!-- Right: Graphic element - Magazine style -->
+                            <div class="hero-magazine hidden lg:block relative">
+                                <div class="magazine-shadow absolute inset-0 bg-[#FEB90E] transform rotate-6 opacity-20"></div>
+                                <div class="magazine-card relative bg-white/5 backdrop-blur-sm border-[3px] border-[#FEB90E] p-6 transform -rotate-3">
+                                    <div class="space-y-2.5">
+                                        <div class="magazine-line-1 h-2.5 bg-white/30 w-3/4"></div>
+                                        <div class="magazine-line-2 h-2.5 bg-white/30 w-full"></div>
+                                        <div class="magazine-line-3 h-2.5 bg-white/30 w-2/3"></div>
+                                        <div class="magazine-box h-14 bg-[#FEB90E]/30 mt-4"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Background pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute top-0 left-0 w-full h-full" style="background-image: repeating-linear-gradient(45deg, #FEB90E 0, #FEB90E 2px, transparent 2px, transparent 20px);"></div>
             </div>
         </div>
 
         <!-- Search Section -->
         <div class="blogs-search max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-14 md:-mt-16 relative z-20 mb-12 sm:mb-14 md:mb-16">
-            <div class="flex flex-col gap-4 sm:gap-6 md:gap-8">
-                <!-- Search Bar -->
-                <div class="h-12 sm:h-13 md:h-14 bg-white rounded-full shadow-lg sm:shadow-xl px-0 sm:px-0 md:px-0 flex items-center gap-1 sm:gap-2 w-full">
-                    <button
-                        type="button"
-                        @click.prevent="handleSearch"
-                        class="h-full bg-[#1A4189] hover:bg-blue-700 active:scale-95 text-white font-['Unbounded'] font-semibold px-4 sm:px-5 md:px-7 rounded-full transition-all duration-200 hover:shadow-md text-xs sm:text-sm md:text-base flex items-center justify-center flex-shrink-0"
-                    >
-                        Search
-                    </button>
-                    <input
+            <div class="flex gap-2 sm:gap-3 items-center w-full">
+                <div class="relative flex-1 min-w-0">
+                    <input 
                         v-model="searchQuery"
                         @keyup.enter="handleSearch"
-                        type="text"
-                        placeholder="Search blog posts..."
-                        class="flex-1 outline-none text-gray-700 placeholder-gray-400 text-xs sm:text-sm md:text-base bg-white h-full pr-4 sm:pr-5 rounded-full"
+                        type="text" 
+                        placeholder="Search blog posts..." 
+                        class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-full border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/20 transition-all shadow-sm hover:shadow-md text-xs sm:text-sm"
                     />
                     <button
                         v-if="searchQuery"
                         type="button"
                         @click.prevent="clearSearch"
-                        class="pr-4 text-gray-400 hover:text-gray-600 transition-colors"
+                        class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                         aria-label="Clear search"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
+                    <svg 
+                        v-else
+                        class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-gray-400 flex-shrink-0" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </div>
             </div>
         </div>
@@ -165,5 +193,194 @@ body,
 #__nuxt {
     overflow-x: hidden !important;
     max-width: 100vw !important;
+}
+
+/* Hero Section Animations */
+.hero-content {
+    animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-badge {
+    animation: slideDown 1s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+}
+
+.hero-title-line-1 {
+    animation: slideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+}
+
+.hero-title-line-2 {
+    animation: slideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) 0.45s backwards;
+}
+
+.hero-title-line-3 {
+    animation: slideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s backwards;
+}
+
+.hero-line {
+    animation: expandWidth 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s backwards;
+}
+
+.hero-description {
+    animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 1s backwards;
+}
+
+.hero-magazine {
+    animation: floatIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.6s backwards;
+}
+
+.magazine-line-1 {
+    animation: lineExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.1s backwards;
+}
+
+.magazine-line-2 {
+    animation: lineExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s backwards;
+}
+
+.magazine-line-3 {
+    animation: lineExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.3s backwards;
+}
+
+.magazine-box {
+    animation: boxGrow 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.4s backwards;
+}
+
+/* Smooth Keyframe Animations with Easing */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) rotate(-2deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotate(-2deg);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes expandWidth {
+    from {
+        width: 0;
+        opacity: 0;
+    }
+    to {
+        width: 100%;
+        opacity: 1;
+    }
+}
+
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shadowGrow {
+    from {
+        opacity: 0;
+        transform: rotate(6deg) scale(0.9);
+    }
+    to {
+        opacity: 0.2;
+        transform: rotate(6deg) scale(1);
+    }
+}
+
+@keyframes cardFloat {
+    from {
+        opacity: 0;
+        transform: translateY(25px) rotate(-3deg) scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotate(-3deg) scale(1);
+    }
+}
+
+@keyframes lineExpand {
+    from {
+        width: 0;
+        opacity: 0;
+    }
+    to {
+        width: var(--line-width, 100%);
+        opacity: 0.3;
+    }
+}
+
+@keyframes boxGrow {
+    from {
+        height: 0;
+        opacity: 0;
+    }
+    to {
+        height: 3.5rem;
+        opacity: 0.3;
+    }
+}
+
+@keyframes gentleFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(-3deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(-3deg);
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .hero-content,
+    .hero-badge,
+    .hero-title-line-1,
+    .hero-title-line-2,
+    .hero-title-line-3,
+    .hero-line,
+    .hero-description,
+    .hero-magazine,
+    .magazine-shadow,
+    .magazine-card,
+    .magazine-line-1,
+    .magazine-line-2,
+    .magazine-line-3,
+    .magazine-box {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
 }
 </style>
