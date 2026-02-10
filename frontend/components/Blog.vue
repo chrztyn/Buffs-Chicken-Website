@@ -37,7 +37,7 @@
                                 v-if="post.image"
                                 :src="post.image"
                                 :alt="post.title"
-                                class="w-full h-auto object-cover"
+                                class="w-full h-full object-cover"
                             />
                             <div 
                                 v-else 
