@@ -31,14 +31,25 @@ router.get('/status', async (req, res) => {
     const settings = await StoreSettings.getSettings();
     const isOpen = settings.isStoreOpen();
     
-    // Find active temporary closure
+    // Find active temporary closure (using Philippines timezone)
     const now = new Date();
+    const philippinesOffset = 8 * 60; // 8 hours in minutes
+    const localOffset = now.getTimezoneOffset();
+    const timezoneDifference = philippinesOffset + localOffset;
+    const philippinesTime = new Date(now.getTime() + timezoneDifference * 60 * 1000);
+    
     const activeClosure = settings.temporaryClosures?.find(closure => {
       const start = new Date(closure.startDate);
       const end = new Date(closure.endDate);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      return now >= start && now <= end;
+      
+      // Convert to Philippines timezone
+      const philippinesStart = new Date(start.getTime() + timezoneDifference * 60 * 1000);
+      const philippinesEnd = new Date(end.getTime() + timezoneDifference * 60 * 1000);
+      
+      philippinesStart.setHours(0, 0, 0, 0);
+      philippinesEnd.setHours(23, 59, 59, 999);
+      
+      return philippinesTime >= philippinesStart && philippinesTime <= philippinesEnd;
     });
     
     res.json({

@@ -73,10 +73,18 @@ storeSettingsSchema.statics.getSettings = async function() {
 storeSettingsSchema.methods.isStoreOpen = function() {
   const now = new Date();
   
-  console.log('[isStoreOpen] Current time:', now.toString());
-  console.log('[isStoreOpen] Current time ISO:', now.toISOString());
+  // Convert to Philippines timezone (UTC+8) for consistent checking
+  const philippinesOffset = 8 * 60; // 8 hours in minutes
+  const localOffset = now.getTimezoneOffset(); // Server's offset from UTC in minutes
+  const timezoneDifference = philippinesOffset + localOffset;
+  const philippinesTime = new Date(now.getTime() + timezoneDifference * 60 * 1000);
+  
+  console.log('[isStoreOpen] Server time:', now.toString());
+  console.log('[isStoreOpen] Philippines time:', philippinesTime.toString());
+  console.log('[isStoreOpen] Server time ISO:', now.toISOString());
   
   // Check temporary closures first (highest priority)
+  // Use Philippines timezone for date comparisons
   if (this.temporaryClosures && this.temporaryClosures.length > 0) {
     console.log('[isStoreOpen] Checking', this.temporaryClosures.length, 'temporary closures');
     
@@ -89,17 +97,20 @@ storeSettingsSchema.methods.isStoreOpen = function() {
       console.log('[isStoreOpen] Closure end (raw):', closure.endDate);
       console.log('[isStoreOpen] Closure end (parsed):', end.toString());
       
-      // Set time to start/end of day for proper comparison
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
+      // Convert closure dates to Philippines timezone and set to start/end of day
+      const philippinesStart = new Date(start.getTime() + timezoneDifference * 60 * 1000);
+      const philippinesEnd = new Date(end.getTime() + timezoneDifference * 60 * 1000);
       
-      console.log('[isStoreOpen] After setHours - start:', start.toString());
-      console.log('[isStoreOpen] After setHours - end:', end.toString());
-      console.log('[isStoreOpen] now >= start?', now >= start);
-      console.log('[isStoreOpen] now <= end?', now <= end);
-      console.log('[isStoreOpen] Active?', now >= start && now <= end);
+      philippinesStart.setHours(0, 0, 0, 0);
+      philippinesEnd.setHours(23, 59, 59, 999);
       
-      return now >= start && now <= end;
+      console.log('[isStoreOpen] After timezone adjustment - start:', philippinesStart.toString());
+      console.log('[isStoreOpen] After timezone adjustment - end:', philippinesEnd.toString());
+      console.log('[isStoreOpen] Philippines time >= start?', philippinesTime >= philippinesStart);
+      console.log('[isStoreOpen] Philippines time <= end?', philippinesTime <= philippinesEnd);
+      console.log('[isStoreOpen] Active?', philippinesTime >= philippinesStart && philippinesTime <= philippinesEnd);
+      
+      return philippinesTime >= philippinesStart && philippinesTime <= philippinesEnd;
     });
     
     if (activeClosure) {
@@ -113,17 +124,24 @@ storeSettingsSchema.methods.isStoreOpen = function() {
     return !this.manualOverride.isClosed;
   }
 
-  // Check scheduled hours last
+  // Check scheduled hours last (using Philippines time already calculated above)
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const currentDay = dayNames[now.getDay()];
+  const currentDay = dayNames[philippinesTime.getDay()];
   const daySchedule = this.operatingHours[currentDay];
 
+  console.log('[isStoreOpen] Current day in Philippines:', currentDay);
+  console.log('[isStoreOpen] Day schedule:', daySchedule);
+
   if (!daySchedule.isOpen) {
+    console.log('[isStoreOpen] Store marked closed for', currentDay);
     return false;
   }
 
-  // Get current time in minutes since midnight
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  // Get current time in minutes since midnight (in Philippines timezone)
+  const currentMinutes = philippinesTime.getHours() * 60 + philippinesTime.getMinutes();
+  
+  console.log('[isStoreOpen] Philippines time - Hours:', philippinesTime.getHours(), 'Minutes:', philippinesTime.getMinutes());
+  console.log('[isStoreOpen] Current minutes since midnight:', currentMinutes);
   
   // Parse open and close times
   const [openHour, openMin] = daySchedule.openTime.split(':').map(Number);
@@ -132,7 +150,15 @@ storeSettingsSchema.methods.isStoreOpen = function() {
   const openMinutes = openHour * 60 + openMin;
   const closeMinutes = closeHour * 60 + closeMin;
 
-  return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+  console.log('[isStoreOpen] Open time:', daySchedule.openTime, '=', openMinutes, 'minutes');
+  console.log('[isStoreOpen] Close time:', daySchedule.closeTime, '=', closeMinutes, 'minutes');
+  console.log('[isStoreOpen] Current >= Open?', currentMinutes >= openMinutes);
+  console.log('[isStoreOpen] Current < Close?', currentMinutes < closeMinutes);
+  
+  const isOpenNow = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+  console.log('[isStoreOpen] Final result:', isOpenNow ? 'OPEN' : 'CLOSED');
+  
+  return isOpenNow;
 };
 
 module.exports = mongoose.model('StoreSettings', storeSettingsSchema);
