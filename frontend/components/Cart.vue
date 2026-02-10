@@ -262,15 +262,31 @@
 
                         <!-- Buttons -->
                         <div class="flex flex-col gap-3">
+                            <!-- Store Closed Warning -->
+                            <div v-if="!storeOpen" class="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-2">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <div class="flex-1">
+                                        <h4 class="font-['Unbounded'] text-sm font-bold text-red-800 mb-1">Store Currently Closed</h4>
+                                        <p class="font-['Unbounded'] text-xs text-red-700">We're not accepting orders right now. Please check back during our operating hours.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- Place Order -->
                             <button
                                 @click="openOrderConfirmModal"
-                                class="w-full px-4 md:px-5 bg-gradient-to-r from-[#FEB90E] to-[#FFD86B]
-                                    text-[#1e3a8a] font-['Unbounded'] font-bold py-3
-                                    text-sm md:text-base rounded-lg transition-all duration-200
-                                    hover:shadow-xl hover:brightness-105 min-h-11 flex items-center justify-center"
+                                :disabled="!storeOpen"
+                                :class="[
+                                    'w-full px-4 md:px-5 font-[\'Unbounded\'] font-bold py-3 text-sm md:text-base rounded-lg transition-all duration-200 min-h-11 flex items-center justify-center',
+                                    storeOpen 
+                                        ? 'bg-gradient-to-r from-[#FEB90E] to-[#FFD86B] text-[#1e3a8a] hover:shadow-xl hover:brightness-105 cursor-pointer'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                                ]"
                             >
-                                Place Order
+                                {{ storeOpen ? 'Place Order' : 'Store Closed - Cannot Order' }}
                             </button>
 
                             <!-- View Status -->
@@ -313,7 +329,9 @@ export default {
             deliveryFee: 40,
             hasActiveOrder: false,
             showOrderConfirmModal: false,
-            orderStatus: ''
+            orderStatus: '',
+            storeOpen: true,
+            storeStatus: null
         };
     },
     computed: {
@@ -501,6 +519,15 @@ export default {
                 
                 if (!response.ok) {
                     const errorData = await response.json();
+                    
+                    // Check if store is closed
+                    if (errorData.storeClosed) {
+                        alert('⚠️ Store is Currently Closed\n\n' + errorData.message + '\n\nPlease check our operating hours and try again when we\'re open.');
+                        // Refresh the page to show updated store status
+                        window.location.reload();
+                        return;
+                    }
+                    
                     throw new Error(errorData.message || `Failed to submit order (${response.status})`);
                 }
                 
@@ -555,11 +582,26 @@ export default {
         checkForActiveOrder() {
             const order = localStorage.getItem('buffs_order');
             this.hasActiveOrder = !!order;
+        },
+        async loadStoreStatus() {
+            try {
+                const { getStoreStatus } = useApi();
+                const response = await getStoreStatus();
+                if (response.data && response.data.data) {
+                    this.storeOpen = response.data.data.isOpen;
+                    this.storeStatus = response.data.data;
+                }
+            } catch (error) {
+                console.error('Failed to load store status:', error);
+                // Assume open if we can't check
+                this.storeOpen = true;
+            }
         }
     },
     mounted() {
         this.loadCart();
         this.checkForActiveOrder();
+        this.loadStoreStatus();
     }
 };
 </script>

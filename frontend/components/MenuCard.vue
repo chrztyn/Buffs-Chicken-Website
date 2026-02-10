@@ -1,15 +1,23 @@
 <template>
     <div>
         <div 
-            @click="openModal"
-            class="menu-card bg-white rounded-2xl p-2 sm:p-2.5 flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 group cursor-pointer"
+            @click="disabled ? null : openModal()"
+            :class="[
+                'menu-card bg-white rounded-2xl p-2 sm:p-2.5 flex flex-col shadow-sm transition-all duration-300 border border-gray-100 group',
+                disabled 
+                    ? 'opacity-60 cursor-not-allowed' 
+                    : 'hover:shadow-xl hover:border-gray-200 cursor-pointer'
+            ]"
         >
             <!-- Image Section -->
             <div class="image-container rounded-xl p-1 sm:p-1.5 mb-2 sm:mb-2.5 flex items-center justify-center overflow-hidden transition-colors duration-300">
                 <img 
                     :src="image" 
                     :alt="name" 
-                    class="w-full h-32 sm:h-40 object-contain transition-transform duration-300 group-hover:scale-105"
+                    :class="[
+                        'w-full h-32 sm:h-40 object-contain transition-transform duration-300',
+                        disabled ? 'grayscale' : 'group-hover:scale-105'
+                    ]"
                 />
             </div>
             
@@ -29,12 +37,21 @@
                     {{ description }}
                 </p>
             </div>
+
+            <!-- Disabled Overlay Badge -->
+            <div 
+                v-if="disabled"
+                class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold font-['Unbounded'] px-2 py-1 rounded-full"
+            >
+                Closed
+            </div>
         </div>
 
         <!-- Modal -->
         <MenuModal
             :isOpen="isModalOpen"
             :item="product"
+            :disabled="disabled"
             @close="closeModal"
             @add-to-cart="handleAddToCart"
         />
@@ -68,6 +85,10 @@ export default {
                 variants: Array,
                 addons: Array
             }
+        },
+        disabled: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {

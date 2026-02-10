@@ -2,7 +2,7 @@
   <div class="p-4 lg:p-8">
     <!-- Page Header -->
     <div class="mb-8">
-      <h1 class="font-['Caprasimo'] text-4xl text-[#1A4189] mb-2">Dashboard</h1>
+      <h1 class="font-['Unbounded'] text-4xl text-[#1A4189] mb-2">Dashboard</h1>
       <p class="font-['Unbounded'] text-gray-600">Welcome back, {{ adminName }}!</p>
     </div>
 
@@ -25,7 +25,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-['Unbounded'] text-sm text-gray-600 font-semibold">Total Orders</p>
-            <p class="font-['Caprasimo'] text-3xl text-[#1A4189] mt-2">{{ analytics.totalOrders }}</p>
+            <p class="font-['Unbounded'] text-3xl text-[#1A4189] mt-2">{{ analytics.totalOrders }}</p>
           </div>
         </div>
       </div>
@@ -35,7 +35,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-['Unbounded'] text-sm text-gray-600 font-semibold">Total Revenue</p>
-            <p class="font-['Caprasimo'] text-3xl text-[#1A4189] mt-2">${{ analytics.totalRevenue }}</p>
+            <p class="font-['Unbounded'] text-3xl text-[#1A4189] mt-2">₱{{ analytics.totalRevenue }}</p>
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-['Unbounded'] text-sm text-gray-600 font-semibold">Today's Orders</p>
-            <p class="font-['Caprasimo'] text-3xl text-[#1A4189] mt-2">{{ analytics.todayOrders }}</p>
+            <p class="font-['Unbounded'] text-3xl text-[#1A4189] mt-2">{{ analytics.todayOrders }}</p>
           </div>
         </div>
       </div>
@@ -55,15 +55,35 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-['Unbounded'] text-sm text-gray-600 font-semibold">Active Orders</p>
-            <p class="font-['Caprasimo'] text-3xl text-[#1A4189] mt-2">{{ analytics.activeOrders }}</p>
+            <p class="font-['Unbounded'] text-3xl text-[#1A4189] mt-2">{{ analytics.activeOrders }}</p>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Website Analytics Link Card -->
+    <a 
+      href="https://analytics.google.com/analytics/web/#/p/414999518/reports/dashboard" 
+      target="_blank"
+      class="block bg-gradient-to-r from-[#FE601C] to-[#e5540a] rounded-xl shadow-lg p-6 mb-8 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+    >
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="font-['Unbounded'] text-sm text-white font-semibold mb-2">Website Analytics</p>
+          <p class="font-['Unbounded'] text-lg text-white mb-3">View detailed traffic and user insights</p>
+          <p class="font-['Unbounded'] text-xs text-white/80">Click to open Google Analytics Dashboard</p>
+        </div>
+        <div class="text-white">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+        </div>
+      </div>
+    </a>
+
     <!-- Order Status Breakdown -->
     <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-      <h2 class="font-['Caprasimo'] text-2xl text-[#1A4189] mb-4">Orders by Status</h2>
+      <h2 class="font-['Unbounded'] text-2xl text-[#1A4189] mb-4">Orders by Status</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div
           v-for="(count, status) in analytics.ordersByStatus"
@@ -71,7 +91,7 @@
           class="p-4 bg-[#FBF4E5] rounded-lg border-2 border-gray-200"
         >
           <p class="font-['Unbounded'] text-xs font-semibold text-gray-600 uppercase">{{ status }}</p>
-          <p class="font-['Caprasimo'] text-2xl text-[#FE601C] mt-2">{{ count }}</p>
+          <p class="font-['Unbounded'] text-2xl text-[#FE601C] mt-2">{{ count }}</p>
         </div>
       </div>
     </div>
@@ -79,7 +99,7 @@
     <!-- Recent Orders -->
     <div class="bg-white rounded-xl shadow-md p-6 mb-8">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="font-['Caprasimo'] text-2xl text-[#1A4189]">Recent Orders</h2>
+        <h2 class="font-['Unbounded'] text-2xl text-[#1A4189]">Recent Orders</h2>
         <button
           @click="loadAnalytics"
           class="px-4 py-2 bg-[#FE601C] text-white font-['Unbounded'] font-semibold rounded-lg hover:bg-[#e5551a] transition"

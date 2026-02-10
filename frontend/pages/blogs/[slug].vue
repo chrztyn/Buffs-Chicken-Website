@@ -32,7 +32,7 @@
     </div>
 
     <!-- Main Content -->
-    <div v-else-if="blog">
+    <div v-else-if="blog" class="bg-[#FBF4E5]">
       <!-- Hero Section with Parallax Effect -->
       <div class="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[75vh] overflow-hidden">
         <!-- Hero Image with Parallax -->
@@ -85,12 +85,12 @@
             </div>
 
             <!-- Title -->
-            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-4 sm:mb-6 font-['Unbounded'] drop-shadow-2xl">
+            <h1 class="blog-title-slug text-s sm:text-l md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight mb-4 sm:mb-6 font-['Unbounded'] drop-shadow-2xl">
               {{ blog.title }}
             </h1>
 
             <!-- Excerpt -->
-            <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 font-light max-w-3xl font-['Unbounded'] leading-relaxed drop-shadow-lg">
+            <p class="blog-excerpt-slug text-base sm:text-md md:text-l lg:text-xl text-white/95 font-light max-w-3xl font-['Unbounded'] leading-relaxed drop-shadow-lg">
               {{ blog.excerpt || blog.metaDescription }}
             </p>
           </div>
@@ -98,7 +98,7 @@
       </div>
 
       <!-- Article Content Container -->
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 relative z-10">
+      <div class="bg-[#FBF4E5] max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 relative z-10">
         <!-- Main Content Card with Drop Shadow -->
         <article class="bg-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden mb-8 sm:mb-12 md:mb-16">
           <div class="p-6 sm:p-8 md:p-10 lg:p-14">
@@ -148,8 +148,8 @@
           <div class="relative p-6 sm:p-8 md:p-10 lg:p-12 text-center">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-10">
-              <div class="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-              <div class="absolute bottom-0 right-0 w-60 h-60 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
+              <div class="absolute top-0 left-0 w-40 h-40 bg-[#FBF4E5] rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+              <div class="absolute bottom-0 right-0 w-60 h-60 bg-[#FBF4E5] rounded-full translate-x-1/3 translate-y-1/3"></div>
             </div>
 
             <!-- Content -->

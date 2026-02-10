@@ -21,6 +21,7 @@ const blogRoutes = require('./routes/blogs');
 const notificationRoutes = require('./routes/notifications');
 const paymentRoutes = require('./routes/payments');
 const contactRoutes = require('./routes/contact');
+const storeSettingsRoutes = require('./routes/storeSettings');
 
 // Initialize Express app
 const app = express();
@@ -104,6 +105,7 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/store-settings', storeSettingsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -59,76 +59,66 @@
         <!-- Mobile Menu Button -->
         <button 
           @click="menuOpen = !menuOpen"
-          class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors relative w-10 h-10 flex items-center justify-center"
           aria-label="Toggle menu"
         >
-          <svg 
-            class="w-6 h-6 text-gray-700"
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              v-if="!menuOpen"
-              stroke-linecap="round" 
-              stroke-linejoin="round" 
-              stroke-width="2" 
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-            <path 
-              v-else
-              stroke-linecap="round" 
-              stroke-linejoin="round" 
-              stroke-width="2" 
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <div class="hamburger-icon">
+            <span class="hamburger-line" :class="{ 'open': menuOpen }"></span>
+            <span class="hamburger-line" :class="{ 'open': menuOpen }"></span>
+            <span class="hamburger-line" :class="{ 'open': menuOpen }"></span>
+          </div>
         </button>
       </div>
 
       <!-- Mobile Menu -->
       <transition name="mobile-menu">
-        <div v-if="menuOpen" class="md:hidden pb-4">
-          <div class="flex flex-col gap-2">
+        <div v-if="menuOpen" class="md:hidden pb-4 overflow-hidden">
+          <div class="flex flex-col gap-2 pt-2">
             <NuxtLink 
               to="/" 
               @click="menuOpen = false"
-              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200"
+              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
+              style="animation-delay: 0.05s"
             >
               Home
             </NuxtLink>
             <NuxtLink 
               to="/blogs" 
               @click="menuOpen = false"
-              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200"
+              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
+              style="animation-delay: 0.1s"
             >
               Blogs
             </NuxtLink>
             <NuxtLink 
               to="/menu" 
               @click="menuOpen = false"
-              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200"
+              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
+              style="animation-delay: 0.15s"
             >
               Menu
             </NuxtLink>
             <NuxtLink 
               to="/about" 
               @click="menuOpen = false"
-              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200"
+              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
+              style="animation-delay: 0.2s"
             >
               About
             </NuxtLink>
             <NuxtLink 
               to="/contact" 
               @click="menuOpen = false"
-              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200"
+              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
+              style="animation-delay: 0.25s"
             >
               Contact
             </NuxtLink>
             <NuxtLink 
               to="/cart" 
               @click="menuOpen = false"
-              class="relative font-['Unbounded'] font-semibold text-sm bg-[#1A4189] text-[#FEB90E] py-3 px-4 rounded-lg hover:bg-[#15306d] transition-all duration-200 text-center"
+              class="relative font-['Unbounded'] font-semibold text-sm bg-[#1A4189] text-[#FEB90E] py-3 px-4 rounded-lg hover:bg-[#15306d] transition-all duration-200 text-center menu-item"
+              style="animation-delay: 0.3s"
             >
               Cart
               <span v-if="cartCount > 0" class="ml-2 bg-[#FEB90E] text-gray-900 text-xs font-bold rounded-full px-2 py-0.5">
@@ -177,27 +167,109 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.mobile-menu-enter-active,
-.mobile-menu-leave-active {
-  transition: all 0.3s ease;
+/* Hamburger icon styles */
+.hamburger-icon {
+  width: 24px;
+  height: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.mobile-menu-enter-from,
-.mobile-menu-leave-to {
+.hamburger-line {
+  display: block;
+  width: 100%;
+  height: 2.5px;
+  background-color: #374151;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out;
+  transform-origin: center;
+}
+
+/* First line - rotates and moves down */
+.hamburger-line:nth-child(1).open {
+  transform: translateY(7.5px) rotate(45deg);
+}
+
+/* Second line - fades out */
+.hamburger-line:nth-child(2).open {
   opacity: 0;
-  max-height: 0;
+  transform: translateX(-10px);
 }
 
-.mobile-menu-enter-to,
-.mobile-menu-leave-from {
-  opacity: 1;
-  max-height: 500px;
+/* Third line - rotates and moves up */
+.hamburger-line:nth-child(3).open {
+  transform: translateY(-7.5px) rotate(-45deg);
+}
+
+/* Mobile menu transition */
+.mobile-menu-enter-active {
+  animation: slideDown 3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-menu-leave-active {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.95);
+    max-height: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 500px;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 500px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    max-height: 0;
+  }
+}
+
+/* Staggered menu items animation */
+.mobile-menu-enter-active .menu-item {
+  animation: fadeInSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@keyframes fadeInSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hamburger-line {
+    transition: none;
+  }
+  
   .mobile-menu-enter-active,
   .mobile-menu-leave-active {
+    animation: none;
     transition: none;
+  }
+  
+  .menu-item {
+    animation: none !important;
   }
 }
 </style>

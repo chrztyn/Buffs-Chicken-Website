@@ -211,6 +211,21 @@
                             </div>
                         </transition>
 
+                        <!-- Store Closed Warning -->
+                        <transition name="slide-down">
+                            <div v-if="disabled" class="border-l-4 border-red-500 bg-red-50 p-4 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-bold text-red-800 font-['Unbounded'] text-sm">Store is currently closed</p>
+                                        <p class="text-red-700 font-['Unbounded'] text-xs mt-1">We're not accepting orders right now. Please check our operating hours.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+
                         <!-- Price Summary -->
                         <div class="price-summary">
                             <div class="price-row">
@@ -239,13 +254,17 @@
                             </button>
                             <button
                                 @click="addToCart"
-                                class="btn-add"
+                                :disabled="disabled"
+                                :class="[
+                                    'btn-add',
+                                    disabled ? 'opacity-50 cursor-not-allowed' : ''
+                                ]"
                                 style="font-family: 'Unbounded';"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                Add
+                                {{ disabled ? 'Closed' : 'Add' }}
                             </button>
                         </div>
                     </div>
@@ -284,6 +303,10 @@ export default {
                 variants: Array,
                 addons: Array
             }
+        },
+        disabled: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -351,6 +374,15 @@ export default {
             }
         },
         addToCart() {
+            // Prevent adding to cart if store is closed
+            if (this.disabled) {
+                this.validationError = 'Store is currently closed. Orders are not available at this time.';
+                setTimeout(() => {
+                    this.validationError = '';
+                }, 3000);
+                return;
+            }
+
             // Validate that at least one sauce is selected for each sauce group
             if (this.item.sauces && this.item.sauces.length > 0) {
                 for (const sauce of this.item.sauces) {

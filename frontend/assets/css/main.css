@@ -390,11 +390,6 @@ body,
     padding-right: 50px;
   }
 
-  h1 {
-    line-height: 1.1;
-    font-size: 4rem;
-  }
-
   h2 {
     font-size: 1.5rem;
     font-weight: 700;
@@ -699,11 +694,6 @@ body,
     padding-top: 50px;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
-  }
-
-  h1 {
-    line-height: 1.2;
-    font-size: 3rem;
   }
 
   h2 {
@@ -1021,6 +1011,14 @@ body,
     padding-left: 1rem;
     padding-right: 1rem;
     margin-bottom: 6px;
+  }
+
+  .blog-title-slug {
+    font-size: 1.25rem;
+  }
+
+  .blog-excerpt-slug {
+    font-size: .75rem;
   }
 }
 

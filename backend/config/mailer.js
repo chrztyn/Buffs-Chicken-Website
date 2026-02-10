@@ -209,7 +209,7 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
 
             <!-- Action Button -->
             <div style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.ADMIN_DASHBOARD_URL || 'http://localhost:3000/admin/orders'}" style="display: inline-block; background: linear-gradient(to right, #1A4189, #2356b4); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              <a href="${process.env.ADMIN_DASHBOARD_URL || 'https://buffschicken.com/admin/orders'}" style="display: inline-block; background: linear-gradient(to right, #1A4189, #2356b4); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                 View Order in Dashboard
               </a>
             </div>

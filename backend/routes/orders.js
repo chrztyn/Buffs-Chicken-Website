@@ -5,11 +5,22 @@ const Cart = require('../models/Cart');
 const User = require('../models/User');
 const Payment = require('../models/Payment');
 const Notification = require('../models/Notification');
+const StoreSettings = require('../models/StoreSettings');
 const { sendOrderNotification, sendAdminOrderNotification } = require('../config/mailer');
 
 // Create order from cart
 router.post('/', async (req, res) => {
   try {
+    // Check if store is open
+    const storeSettings = await StoreSettings.getSettings();
+    if (!storeSettings.isStoreOpen()) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Store is currently closed. Please try again during our operating hours.',
+        storeClosed: true
+      });
+    }
+
     const { userId, cartId, deliveryAddress, notes, subtotal, tax, deliveryFee } = req.body;
 
     const user = await User.findById(userId);
@@ -239,6 +250,16 @@ router.post('/:orderId/reorder', async (req, res) => {
 // Submit order after OTP verification (for direct cart checkout)
 router.post('/submit', async (req, res) => {
   try {
+    // Check if store is open
+    const storeSettings = await StoreSettings.getSettings();
+    if (!storeSettings.isStoreOpen()) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Store is currently closed. Please try again during our operating hours.',
+        storeClosed: true
+      });
+    }
+
     const { 
       userId, 
       name,

@@ -28,6 +28,147 @@
 
         <Navbar class="relative z-20" />
 
+        <!-- Store Status Banner -->
+        <div 
+            v-if="storeStatus"
+            :class="[
+                'store-status-banner py-4 px-6 shadow-md border-b-2',
+                storeStatus.isOpen 
+                    ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-400' 
+                    : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-400'
+            ]"
+        >
+            <div class="max-w-[1920px] mx-auto">
+                <div class="flex flex-col gap-3">
+                    <!-- Status Header -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div 
+                                :class="[
+                                    'w-3 h-3 rounded-full animate-pulse',
+                                    storeStatus.isOpen ? 'bg-green-500' : 'bg-red-500'
+                                ]"
+                            ></div>
+                            <h3 
+                                :class="[
+                                    'text-lg sm:text-xl font-bold font-[\'Unbounded\']',
+                                    storeStatus.isOpen ? 'text-green-800' : 'text-red-800'
+                                ]"
+                            >
+                                {{ storeStatus.isOpen ? 'We\'re Open!' : 'We\'re Closed' }}
+                            </h3>
+                        </div>
+                        <button 
+                            @click="showOperatingHours = !showOperatingHours"
+                            class="text-xs sm:text-sm font-semibold font-['Unbounded'] text-gray-600 hover:text-gray-800 flex items-center gap-1 transition-colors"
+                        >
+                            {{ showOperatingHours ? 'Hide' : 'View' }} Hours
+                            <svg 
+                                :class="['w-4 h-4 transition-transform duration-300', { 'rotate-180': showOperatingHours }]"
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Custom Message (if exists) -->
+                    <p 
+                        v-if="storeStatus.message"
+                        :class="[
+                            'text-sm sm:text-base font-[\'Unbounded\']',
+                            storeStatus.isOpen ? 'text-green-700' : 'text-red-700'
+                        ]"
+                    >
+                        {{ storeStatus.message }}
+                    </p>
+
+                    <!-- Temporary Closure Countdown -->
+                    <div 
+                        v-if="storeStatus.activeClosure"
+                        class="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 border border-red-300 rounded-full"
+                    >
+                        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-xs font-semibold font-['Unbounded'] text-red-800">
+                            {{ getClosureCountdown(storeStatus.activeClosure) }}
+                        </span>
+                    </div>
+
+                    <!-- Operating Hours -->
+                    <transition
+                        enter-active-class="transition-all duration-300 ease-out"
+                        leave-active-class="transition-all duration-200 ease-in"
+                        enter-from-class="opacity-0 max-h-0"
+                        leave-to-class="opacity-0 max-h-0"
+                    >
+                        <div v-if="showOperatingHours" class="mt-2 pt-3 border-t border-gray-300">
+                            <h4 class="text-sm font-bold font-['Unbounded'] text-gray-800 mb-2">Operating Hours</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                <div 
+                                    v-for="(hours, day) in operatingHours" 
+                                    :key="day"
+                                    class="flex flex-col text-xs sm:text-sm font-['Unbounded'] bg-white px-3 py-2 rounded-lg"
+                                >
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-semibold text-gray-700 capitalize">{{ day }}:</span>
+                                        <span 
+                                            :class="[
+                                                'font-medium',
+                                                hours.isOpen ? 'text-gray-600' : 'text-red-600'
+                                            ]"
+                                        >
+                                            {{ hours.isOpen ? `${formatTime(hours.openTime)} - ${formatTime(hours.closeTime)}` : 'Closed' }}
+                                        </span>
+                                    </div>
+                                    <p 
+                                        v-if="hours.customMessage"
+                                        class="text-xs text-blue-600 font-medium mt-1 italic"
+                                    >
+                                        {{ hours.customMessage }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Upcoming Closures Section -->
+                            <div v-if="upcomingClosures.length > 0" class="mt-4 pt-3 border-t border-gray-300">
+                                <h4 class="text-sm font-bold font-['Unbounded'] text-gray-800 mb-3 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    Upcoming Closures
+                                </h4>
+                                <div class="space-y-2">
+                                    <div 
+                                        v-for="closure in upcomingClosures" 
+                                        :key="closure._id"
+                                        class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
+                                    >
+                                        <div class="flex items-start gap-2">
+                                            <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="text-xs font-semibold font-['Unbounded'] text-amber-800">
+                                                    {{ formatDate(closure.startDate) }} - {{ formatDate(closure.endDate) }}
+                                                </p>
+                                                <p v-if="closure.message" class="text-xs font-['Unbounded'] text-amber-700 mt-0.5">
+                                                    {{ closure.message }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
+            </div>
+        </div>
+
         <!-- Menu Content Section -->
         <div class="menu-content-container pt-8 sm:pt-12 md:pt-16 pb-16 sm:pb-20 md:pb-24 lg:pb-32 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 max-w-[1920px] mx-auto w-full">
             <!-- Main Content: Left Sidebar and Right Grid -->
@@ -151,11 +292,22 @@
 
                 <!-- Right Main Content (Full width on mobile/tablet, 75% on desktop) -->
                 <div class="flex-1 w-full lg:w-[75%] pb-8">
+                    <!-- Store Closed Message (shown when items are disabled) -->
+                    <div 
+                        v-if="storeStatus && !storeStatus.isOpen"
+                        class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg"
+                    >
+                        <p class="text-sm font-semibold font-['Unbounded'] text-red-800">
+                            Sorry, we're currently closed. You can browse our menu but ordering is disabled.
+                        </p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-7 menu-grid">
                         <MenuCard
                             v-for="item in filteredMenuItems"
                             :key="item.id"
                             :product="item"
+                            :disabled="storeStatus && !storeStatus.isOpen"
                             @add-to-cart="handleAddToCart"
                         />
                     </div>
@@ -225,7 +377,12 @@ export default {
       pageSize: 12,
       totalProducts: 0,
       hasMore: true,
-      isLoadingMore: false
+      isLoadingMore: false,
+      // Store status properties
+      storeStatus: null,
+      showOperatingHours: false,
+      operatingHours: {},
+      upcomingClosures: []
     }
   },
   async mounted() {
@@ -235,6 +392,13 @@ export default {
       console.log('[Menu] after loadProducts, items =', this.menuItems.length)
     } catch (e) {
       console.error('[Menu] mounted -> loadProducts threw', e)
+    }
+
+    // Load store status
+    try {
+      await this.loadStoreStatus()
+    } catch (e) {
+      console.error('[Menu] Failed to load store status:', e)
     }
 
     // Load cart count on page load
@@ -435,6 +599,83 @@ export default {
           this.loadProducts(this.currentPage + 1)
         }
       }
+    },
+    async loadStoreStatus() {
+      try {
+        const { getStoreStatus } = useApi()
+        
+        // Fetch current store status (open/closed) and operating hours
+        const statusResponse = await getStoreStatus()
+        
+        // Extract data from backend response
+        if (statusResponse.data && statusResponse.data.data) {
+          const { isOpen, manualOverride, operatingHours, activeClosure, temporaryClosures } = statusResponse.data.data
+          
+          // Priority: 1. Active temporary closure, 2. Manual override, 3. Day's custom message
+          let displayMessage = ''
+          
+          if (activeClosure) {
+            // Temporary closure is active
+            displayMessage = activeClosure.message || 'Temporarily closed'
+          } else if (manualOverride.isActive) {
+            // Manual override is active
+            displayMessage = manualOverride.message
+          } else {
+            // Use day's custom message
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+            const today = new Date().getDay()
+            const currentDay = dayNames[today]
+            const todaySchedule = operatingHours[currentDay]
+            displayMessage = todaySchedule?.customMessage || ''
+          }
+          
+          // Set store status
+          this.storeStatus = {
+            isOpen,
+            message: displayMessage,
+            activeClosure: activeClosure || null
+          }
+          
+          // Set operating hours
+          this.operatingHours = operatingHours || {}
+          
+          // Filter for upcoming closures only (not active, not past)
+          const now = new Date()
+          this.upcomingClosures = (temporaryClosures || []).filter(closure => {
+            const start = new Date(closure.startDate)
+            start.setHours(0, 0, 0, 0)
+            return start > now
+          }).sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+        }
+      } catch (error) {
+        console.error('Error loading store status:', error)
+      }
+    },
+    formatTime(time) {
+      // Convert 24-hour time to 12-hour format with AM/PM
+      if (!time) return ''
+      const [hours, minutes] = time.split(':')
+      const hour = parseInt(hours, 10)
+      const ampm = hour >= 12 ? 'PM' : 'AM'
+      const displayHour = hour % 12 || 12
+      return `${displayHour}:${minutes} ${ampm}`
+    },
+    getClosureCountdown(closure) {
+      if (!closure) return ''
+      
+      const now = new Date()
+      const end = new Date(closure.endDate)
+      end.setHours(23, 59, 59, 999)
+      
+      const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      
+      if (daysLeft === 0) return 'Reopening today'
+      if (daysLeft === 1) return 'Reopening tomorrow'
+      return `Reopening in ${daysLeft} days`
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     }
   }
 }

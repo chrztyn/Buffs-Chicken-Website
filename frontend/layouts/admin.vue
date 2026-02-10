@@ -43,11 +43,11 @@
           Blogs
         </NuxtLink>
         <NuxtLink
-          to="/admin/analytics"
+          to="/admin/store-hours"
           class="block px-4 py-2 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
           @click="menuOpen = false"
         >
-          Analytics
+          Store Hours
         </NuxtLink>
         <button
           @click="handleLogout"
@@ -90,10 +90,10 @@
               Blogs
             </NuxtLink>
             <NuxtLink
-              to="/admin/analytics"
+              to="/admin/store-hours"
               class="block px-4 py-3 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
             >
-              Analytics
+              Store Hours
             </NuxtLink>
           </nav>
 

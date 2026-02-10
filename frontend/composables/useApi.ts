@@ -113,6 +113,14 @@ export const useApi = () => {
     })
   }
 
+  // Store Settings endpoints
+  const getStoreSettings = () => api.get('/store-settings')
+  const getStoreStatus = () => api.get('/store-settings/status')
+  const updateStoreSettings = (data: any) => api.put('/store-settings', data)
+  const toggleStoreOverride = (data: any) => api.post('/store-settings/toggle-override', data)
+  const addTemporaryClosure = (data: any) => api.post('/store-settings/temporary-closures', data)
+  const deleteTemporaryClosure = (id: string) => api.delete(`/store-settings/temporary-closures/${id}`)
+
   return {
     api,
     adminLogin,
@@ -147,6 +155,12 @@ export const useApi = () => {
     deleteNotification,
     submitContactForm,
     uploadImage,
-    getPopularPicks
+    getPopularPicks,
+    getStoreSettings,
+    getStoreStatus,
+    updateStoreSettings,
+    toggleStoreOverride,
+    addTemporaryClosure,
+    deleteTemporaryClosure
   }
 }
