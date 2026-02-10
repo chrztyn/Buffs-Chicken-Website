@@ -1,248 +1,272 @@
 <template>
-  <div class="bg-white min-h-screen">
+  <div class="bg-gray-50 min-h-screen">
+    <!-- Navbar -->
+    <Navbar />
+
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center min-h-screen">
       <div class="text-center">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#2B5B9E]"></div>
-        <p class="mt-4 text-gray-600">Loading article...</p>
+        <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-[#FE601C] border-t-transparent"></div>
+        <p class="mt-6 text-lg text-gray-600 font-['Unbounded']">Loading article...</p>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="flex items-center justify-center min-h-screen">
-      <div class="text-center">
-        <p class="text-2xl font-bold text-gray-900 mb-4">Article Not Found</p>
-        <p class="text-gray-600 mb-8">{{ error }}</p>
-        <NuxtLink 
-          to="/"
-          class="inline-block bg-[#2B5B9E] text-white px-8 py-3 rounded-lg hover:bg-[#1e4670] transition-colors"
+    <div v-else-if="error" class="flex items-center justify-center min-h-screen px-4">
+      <div class="text-center max-w-md">
+        <svg class="w-20 h-20 mx-auto mb-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4 font-['Unbounded']">Article Not Found</h2>
+        <p class="text-gray-600 mb-8 font-['Unbounded']">{{ error }}</p>
+        <NuxtLink
+          to="/blogs"
+          class="inline-flex items-center gap-2 bg-gradient-to-r from-[#FE601C] to-[#e5540a] text-white px-8 py-3.5 rounded-full hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-['Unbounded'] font-semibold"
         >
-          Back to Home
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Back to Blog
         </NuxtLink>
       </div>
     </div>
 
-    <!-- Hero Section -->
-    <div v-else-if="blog" class="relative w-full min-h-[40vh] sm:min-h-[50vh] md:min-h-[60vh] lg:min-h-[70vh] overflow-hidden">
-      <!-- Hero Image -->
-      <img
-        v-if="blog.image"
-        :src="blog.image"
-        :alt="blog.title"
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <div v-else class="absolute inset-0 w-full h-full bg-gradient-to-r from-[#1A4189] to-[#FE601C]"></div>
-      
-      <!-- Gradient Overlay -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 pointer-events-none"></div>
+    <!-- Main Content -->
+    <div v-else-if="blog">
+      <!-- Hero Section with Parallax Effect -->
+      <div class="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[75vh] overflow-hidden">
+        <!-- Hero Image with Parallax -->
+        <div class="absolute inset-0 transform transition-transform duration-300" :style="{ transform: `translateY(${scrollY * 0.5}px)` }">
+          <img
+            v-if="blog.image"
+            :src="blog.image"
+            :alt="blog.title"
+            class="w-full h-full object-cover scale-110"
+          />
+          <div v-else class="w-full h-full bg-gradient-to-br from-[#1A4189] via-[#2B5B9E] to-[#FE601C]"></div>
+        </div>
 
-      <!-- Back Button -->
-      <button
-        @click="goBack"
-        class="absolute top-6 left-6 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all duration-300 group z-30"
-      >
-        <svg
-          class="w-5 h-5 text-gray-800 group-hover:text-[#FE601C] transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        <!-- Gradient Overlays -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent"></div>
+
+        <!-- Back Button -->
+        <button
+          @click="goBack"
+          class="absolute top-6 left-4 sm:left-6 md:left-8 bg-white/95 backdrop-blur-md p-3 sm:p-3.5 rounded-full shadow-xl hover:bg-white hover:shadow-2xl transition-all duration-300 group z-30 transform hover:scale-110"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M10 19l-7-7m0 0l7-7m-7 7h18"
-          ></path>
-        </svg>
-      </button>
-
-      <!-- Title Overlay -->
-      <div class="absolute bottom-0 left-0 right-0 pt-24 sm:pt-28 md:pt-32 lg:pt-36 pb-6 sm:pb-8 md:pb-12 lg:pb-16 px-6 sm:px-8 md:px-12 lg:px-16 z-20">
-        <div class="max-w-5xl mx-auto">
-          <div class="flex items-center gap-3 mb-4">
-            <span class="text-white/80 text-xs sm:text-sm font-['Unbounded']">
-              {{ formatDate(blog.createdAt) }}
-            </span>
-          </div>
-          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight mb-2 font-['Caprasimo']">
-            {{ blog.title }}
-          </h1>
-          <p class="text-lg sm:text-xl md:text-2xl text-white/90 font-light italic font-['Unbounded']">
-            {{ blog.excerpt || blog.metaDescription }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Content Section -->
-    <div v-if="blog" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
-      <!-- Main Content Card -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-12 mb-12">
-        <!-- Description -->
-        <div class="prose prose-sm sm:prose-base lg:prose-lg max-w-none mb-8">
-          <p class="text-base sm:text-lg md:text-lg text-gray-700 leading-relaxed whitespace-pre-line">
-            {{ blog.description || blog.content }}
-          </p>
-        </div>
-
-        <!-- Divider -->
-        <div class="my-8 sm:my-12 border-t border-gray-200"></div>
-
-        <!-- Full Content -->
-        <div class="mt-8 sm:mt-12">
-          <div class="prose prose-lg max-w-none space-y-6 text-gray-700 leading-relaxed">
-            <div v-html="parseContent(blog.content)" class="font-['Unbounded'] text-base leading-8"></div>
-          </div>
-        </div>
-
-                <!-- Meta Information -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-            <div class="w-10 h-10 bg-[#FE601C]/20 rounded-lg flex items-center justify-center">
-              <svg
-                class="w-5 h-5 text-[#FE601C]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                ></path>
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs text-gray-500 font-['Unbounded']">Published</p>
-              <p class="text-sm font-semibold text-gray-800 font-['Unbounded']">
-                {{ formatDateShort(blog.createdAt) }}
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-            <div class="w-10 h-10 bg-[#1A4189]/20 rounded-lg flex items-center justify-center">
-              <svg
-                class="w-5 h-5 text-[#1A4189]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs text-gray-500 font-['Unbounded']">Reading Time</p>
-              <p class="text-sm font-semibold text-gray-800 font-['Unbounded']">
-                {{ readTime }} min read
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Related Posts Section -->
-      <div v-if="relatedPosts.length > 0" class="mt-12 sm:mt-16">
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 font-['Caprasimo']">
-          More Stories
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div
-            v-for="post in relatedPosts"
-            :key="post._id"
-            @click="goToRelatedBlog(post.slug)"
-            class="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 border border-gray-100"
+          <svg
+            class="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 group-hover:text-[#FE601C] transition-colors"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <!-- Image Container -->
-            <div class="relative aspect-[4/3] overflow-hidden bg-gray-100">
-              <img
-                v-if="post.image"
-                :src="post.image"
-                :alt="post.title"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-              <div v-else class="w-full h-full bg-gradient-to-br from-[#1A4189] to-[#FE601C]"></div>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+        </button>
+
+        <!-- Title Content -->
+        <div class="absolute bottom-0 left-0 right-0 pb-8 sm:pb-12 md:pb-16 lg:pb-20 px-4 sm:px-6 md:px-8 lg:px-12 z-20">
+          <div class="max-w-5xl mx-auto">
+            <!-- Meta Info -->
+            <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <span class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs sm:text-sm font-['Unbounded'] font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                {{ formatDate(blog.publishedAt || blog.createdAt) }}
+              </span>
+              <span class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs sm:text-sm font-['Unbounded'] font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ readTime }} min read
+              </span>
             </div>
 
-            <!-- Content Container -->
-            <div class="p-5 sm:p-6 flex flex-col flex-grow">
-              <!-- Title -->
-              <h3 class="text-base sm:text-lg md:text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#FE601C] transition-colors font-['Unbounded']">
-                {{ post.title }}
-              </h3>
+            <!-- Title -->
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-4 sm:mb-6 font-['Unbounded'] drop-shadow-2xl">
+              {{ blog.title }}
+            </h1>
 
-              <!-- Excerpt -->
-              <p class="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-3 italic font-['Unbounded']">
-                {{ post.excerpt || post.metaDescription }}
-              </p>
+            <!-- Excerpt -->
+            <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 font-light max-w-3xl font-['Unbounded'] leading-relaxed drop-shadow-lg">
+              {{ blog.excerpt || blog.metaDescription }}
+            </p>
+          </div>
+        </div>
+      </div>
 
-              <!-- Footer -->
-              <div class="flex items-center gap-2 text-xs text-gray-500 font-['Unbounded']">
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                {{ formatDateShort(post.createdAt) }}
+      <!-- Article Content Container -->
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 relative z-10">
+        <!-- Main Content Card with Drop Shadow -->
+        <article class="bg-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden mb-8 sm:mb-12 md:mb-16">
+          <div class="p-6 sm:p-8 md:p-10 lg:p-14">
+            <!-- Article Content -->
+            <div class="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none">
+              <!-- Main Content -->
+              <div v-html="parseContent(blog.content)" class="article-content font-['Unbounded'] text-base sm:text-lg leading-7 sm:leading-8 text-gray-800 space-y-5"></div>
+            </div>
+
+            <!-- Article Meta -->
+            <div class="mt-8 sm:mt-10 md:mt-12 pt-6 sm:pt-8 md:pt-10 border-t-2 border-gray-100">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div class="flex items-center gap-4 p-5 bg-gradient-to-br from-[#FE601C]/10 to-[#FE601C]/5 rounded-2xl border border-[#FE601C]/20">
+                  <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#FE601C] to-[#e5540a] rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-xs sm:text-sm text-gray-600 font-['Unbounded'] mb-1">Published On</p>
+                    <p class="text-sm sm:text-base font-bold text-gray-900 font-['Unbounded']">
+                      {{ formatDateFull(blog.publishedAt || blog.createdAt) }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-5 bg-gradient-to-br from-[#1A4189]/10 to-[#1A4189]/5 rounded-2xl border border-[#1A4189]/20">
+                  <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#1A4189] to-[#2B5B9E] rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-xs sm:text-sm text-gray-600 font-['Unbounded'] mb-1">Written By</p>
+                    <p class="text-sm sm:text-base font-bold text-gray-900 font-['Unbounded']">
+                      Buffs Chicken Team
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CTA Section -->
+        <div class="bg-gradient-to-r from-[#1A4189] to-[#2B5B9E] rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden mb-8 sm:mb-12 md:mb-16 transform hover:scale-[1.02] transition-transform duration-500">
+          <div class="relative p-6 sm:p-8 md:p-10 lg:p-12 text-center">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+              <div class="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+              <div class="absolute bottom-0 right-0 w-60 h-60 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
+            </div>
+
+            <!-- Content -->
+            <div class="relative z-10">
+              <div class="inline-block mb-6">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-[#FE601C] rounded-full flex items-center justify-center mx-auto shadow-xl">
+                  <svg class="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                </div>
               </div>
 
-              <!-- View Details Button -->
-              <button class="mt-4 w-full bg-gradient-to-r from-[#FE601C] to-[#e5551a] text-white py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:from-[#e5551a] hover:to-[#cc4815] shadow-lg font-['Unbounded']">
-                View Details
-              </button>
+              <h3 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6 font-['Unbounded']">
+                Craving Something Delicious?
+              </h3>
+              <p class="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto font-['Unbounded'] leading-relaxed">
+                Order our signature crispy chicken wings, loaded combos, and cheesy pastas now. Fresh, hot, and delivered straight to your door!
+              </p>
+
+              <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <NuxtLink
+                  to="/menu"
+                  class="inline-flex items-center gap-3 bg-gradient-to-r from-[#FE601C] to-[#e5540a] text-white px-8 sm:px-10 py-4 sm:py-4.5 rounded-full font-bold text-base sm:text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-['Unbounded'] group w-full sm:w-auto justify-center"
+                >
+                  Order Now
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </NuxtLink>
+
+                <NuxtLink
+                  to="/contact"
+                  class="inline-flex items-center gap-3 bg-white text-[#1A4189] px-8 sm:px-10 py-4 sm:py-4.5 rounded-full font-bold text-base sm:text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-['Unbounded'] w-full sm:w-auto justify-center"
+                >
+                  Contact Us
+                </NuxtLink>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Latest Blogs Section -->
+        <div class="mb-8 sm:mb-12">
+          <div class="text-center mb-6 sm:mb-8 md:mb-10">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 font-['Unbounded']">
+              Latest Blogs
+            </h2>
+            <p class="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto font-['Unbounded']">
+              Explore more delicious stories and updates from Buffs Chicken
+            </p>
+          </div>
+
+          <!-- Blog Cards Grid -->
+          <div v-if="latestBlogs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <BlogCard
+              v-for="post in latestBlogs"
+              :key="post._id"
+              :blog="post"
+              @click="goToRelatedBlog(post.slug)"
+            />
+          </div>
+
+          <!-- No Blogs Message -->
+          <div v-else class="text-center py-8">
+            <p class="text-gray-500 font-['Unbounded'] text-sm sm:text-base">
+              No other blog posts available at the moment.
+            </p>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Footer -->
+    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useApi } from '~/composables/useApi'
+import BlogCard from '~/components/BlogCard.vue'
+import Navbar from '~/components/Navbar.vue'
+import Footer from '~/components/Footer.vue'
 
 const route = useRoute()
 const router = useRouter()
 const blog = ref<any>(null)
-const relatedPosts = ref<any[]>([])
+const latestBlogs = ref<any[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+const scrollY = ref(0)
 
 const { getBlogBySlug, getBlogs } = useApi()
 
-// Calculate read time (average 200 words per minute)
+// Handle scroll for parallax effect
+const handleScroll = () => {
+  scrollY.value = window.scrollY
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  loadBlog()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+// Calculate read time
 const readTime = computed(() => {
   if (!blog.value?.content || !blog.value?.description) return 5
   const wordCount = (blog.value.content + blog.value.description).split(/\s+/).length
   return Math.max(1, Math.ceil(wordCount / 200))
 })
 
-// Format date
+// Format dates
 const formatDate = (date: string | Date) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
-// Format date short
-const formatDateShort = (date: string | Date) => {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -250,42 +274,117 @@ const formatDateShort = (date: string | Date) => {
   })
 }
 
-// Parse content - simple markdown to HTML conversion
+const formatDateFull = (date: string | Date) => {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+// Parse markdown content
 const parseContent = (content: string) => {
   if (!content) return ''
-  
+
   let html = content
-    // Bold text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Italic text
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Headings
-    .replace(/^### (.*?)$/gm, '<h3 class="text-2xl font-bold mt-8 mb-4">$1</h3>')
-    .replace(/^## (.*?)$/gm, '<h2 class="text-3xl font-bold mt-10 mb-6">$1</h2>')
-    .replace(/^# (.*?)$/gm, '<h1 class="text-4xl font-bold mt-12 mb-8">$1</h1>')
-    // Line breaks for paragraphs
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[#1A4189]">$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+    .replace(/^### (.*?)$/gm, '<h3 class="text-xl sm:text-2xl font-bold mt-10 mb-5 text-[#1A4189] font-[\'Unbounded\']">$1</h3>')
+    .replace(/^## (.*?)$/gm, '<h2 class="text-2xl sm:text-3xl font-bold mt-12 mb-6 text-[#1A4189] font-[\'Unbounded\']">$1</h2>')
+    .replace(/^# (.*?)$/gm, '<h1 class="text-3xl sm:text-4xl font-bold mt-14 mb-8 text-[#1A4189] font-[\'Unbounded\']">$1</h1>')
     .split('\n\n')
     .map((para) => `<p class="mb-6">${para}</p>`)
     .join('')
-    // Lists
-    .replace(/\n- (.*?)(?=\n|$)/g, '<li class="ml-4 mb-2">$1</li>')
-    .replace(/(<li.*?<\/li>)+/g, '<ul class="list-disc space-y-2 mb-6">$&</ul>')
+    .replace(/\n- (.*?)(?=\n|$)/g, '<li class="ml-4 mb-3">$1</li>')
+    .replace(/(<li.*?<\/li>)+/g, '<ul class="list-disc list-inside space-y-3 mb-8 pl-4">$&</ul>')
 
   return html
 }
 
-// Fetch related posts
-const fetchRelatedPosts = async () => {
+// Fetch latest blogs
+const fetchLatestBlogs = async () => {
   try {
+    console.log('Fetching latest blogs from API...')
     const response = await getBlogs()
-    const allBlogs = response.data || []
+    console.log('Full API response:', response)
+    console.log('Response type:', typeof response)
+    console.log('Response.data:', response?.data)
+    console.log('Response.data type:', typeof response?.data)
     
-    // Filter out current blog and get random 3
-    const filtered = allBlogs.filter((b: any) => b._id !== blog.value._id)
-    const shuffled = filtered.sort(() => 0.5 - Math.random())
-    relatedPosts.value = shuffled.slice(0, 3)
+    // Extract blogs array from axios response
+    // Axios returns response.data as the actual response body
+    let allBlogs = []
+    
+    if (response?.data) {
+      // Check if response.data is the array directly
+      if (Array.isArray(response.data)) {
+        allBlogs = response.data
+        console.log('Blogs found in response.data (array)')
+      }
+      // Or if it's wrapped in response.data.data
+      else if (response.data.data && Array.isArray(response.data.data)) {
+        allBlogs = response.data.data
+        console.log('Blogs found in response.data.data')
+      }
+      // Or if it's in response.data.blogs
+      else if (response.data.blogs && Array.isArray(response.data.blogs)) {
+        allBlogs = response.data.blogs
+        console.log('Blogs found in response.data.blogs')
+      }
+      // Log the structure if we can't find it
+      else {
+        console.error('Unable to find blogs array. Response.data structure:', Object.keys(response.data))
+      }
+    }
+    
+    console.log('Total blogs extracted:', allBlogs.length)
+    console.log('All blogs:', allBlogs)
+    console.log('Current blog:', { id: blog.value?._id, slug: blog.value?.slug, title: blog.value?.title })
+
+    if (allBlogs.length === 0) {
+      console.warn('No blogs found in API response')
+      latestBlogs.value = []
+      return
+    }
+
+    // Filter: exclude current blog and only show published ones
+    const filtered = allBlogs
+      .filter((b: any) => {
+        const isNotCurrentById = b._id !== blog.value?._id
+        const isNotCurrentBySlug = b.slug !== blog.value?.slug
+        const isNotCurrent = isNotCurrentById || isNotCurrentBySlug
+        const isPublished = b.isPublished !== false // Default to true if field doesn't exist
+        
+        console.log(`Blog "${b.title}":`, {
+          id: b._id,
+          slug: b.slug,
+          currentBlogId: blog.value?._id,
+          currentBlogSlug: blog.value?.slug,
+          isNotCurrentById,
+          isNotCurrentBySlug,
+          isNotCurrent,
+          isPublished,
+          publishedField: b.isPublished,
+          willShow: isNotCurrent && isPublished
+        })
+        return isNotCurrent && isPublished
+      })
+      .sort((a: any, b: any) => {
+        // Sort by most recent first
+        const dateA = new Date(a.publishedAt || a.createdAt).getTime()
+        const dateB = new Date(b.publishedAt || b.createdAt).getTime()
+        return dateB - dateA
+      })
+      .slice(0, 3) // Limit to 3 blogs
+    
+    console.log('Filtered blogs:', filtered)
+    console.log('Number of blogs to display:', filtered.length)
+    
+    latestBlogs.value = filtered
   } catch (err) {
-    console.error('Error fetching related posts:', err)
+    console.error('Error fetching latest blogs:', err)
+    console.error('Error details:', err)
+    latestBlogs.value = []
   }
 }
 
@@ -294,35 +393,31 @@ const loadBlog = async () => {
   try {
     loading.value = true
     const slug = route.params.slug as string
-    
+
     if (!slug) {
       error.value = 'No article specified'
       return
     }
 
     const data = await getBlogBySlug(slug)
-    
+
     if (!data || !data.data) {
       error.value = 'Article not found. It may have been deleted or the URL is incorrect.'
       return
     }
 
     blog.value = data.data
-    
-    // Fetch related posts after blog is loaded
-    await fetchRelatedPosts()
 
-    // Set page title and meta tags for SEO
+    // Fetch latest blogs
+    await fetchLatestBlogs()
+
+    // Set page meta
     useHead({
       title: `${blog.value.title} | Buffs Chicken Blog`,
       meta: [
         {
           name: 'description',
           content: blog.value.metaDescription || blog.value.excerpt || `Read about ${blog.value.title} on Buffs Chicken blog`
-        },
-        {
-          name: 'keywords',
-          content: blog.value.metaKeywords?.join(', ') || 'buffs, chicken, blog'
         },
         {
           property: 'og:title',
@@ -337,8 +432,12 @@ const loadBlog = async () => {
           content: 'article'
         },
         {
+          property: 'og:image',
+          content: blog.value.image || 'https://buffschicken.com/buffs-logo.png'
+        },
+        {
           property: 'article:published_time',
-          content: blog.value.createdAt
+          content: blog.value.publishedAt || blog.value.createdAt
         }
       ],
       script: [
@@ -383,37 +482,53 @@ const loadBlog = async () => {
 }
 
 const goBack = () => {
-  router.back()
+  router.push('/blogs')
 }
 
 const goToRelatedBlog = (slug: string) => {
   router.push(`/blogs/${slug}`)
-  window.scrollTo(0, 0)
-}
-
-onMounted(() => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  // Reload blog data for new slug
   loadBlog()
-})
+}
 </script>
 
 <style scoped>
-/* Add any additional styles here */
-.prose {
+/* Article Content Styling */
+.article-content :deep(p) {
+  margin-bottom: 1.5rem;
+  line-height: 1.75;
+}
+
+.article-content :deep(strong) {
+  font-weight: 700;
+  color: #1A4189;
+}
+
+.article-content :deep(em) {
+  font-style: italic;
   color: #374151;
 }
 
-.prose strong {
-  font-weight: 700;
-  color: #1a4189;
+.article-content :deep(h1),
+.article-content :deep(h2),
+.article-content :deep(h3) {
+  font-family: 'Unbounded', cursive;
 }
 
-.prose em {
-  font-style: italic;
-  color: #555;
+.article-content :deep(ul) {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
-.prose h1, .prose h2, .prose h3 {
-  color: #1a4189;
-  font-family: 'Caprasimo', cursive;
+.article-content :deep(li) {
+  color: #374151;
+  line-height: 1.75;
+  margin-bottom: 0.75rem;
+}
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: smooth;
 }
 </style>
