@@ -12,25 +12,30 @@ export default defineNuxtConfig({
   },
   
   experimental: {
-    inlineSSRStyles: true, // Inline critical CSS for faster FCP
+    inlineSSRStyles: (id) => {
+      // Only inline critical components, not node_modules (saves memory)
+      return !id?.includes('node_modules')
+    },
   },
   
   features: {
-    inlineStyles: true, // Inline critical CSS
+    inlineStyles: false, // Disabled for server builds, but CSS still optimized
   },
   
   build: {
     transpile: ['@nuxt/image'],
+    analyze: false, // Disable bundle analyzer in production
   },
   vite: {
     build: {
       cssCodeSplit: false, // Bundle all CSS into one file to reduce requests
-      cssMinify: 'lightningcss',
+      cssMinify: 'esbuild', // Less memory than lightningcss, still good compression
       rollupOptions: {
         output: {
           manualChunks: undefined, // Prevent code splitting for better initial load
         }
-      }
+      },
+      chunkSizeWarningLimit: 1000, // Suppress warnings for server builds
     },
     css: {
       devSourcemap: false,
@@ -41,6 +46,8 @@ export default defineNuxtConfig({
   },
   nitro: {
     compressPublicAssets: true,
+    minify: true, // Minify server code for smaller output
+    sourceMap: false, // Disable source maps in production for smaller size
     routeRules: {
       '/': {
         headers: {
@@ -59,8 +66,8 @@ export default defineNuxtConfig({
       },
     },
     prerender: {
-      crawlLinks: true,
-      routes: ['/']
+      crawlLinks: false, // Disabled for memory efficiency
+      routes: ['/', '/menu', '/about', '/contact', '/blogs'], // Only prerender key pages
     }
   } as any,
   runtimeConfig: {
