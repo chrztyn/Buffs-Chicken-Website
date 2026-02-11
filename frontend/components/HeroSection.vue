@@ -59,8 +59,9 @@
             <div class="image-container group">
                 <div class="image-frame">
                 <img 
-                    src="/hero-main.jpg" 
+                    src="/hero-main.webp" 
                     alt="Buffs Chicken" 
+                    fetchpriority="high"
                     class="main-image"
                 />
                 

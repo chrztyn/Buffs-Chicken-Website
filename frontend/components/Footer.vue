@@ -100,7 +100,7 @@
 
 <style scoped>
 .footer-container {
-    background-color: #1e3a8a;
+    background-color: #1A4189;
     color: white;
     padding: 1rem 1rem;
     width: 100%;
@@ -166,7 +166,7 @@
 }
 
 .footer-title {
-    color: #FE601C !important;
+    color: #FEB90E;
     font-family: 'Caprasimo', cursive;
     font-size: 1.25rem;
     font-weight: 100;
@@ -201,7 +201,7 @@
 }
 
 .footer-subtitle {
-    color: #FE601C !important;
+    color: #FEB90E;
     font-size: 0.75rem;
     font-weight: 600;
     margin: 0 0 0.75rem 0;
@@ -245,7 +245,7 @@
 }
 
 .footer-link:hover {
-    color: #ff6b35;
+    color: #FEB90E;
 }
 
 /* Hours Section */
@@ -277,7 +277,7 @@
 .footer-social-link {
     width: 1.75rem;
     height: 1.75rem;
-    background-color: #FE601C;
+    background-color: #FEB90E;
     border-radius: 9999px;
     display: flex;
     align-items: center;
@@ -293,14 +293,14 @@
 }
 
 .footer-social-link:hover {
-    background-color: #ff8555;
+    background-color: #db9d00;
 }
 
 .footer-social-link svg {
     width: 1rem;
     height: 1rem;
 }
-
+    
 @media (min-width: 768px) {
     .footer-social-link svg {
         width: 1.25rem;

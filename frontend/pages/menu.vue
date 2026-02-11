@@ -382,7 +382,9 @@ export default {
       storeStatus: null,
       showOperatingHours: false,
       operatingHours: {},
-      upcomingClosures: []
+      upcomingClosures: [],
+      // Scroll optimization
+      scrollTicking: false
     }
   },
   async mounted() {
@@ -592,12 +594,24 @@ export default {
       this.$router.push('/cart')
     },
     handleScroll() {
-      // Check if user scrolled near bottom of page (500px from bottom)
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
-        // Load more products if available and not already loading
-        if (this.hasMore && !this.isLoadingMore && !this.loading) {
-          this.loadProducts(this.currentPage + 1)
-        }
+      // Throttle scroll events using requestAnimationFrame to prevent forced reflows
+      if (!this.scrollTicking) {
+        this.scrollTicking = true
+        requestAnimationFrame(() => {
+          // Check if user scrolled near bottom of page (500px from bottom)
+          // Use documentElement instead of body to avoid forced reflow
+          const scrollTop = window.scrollY
+          const windowHeight = window.innerHeight
+          const docHeight = document.documentElement.scrollHeight
+          
+          if (scrollTop + windowHeight >= docHeight - 500) {
+            // Load more products if available and not already loading
+            if (this.hasMore && !this.isLoadingMore && !this.loading) {
+              this.loadProducts(this.currentPage + 1)
+            }
+          }
+          this.scrollTicking = false
+        })
       }
     },
     async loadStoreStatus() {

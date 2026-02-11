@@ -6,9 +6,9 @@
         <!-- Logo -->
         <NuxtLink to="/" class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-[#1A4189] flex items-center justify-center overflow-hidden border-2 border-white shadow-lg hover:scale-105 transition-transform">
-            <img src="/logo.png" alt="Buff's Chicken Logo" class="w-full h-full object-contain p-1.5" />
+            <img src="/buffs-logo.webp" alt="Buff's Chicken Logo" fetchpriority="high" class="w-full h-full object-contain p-1.5" />
           </div>
-          <span class="font-['Unbounded'] font-semibold text-xl text-[#1A4189] hidden sm:block">Buff's Chicken</span>
+          <span class="font-['Unbounded'] font-semibold text-xl text-[#1A4189] hidden sm:block">Buffs Chicken</span>
         </NuxtLink>
 
         <!-- Desktop Navigation -->
@@ -18,9 +18,9 @@
             class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] transition-colors duration-200"
           >
             Home
-          </NuxtLink>
+          </NuxtLink> 
           <NuxtLink 
-            to="/blogs" 
+            to="/blogs"  
             class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] transition-colors duration-200"
           >
             Blogs
