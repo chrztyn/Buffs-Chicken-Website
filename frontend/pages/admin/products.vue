@@ -114,6 +114,7 @@
     <Modal
       :is-open="showProductModal"
       :title="editingProduct ? 'Edit Product' : 'Add New Product'"
+      :submit-disabled="imageUploading"
       @close="closeProductModal"
       @submit="saveProduct"
     >
@@ -181,21 +182,30 @@
             Product Image
           </label>
           <div
-            @click="triggerFileInput"
-            @dragover.prevent="isDragOver = true"
+            @click="!imageUploading && triggerFileInput()"
+            @dragover.prevent="!imageUploading && (isDragOver = true)"
             @dragleave="isDragOver = false"
-            @drop.prevent="handleDrop"
+            @drop.prevent="!imageUploading && handleDrop($event)"
             :class="[
-              'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition',
+              'border-2 border-dashed rounded-lg p-6 text-center transition',
+              imageUploading ? 'cursor-not-allowed opacity-75' : 'cursor-pointer',
               isDragOver 
                 ? 'border-[#FE601C] bg-orange-50' 
                 : 'border-gray-300 hover:border-[#FE601C]'
             ]"
           >
-            <div v-if="!productForm.imagePreview" class="text-gray-500 font-['Unbounded']">
+            <!-- Loading State -->
+            <div v-if="imageUploading" class="text-[#FE601C] font-['Unbounded']">
+              <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-solid border-[#FE601C] border-r-transparent mb-3"></div>
+              <p class="font-semibold">Uploading & compressing image...</p>
+              <p class="text-sm text-gray-600 mt-1">Please wait</p>
+            </div>
+            <!-- Empty State -->
+            <div v-else-if="!productForm.imagePreview" class="text-gray-500 font-['Unbounded']">
               <p class="mb-2">Click to upload or drag and drop</p>
               <p class="text-sm">PNG, JPG, GIF up to 10MB</p>
             </div>
+            <!-- Preview State -->
             <div v-else class="relative inline-block">
               <img
                 :src="productForm.imagePreview"
@@ -204,12 +214,19 @@
               />
               <button
                 @click.stop="productForm.imagePreview = ''; productForm.image = ''"
-                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition"
               >
                 ✕
               </button>
             </div>
           </div>
+          <!-- Upload Status Message -->
+          <p v-if="imageUploading" class="text-sm text-[#FE601C] font-['Unbounded'] font-semibold mt-2">
+            ⏳ Wait for upload to complete before saving
+          </p>
+          <p v-else-if="productForm.image" class="text-sm text-green-600 font-['Unbounded'] font-semibold mt-2">
+            ✓ Image ready - You can now save the product
+          </p>
           <input
             ref="fileInput"
             type="file"
@@ -491,6 +508,7 @@ const productForm = ref<any>({
 
 const showDeleteConfirm = ref(false)
 const deletingProduct = ref<any>(null)
+const imageUploading = ref(false)
 
 const filteredProducts = computed(() => {
   return products.value.filter((product) => {
@@ -597,6 +615,7 @@ const handleImageUpload = async (event: any) => {
   }
 
   console.log('Starting image upload for file:', file.name, 'Size:', file.size)
+  imageUploading.value = true
 
   // Create preview
   const reader = new FileReader()
@@ -622,6 +641,8 @@ const handleImageUpload = async (event: any) => {
     alert('Failed to upload image: ' + (error.response?.data?.message || error.message))
     // Clear the preview if upload failed
     productForm.value.imagePreview = ''
+  } finally {
+    imageUploading.value = false
   }
 }
 

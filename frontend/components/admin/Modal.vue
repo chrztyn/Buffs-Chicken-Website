@@ -24,7 +24,13 @@
           <button
             v-if="showSubmit"
             @click="submit"
-            class="px-4 py-2 bg-[#FE601C] text-white rounded-lg hover:bg-[#e5551a] transition"
+            :disabled="submitDisabled"
+            :class="[
+              'px-4 py-2 rounded-lg transition font-[\'Unbounded\'] font-bold',
+              submitDisabled 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-[#FE601C] text-white hover:bg-[#e5551a]'
+            ]"
           >
             {{ submitText }}
           </button>
@@ -55,6 +61,10 @@ defineProps({
   submitText: {
     type: String,
     default: 'Save'
+  },
+  submitDisabled: {
+    type: Boolean,
+    default: false
   }
 })
 
