@@ -17,6 +17,8 @@ useHead({
   ],
   link: [
     { rel: 'icon', href: '/buffs-logo.png' },
+    // Preconnect to Google Tag Manager for faster analytics loading
+    { rel: 'preconnect', href: 'https://www.googletagmanager.com' },
     // Preload critical LCP images
     { rel: 'preload', as: 'image', href: '/buffs-logo.webp', fetchpriority: 'high' },
     { rel: 'preload', as: 'image', href: '/hero-main.webp', fetchpriority: 'high' }

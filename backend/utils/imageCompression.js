@@ -7,9 +7,9 @@ const fs = require('fs');
  * - Converts to WebP format (best compression)
  * - Resizes to max dimensions (prevents huge uploads)
  * - Strips metadata (privacy + smaller file)
- * - Quality optimized for web (85%)
+ * - Quality optimized for web (75%)
  */
-const compressImage = async (file, outputDir, maxWidth = 1200, maxHeight = 1200) => {
+const compressImage = async (file, outputDir, maxWidth = 600, maxHeight = 600) => {
   try {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const originalName = path.basename(file.originalname, path.extname(file.originalname));
@@ -25,8 +25,8 @@ const compressImage = async (file, outputDir, maxWidth = 1200, maxHeight = 1200)
         withoutEnlargement: true  // Don't upscale smaller images
       })
       .webp({
-        quality: 85,  // Good balance of quality vs size
-        effort: 4     // Compression effort (0-6, higher = smaller file but slower)
+        quality: 75,  // Optimized for web performance
+        effort: 5     // Compression effort (0-6, higher = smaller file but slower)
       })
       .toFile(filepath);
 

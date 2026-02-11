@@ -59,7 +59,7 @@ app.use((req, res, next) => {
     res.set('Expires', '0');
   }
   // Cache static assets for 1 week (immutable - never changes)
-  else if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+  else if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$/)) {
     res.set('Cache-Control', 'public, max-age=604800, immutable');
   }
   // Cache other API responses for 5 minutes

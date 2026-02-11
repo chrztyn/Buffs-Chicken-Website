@@ -11,15 +11,8 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV === 'development',
   },
   
-  experimental: {
-    inlineSSRStyles: (id) => {
-      // Only inline critical components, not node_modules (saves memory)
-      return !id?.includes('node_modules')
-    },
-  },
-  
   features: {
-    inlineStyles: false, // Disabled for server builds, but CSS still optimized
+    inlineStyles: true, // Inline critical CSS for faster LCP
   },
   
   build: {
@@ -55,6 +48,16 @@ export default defineNuxtConfig({
         }
       },
       '/_nuxt/**': {
+        headers: {
+          'cache-control': 'public, max-age=31536000, immutable'
+        }
+      },
+      '/**/*.webp': {
+        headers: {
+          'cache-control': 'public, max-age=31536000, immutable'
+        }
+      },
+      '/**/*.{png,jpg,jpeg,gif,svg}': {
         headers: {
           'cache-control': 'public, max-age=31536000, immutable'
         }
@@ -107,7 +110,6 @@ export default defineNuxtConfig({
 
   // Sitemap configuration - simplified
   sitemap: {
-    gzip: true,
     exclude: ['/admin/**', '/cart', '/checkout'],
   },
   router: {
@@ -146,11 +148,6 @@ export default defineNuxtConfig({
           media: 'print',
           onload: "this.media='all'"
         },
-      ],
-      noscript: [
-        {
-          children: '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap">'
-        }
       ]
     }
   },
