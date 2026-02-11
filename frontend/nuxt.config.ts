@@ -88,6 +88,11 @@ export default defineNuxtConfig({
     }
   },
 
+  // Site configuration (required for sitemap)
+  site: {
+    url: 'https://buffschicken.com'
+  },
+
   // Minimal image config
   image: {
     quality: 80,
@@ -95,7 +100,6 @@ export default defineNuxtConfig({
 
   // Sitemap configuration - simplified
   sitemap: {
-    hostname: 'https://buffschicken.com',
     gzip: true,
     exclude: ['/admin/**', '/cart', '/checkout'],
   },
