@@ -22,6 +22,9 @@
         <img 
     	    :src="image" 
     	    :alt="name" 
+    	    width="400"
+    	    height="400"
+    	    loading="lazy"
     	    class="w-full h-64 object-contain"
     	/>
         </div>

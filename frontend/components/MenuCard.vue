@@ -14,6 +14,9 @@
                 <img 
                     :src="image" 
                     :alt="name" 
+                    width="300"
+                    height="300"
+                    loading="lazy"
                     :class="[
                         'w-full h-32 sm:h-40 object-contain transition-transform duration-300',
                         disabled ? 'grayscale' : 'group-hover:scale-105'

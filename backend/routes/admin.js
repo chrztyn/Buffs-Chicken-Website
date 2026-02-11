@@ -11,6 +11,7 @@ const authenticateAdmin = require('../middleware/authenticateAdmin');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const { compressImage, ensureCompressedImagesDir } = require('../utils/imageCompression');
 
 // Ensure backend-images directory exists
 const backendImagesDir = path.join(__dirname, '../public/backend-images');
@@ -18,26 +19,36 @@ if (!fs.existsSync(backendImagesDir)) {
   fs.mkdirSync(backendImagesDir, { recursive: true });
 }
 
+// Ensure compressed-images subdirectory exists
+const compressedImagesDir = ensureCompressedImagesDir(backendImagesDir);
+
 // Multer setup for file uploads
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-// Helper to save image locally
-const saveImageLocally = (file) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const ext = path.extname(file.originalname);
-      const name = path.basename(file.originalname, ext);
-      const filename = `${name}-${uniqueSuffix}${ext}`;
-      const filepath = path.join(backendImagesDir, filename);
-      
-      fs.writeFileSync(filepath, file.buffer);
-      resolve(`/backend-images/${filename}`);
-    } catch (error) {
-      reject(error);
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB max (will be compressed anyway)
+  },
+  fileFilter: (req, file, cb) => {
+    // Only allow images
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
     }
-  });
+  }
+});
+
+// Helper to save and compress image
+const saveImageLocally = async (file) => {
+  try {
+    // Compress and save image
+    const filename = await compressImage(file, compressedImagesDir);
+    return `/backend-images/compressed-images/${filename}`;
+  } catch (error) {
+    console.error('Error saving image:', error);
+    throw error;
+  }
 };
 
 

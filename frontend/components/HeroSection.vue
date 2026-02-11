@@ -61,7 +61,10 @@
                 <img 
                     src="/hero-main.webp" 
                     alt="Buffs Chicken" 
+                    width="800"
+                    height="600"
                     fetchpriority="high"
+                    loading="eager"
                     class="main-image"
                 />
                 
