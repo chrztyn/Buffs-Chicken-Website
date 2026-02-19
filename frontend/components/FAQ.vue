@@ -15,7 +15,7 @@
                 <div
                     v-for="(faq, index) in faqs"
                     :key="faq.id"
-                    :ref="el => setFaqRef(el, index)"
+                    :ref="el => { if (el) faqRefs.value[index] = el }"
                     class="faq-item bg-white/80 rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg border-0 opacity-0 transform translate-y-12"
                     :class="[
                         faq.isOpen ? 'shadow-md' : '',
@@ -132,11 +132,6 @@ function toggleFaq(index) {
   faqs.value[index].isOpen = !faqs.value[index].isOpen
 }
 
-function setFaqRef(el, index) {
-    if (!faqRefs.value) faqRefs.value = []
-    if (el) faqRefs.value[index] = el
-}
-
 function setupScrollObserver() {
   const titleOptions = {
     root: null,
@@ -172,9 +167,9 @@ function setupScrollObserver() {
         faqRefs.value.forEach(r => { if (r) faqObserver.observe(r) })
     }
 
-    // store observers to disconnect later
-    globalThis.__faq_titleObserver = titleObserver
-    globalThis.__faq_faqObserver = faqObserver
+  // store observers to disconnect later
+  ;(globalThis as any).__faq_titleObserver = titleObserver
+  ;(globalThis as any).__faq_faqObserver = faqObserver
 }
 
 onMounted(() => {
@@ -183,10 +178,10 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-    const to = globalThis.__faq_titleObserver
-    const fo = globalThis.__faq_faqObserver
-    if (to) to.disconnect()
-    if (fo) fo.disconnect()
+  const to = (globalThis as any).__faq_titleObserver
+  const fo = (globalThis as any).__faq_faqObserver
+  if (to) to.disconnect()
+  if (fo) fo.disconnect()
 })
 </script>
 

@@ -330,59 +330,6 @@
     </div>
 </template>
 
-<script setup>
-import { useHead, useAsyncData } from '#imports'
-import { useApi } from '~/composables/useApi'
-
-// Server-side fetch of initial menu items for JSON-LD (so Rich Results can detect menu)
-try {
-  const { getProducts } = useApi()
-  const { data: productsRes } = await useAsyncData('menu-json-ld', () => getProducts({ page: 1, limit: 200 }))
-  const rawProducts = productsRes?.value || []
-  const products = Array.isArray(rawProducts) ? rawProducts.map(p => ({
-    name: p.name,
-    description: p.description || '',
-    image: p.image || '',
-    price: p.price || ''
-  })) : []
-
-  if (products.length > 0) {
-    const menuJson = {
-      '@context': 'https://schema.org',
-      '@type': 'Menu',
-      'name': 'Buffs Chicken Menu',
-      'url': 'https://www.buffschicken.com/menu',
-      'hasMenuSection': [
-        {
-          '@type': 'MenuSection',
-          'name': 'All Items',
-          'hasMenuItem': products.map(item => ({
-            '@type': 'MenuItem',
-            'name': item.name,
-            'description': item.description,
-            'image': item.image,
-            'offers': item.price !== '' ? {
-              '@type': 'Offer',
-              'price': String(item.price),
-              'priceCurrency': 'PHP'
-            } : undefined
-          }))
-        }
-      ]
-    }
-
-    useHead({
-      script: [
-        { type: 'application/ld+json', children: JSON.stringify(menuJson) }
-      ]
-    })
-  }
-} catch (e) {
-  // fail gracefully on server fetch errors
-  console.error('[menu] failed to fetch products for JSON-LD', e)
-}
-</script>
-
 <script>
 import Navbar from '~/components/Navbar.vue'
 import Footer from '~/components/Footer.vue'

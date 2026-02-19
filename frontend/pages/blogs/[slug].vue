@@ -229,7 +229,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue'
-import { useAsyncData, useHead } from '#imports'
 import { useApi } from '~/composables/useApi'
 import BlogCard from '~/components/BlogCard.vue'
 import Navbar from '~/components/Navbar.vue'
@@ -396,7 +395,7 @@ if (!slug) {
 } else {
   try {
     loading.value = true
-    const { data: blogRes } = (await useAsyncData(`blog-${slug}`, () => getBlogBySlug(slug))) as any
+    const { data: blogRes } = await useAsyncData(`blog-${slug}`, () => getBlogBySlug(slug))
 
     if (!blogRes || !blogRes.value || !blogRes.value.data) {
       error.value = 'Article not found. It may have been deleted or the URL is incorrect.'
@@ -421,7 +420,7 @@ if (!slug) {
           { property: 'article:published_time', content: blog.value.publishedAt || blog.value.createdAt }
         ],
         script: [
-          ({
+          {
             type: 'application/ld+json',
             children: JSON.stringify({
               '@context': 'https://schema.org',
@@ -440,7 +439,7 @@ if (!slug) {
               },
               mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.buffschicken.com/blogs/${slug}` }
             })
-          } as any)
+          }
         ]
       })
     }
@@ -456,56 +455,11 @@ const goBack = () => {
   router.push('/blogs')
 }
 
-const loadBlog = async (slugArg?: string) => {
-  const s = slugArg || (route.params.slug as string)
-  if (!s) return
-  try {
-    loading.value = true
-    const resp: any = await getBlogBySlug(s)
-    const data = resp?.data || resp
-    if (!data) {
-      error.value = 'Article not found. It may have been deleted or the URL is incorrect.'
-      return
-    }
-    blog.value = data
-    await fetchLatestBlogs()
-    // update head/meta and JSON-LD on client
-    useHead({
-      title: `${blog.value.title} | Buffs Chicken Blog`,
-      meta: [
-        { name: 'description', content: blog.value.metaDescription || blog.value.excerpt || `Read about ${blog.value.title} on Buffs Chicken blog` },
-        { property: 'og:title', content: blog.value.title },
-        { property: 'og:description', content: blog.value.metaDescription || blog.value.excerpt || blog.value.title },
-        { property: 'og:type', content: 'article' },
-        { property: 'og:image', content: blog.value.image || 'https://www.buffschicken.com/buffs-logo.png' },
-        { property: 'article:published_time', content: blog.value.publishedAt || blog.value.createdAt }
-      ],
-      script: [({ type: 'application/ld+json', children: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        headline: blog.value.title,
-        description: blog.value.metaDescription || blog.value.excerpt || '',
-        image: blog.value.image || '',
-        datePublished: blog.value.publishedAt || blog.value.createdAt,
-        dateModified: blog.value.updatedAt || blog.value.createdAt,
-        author: { '@type': 'Organization', name: 'Buffs Chicken', url: 'https://www.buffschicken.com' },
-        publisher: { '@type': 'Organization', name: 'Buffs Chicken', url: 'https://www.buffschicken.com', logo: { '@type': 'ImageObject', url: 'https://www.buffschicken.com/buffs-logo.png' } },
-        mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.buffschicken.com/blogs/${s}` }
-      }) } as any)]
-    })
-  } catch (err) {
-    console.error('Failed to load blog (client):', err)
-    error.value = 'Failed to load the article. Please try again later.'
-  } finally {
-    loading.value = false
-  }
-}
-
 const goToRelatedBlog = (slug: string) => {
   router.push(`/blogs/${slug}`)
   window.scrollTo({ top: 0, behavior: 'smooth' })
   // Reload blog data for new slug
-  loadBlog(slug)
+  loadBlog()
 }
 </script>
 
