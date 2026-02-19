@@ -54,8 +54,10 @@ export const useApi = () => {
     async (...args: any[]) => {
       try {
         return await fn(...args)
-      } catch (err) {
-        console.error('[useApi] request failed', err)
+      } catch (err: any) {
+        const message = err?.message || String(err)
+        const url = err?.config?.url || ''
+        console.warn(`[useApi] request failed (returning fallback) ${url} — ${message}`)
         return { data: fallback }
       }
     }
