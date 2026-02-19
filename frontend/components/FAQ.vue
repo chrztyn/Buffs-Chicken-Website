@@ -15,7 +15,7 @@
                 <div
                     v-for="(faq, index) in faqs"
                     :key="faq.id"
-                    :ref="el => { if (el) faqRefs[index] = el }"
+                    :ref="el => setFaqRef(el, index)"
                     class="faq-item bg-white/80 rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg border-0 opacity-0 transform translate-y-12"
                     :class="[
                         faq.isOpen ? 'shadow-md' : '',
@@ -62,121 +62,132 @@
     </section>
 </template>
 
-<script>
-export default {
-    name: 'FAQ',
-    data() {
-        return {
-            titleVisible: false,
-            faqRefs: [],
-            faqs: [
-                {
-                    id: 1,
-                    question: 'Where is Buffs Chicken located?',
-                    answer: 'Buffs Chicken is located at The Hood, Angeles City. We are easily accessible and welcome walk-in customers.',
-                    isOpen: false,
-                    isVisible: false
-                },
-                {
-                    id: 2,
-                    question: 'Do you deliver?',
-                    answer: "Yes, we accept delivery by placing an order through this website. Once your order is submitted, we'll confirm it with you shortly.",
-                    isOpen: false,
-                    isVisible: false
-                },
-                {
-                    id: 3,
-                    question: 'Can I order for take-out?',
-                    answer: 'Absolutely! We offer take-out services. You can place your order by calling us or visiting our location. We recommend calling ahead for faster service, especially during peak hours.',
-                    isOpen: false,
-                    isVisible: false
-                },
-                {
-                    id: 4,
-                    question: 'Do you join pop-ups or food events?',
-                    answer: 'Yes, we participate in various pop-ups and food events. For inquiries about our participation in events or to invite us to your event, please contact us through email or our social media channels.',
-                    isOpen: false,
-                    isVisible: false
-                },
-                {
-                    id: 5,
-                    question: 'What makes Buffs Chicken special?',
-                    answer: 'Buffs Chicken stands out with our signature brined and spiced chicken that delivers next-level flavor. Every meal is cooked fresh to order, ensuring the crispiest and juiciest chicken experience. From our OG Buffs poppers to our loaded combos, we focus on quality ingredients and authentic flavors.',
-                    isOpen: false,
-                    isVisible: false
-                }
-            ]
-        }
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useHead } from '#imports'
+
+const titleVisible = ref(false)
+const title = ref(null)
+const faqRefs = ref([])
+const faqs = ref([
+    {
+        id: 1,
+        question: 'Where is Buffs Chicken located?',
+        answer: 'Buffs Chicken is located at The Hood, Angeles City. We are easily accessible and welcome walk-in customers.',
+        isOpen: false,
+        isVisible: false
     },
-    mounted() {
-        this.$nextTick(() => {
-            this.setupScrollObserver();
-        });
+    {
+        id: 2,
+        question: 'Do you deliver?',
+        answer: "Yes, we accept delivery by placing an order through this website. Once your order is submitted, we'll confirm it with you shortly.",
+        isOpen: false,
+        isVisible: false
     },
-    beforeUnmount() {
-        if (this.titleObserver) {
-            this.titleObserver.disconnect();
-        }
-        if (this.faqObserver) {
-            this.faqObserver.disconnect();
-        }
+    {
+        id: 3,
+        question: 'Can I order for take-out?',
+        answer: 'Absolutely! We offer take-out services. You can place your order by calling us or visiting our location. We recommend calling ahead for faster service, especially during peak hours.',
+        isOpen: false,
+        isVisible: false
     },
-    methods: {
-        toggleFaq(index) {
-            this.faqs[index].isOpen = !this.faqs[index].isOpen;
-        },
-        setupScrollObserver() {
-            // Observer for title with higher threshold
-            const titleOptions = {
-                root: null,
-                rootMargin: '-100px 0px -100px 0px',
-                threshold: 0.3
-            };
-
-            this.titleObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        this.titleVisible = true;
-                    } else {
-                        this.titleVisible = false;
-                    }
-                });
-            }, titleOptions);
-
-            // Observer for FAQ items
-            const faqOptions = {
-                root: null,
-                rootMargin: '-50px 0px -100px 0px',
-                threshold: 0.2
-            };
-
-            this.faqObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const index = this.faqRefs.indexOf(entry.target);
-                    if (index !== -1) {
-                        if (entry.isIntersecting) {
-                            this.faqs[index].isVisible = true;
-                        } else {
-                            this.faqs[index].isVisible = false;
-                        }
-                    }
-                });
-            }, faqOptions);
-
-            // Observe title
-            if (this.$refs.title) {
-                this.titleObserver.observe(this.$refs.title);
-            }
-
-            // Observe FAQ items
-            this.faqRefs.forEach(ref => {
-                if (ref) {
-                    this.faqObserver.observe(ref);
-                }
-            });
-        }
+    {
+        id: 4,
+        question: 'Do you join pop-ups or food events?',
+        answer: 'Yes, we participate in various pop-ups and food events. For inquiries about our participation in events or to invite us to your event, please contact us through email or our social media channels.',
+        isOpen: false,
+        isVisible: false
+    },
+    {
+        id: 5,
+        question: 'What makes Buffs Chicken special?',
+        answer: 'Buffs Chicken stands out with our signature brined and spiced chicken that delivers next-level flavor. Every meal is cooked fresh to order, ensuring the crispiest and juiciest chicken experience. From our OG Buffs poppers to our loaded combos, we focus on quality ingredients and authentic flavors.',
+        isOpen: false,
+        isVisible: false
     }
+])
+
+// Build FAQPage JSON-LD from the faqs
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': faqs.value.map(f => ({
+          '@type': 'Question',
+          'name': f.question,
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text': f.answer
+          }
+        }))
+      })
+    }
+  ]
+})
+
+function toggleFaq(index) {
+  faqs.value[index].isOpen = !faqs.value[index].isOpen
 }
+
+function setFaqRef(el, index) {
+    if (!faqRefs.value) faqRefs.value = []
+    if (el) faqRefs.value[index] = el
+}
+
+function setupScrollObserver() {
+  const titleOptions = {
+    root: null,
+    rootMargin: '-100px 0px -100px 0px',
+    threshold: 0.3
+  }
+
+  const faqOptions = {
+    root: null,
+    rootMargin: '-50px 0px -100px 0px',
+    threshold: 0.2
+  }
+
+  // Title observer
+  const titleObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      titleVisible.value = entry.isIntersecting
+    })
+  }, titleOptions)
+
+  // FAQ observer
+  const faqObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const index = faqRefs.value.indexOf(entry.target)
+      if (index !== -1) {
+        faqs.value[index].isVisible = entry.isIntersecting
+      }
+    })
+  }, faqOptions)
+
+    if (typeof window !== 'undefined') {
+        if (title.value) titleObserver.observe(title.value)
+        faqRefs.value.forEach(r => { if (r) faqObserver.observe(r) })
+    }
+
+    // store observers to disconnect later
+    globalThis.__faq_titleObserver = titleObserver
+    globalThis.__faq_faqObserver = faqObserver
+}
+
+onMounted(() => {
+  // wait next tick equivalents
+  setupScrollObserver()
+})
+
+onBeforeUnmount(() => {
+    const to = globalThis.__faq_titleObserver
+    const fo = globalThis.__faq_faqObserver
+    if (to) to.disconnect()
+    if (fo) fo.disconnect()
+})
 </script>
 
 <style scoped>
