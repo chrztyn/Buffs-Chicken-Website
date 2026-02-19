@@ -338,12 +338,13 @@ import { useApi } from '~/composables/useApi'
 try {
   const { getProducts } = useApi()
   const { data: productsRes } = await useAsyncData('menu-json-ld', () => getProducts({ page: 1, limit: 200 }))
-  const products = (productsRes?.value || []).map(p => ({
+  const rawProducts = productsRes?.value || []
+  const products = Array.isArray(rawProducts) ? rawProducts.map(p => ({
     name: p.name,
     description: p.description || '',
     image: p.image || '',
     price: p.price || ''
-  }))
+  })) : []
 
   if (products.length > 0) {
     const menuJson = {
