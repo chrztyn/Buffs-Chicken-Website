@@ -1,0 +1,1 @@
+import{ref as e,computed as l}from"vue";let n=e(null),u=e(null);const useAdmin=()=>{const t=n,a=u,o=e(!1),r=e(null),i=l(()=>!!t.value);return{token:t,admin:a,isLoading:o,error:r,isAuthenticated:i,initToken:()=>{},saveToken:e=>{t.value=e},clearToken:()=>{t.value=null,a.value=null},getAuthHeader:()=>({Authorization:`Bearer ${t.value}`})}};export{useAdmin as u};

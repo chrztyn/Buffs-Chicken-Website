@@ -1,0 +1,9 @@
+# Buffs Chicken Restaurant - robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cart
+Disallow: /checkout
+
+# Sitemap
+Sitemap: https://www.buffschicken.com/sitemap.xml
