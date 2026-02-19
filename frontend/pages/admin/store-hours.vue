@@ -115,7 +115,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-              <p class="font-['Unbounded'] text-sm text-blue-800 font-semibold mb-1">Custom Messages (Phase 2 Feature)</p>
+              <p class="font-['Unbounded'] text-sm text-blue-800 font-semibold mb-1">Custom Messages</p>
               <p class="font-['Unbounded'] text-xs text-blue-700">
                 Add special notes to any day without changing hours. Examples: "Happy Hour 5-7 PM!", "Limited menu today", "Special: Buy 1 Get 1". 
                 These messages appear on the menu page for customers to see.
@@ -206,7 +206,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             <div>
-              <p class="font-['Unbounded'] text-sm text-purple-800 font-semibold mb-1">Temporary Closures (Phase 3 Feature)</p>
+              <p class="font-['Unbounded'] text-sm text-purple-800 font-semibold mb-1">Temporary Closures</p>
               <p class="font-['Unbounded'] text-xs text-purple-700">
                 Schedule closures in advance. Examples: "Closed Feb 15-17 for renovation", "Closed for National Holiday". 
                 These take priority over all other settings during the scheduled dates.
