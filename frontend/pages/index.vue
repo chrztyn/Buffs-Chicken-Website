@@ -53,6 +53,37 @@ useHead({
     { property: 'og:url', content: 'https://www.buffschicken.com' },
     { name: 'twitter:card', content: 'summary_large_image' }
   ],
+  script: [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": "Buffs Chicken",
+        "description": "Crispy wings & comfort food in Angeles City.",
+        "url": "https://www.buffschicken.com",
+        "logo": "https://www.buffschicken.com/buffs-logo.webp",
+        "image": "https://www.buffschicken.com/hero-main.webp",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "The Hood",
+          "addressLocality": "Angeles City",
+          "addressRegion": "Pampanga",
+          "addressCountry": "PH"
+        }
+      })
+    },
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Buffs Chicken",
+        "url": "https://www.buffschicken.com",
+        "logo": "https://www.buffschicken.com/buffs-logo.webp"
+      })
+    }
+  ],
   link: [
     { rel: 'canonical', href: 'https://www.buffschicken.com' }
   ]
