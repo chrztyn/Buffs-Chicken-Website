@@ -53,12 +53,15 @@ export const useApi = () => {
   const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     async (...args: any[]) => {
       try {
-        return await fn(...args)
+        const res = await fn(...args)
+        // If axios response, return its data; otherwise return value directly
+        if (res && typeof res === 'object' && 'data' in res) return res.data
+        return res
       } catch (err: any) {
         const message = err?.message || String(err)
         const url = err?.config?.url || ''
         console.warn(`[useApi] request failed (returning fallback) ${url} — ${message}`)
-        return { data: fallback }
+        return fallback
       }
     }
 
