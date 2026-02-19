@@ -4,7 +4,6 @@ Allow: /
 Disallow: /admin/
 Disallow: /cart
 Disallow: /checkout
-Disallow: /api/
 
 # Sitemap
-Sitemap: https://buffschicken.com/sitemap.xml
+Sitemap: https://www.buffschicken.com/sitemap.xml

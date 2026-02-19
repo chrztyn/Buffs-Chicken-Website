@@ -75,8 +75,8 @@ export default defineNuxtConfig({
   } as any,
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://buffschicken.com/api',
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'https://buffschicken.com',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://www.buffschicken.com/api',
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'https://www.buffschicken.com',
     }
   },
   components: {
@@ -100,7 +100,9 @@ export default defineNuxtConfig({
 
   // Site configuration (required for sitemap)
   site: {
-    url: 'https://buffschicken.com'
+    url: 'https://www.buffschicken.com',
+    name: 'Buffs Chicken - Crispy Wings & Comfort Food',
+    description: 'Buffs Chicken at The Hood, Angeles City serves crispy and juicy signature OG Buffs wings, cheesy pastas, and loaded combos.'
   },
 
   // Minimal image config
@@ -108,9 +110,46 @@ export default defineNuxtConfig({
     quality: 80,
   },
 
-  // Sitemap configuration - simplified
+  // Sitemap configuration - explicit routes to ensure all pages are included
   sitemap: {
+    urls: async () => {
+      return [
+        {
+          loc: '/',
+          lastmod: new Date().toISOString(),
+          changefreq: 'weekly',
+          priority: 1.0
+        },
+        {
+          loc: '/menu',
+          lastmod: new Date().toISOString(),
+          changefreq: 'weekly',
+          priority: 0.9
+        },
+        {
+          loc: '/about',
+          lastmod: new Date().toISOString(),
+          changefreq: 'monthly',
+          priority: 0.8
+        },
+        {
+          loc: '/contact',
+          lastmod: new Date().toISOString(),
+          changefreq: 'monthly',
+          priority: 0.8
+        },
+        {
+          loc: '/blogs',
+          lastmod: new Date().toISOString(),
+          changefreq: 'weekly',
+          priority: 0.8
+        }
+      ]
+    },
     exclude: ['/admin/**', '/cart', '/checkout'],
+    sitemapSize: 50000,
+    gzip: false,
+    baseURL: 'https://www.buffschicken.com'
   },
   router: {
     options: {

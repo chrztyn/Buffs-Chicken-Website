@@ -26,7 +26,11 @@ export default {
         },
         { name: 'keywords', content: 'about us, Buffs Chicken, Angeles City, The Hood, restaurant story' },
         { property: 'og:title', content: 'About Us - Buffs Chicken' },
-        { property: 'og:type', content: 'website' }
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: 'https://www.buffschicken.com/about' }
+      ],
+      link: [
+        { rel: 'canonical', href: 'https://www.buffschicken.com/about' }
       ]
     }
   },

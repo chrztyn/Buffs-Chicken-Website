@@ -82,7 +82,11 @@ export default {
         },
         { name: 'keywords', content: 'contact, Buffs Chicken, Angeles City, customer support, inquiries' },
         { property: 'og:title', content: 'Contact Us - Buffs Chicken' },
-        { property: 'og:type', content: 'website' }
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: 'https://www.buffschicken.com/contact' }
+      ],
+      link: [
+        { rel: 'canonical', href: 'https://www.buffschicken.com/contact' }
       ]
     }
   },

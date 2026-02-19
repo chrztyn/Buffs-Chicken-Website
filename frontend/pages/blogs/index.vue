@@ -156,6 +156,28 @@ const totalPages = computed(() => {
   return Math.ceil(totalBlogs.value / itemsPerPage)
 })
 
+// SEO Meta Tags
+useHead({
+  title: 'Blog - Buffs Chicken | Behind The Scenes, Stories & Updates',
+  meta: [
+    {
+      name: 'description',
+      content: 'Discover stories, tips, and updates from the Buffs Chicken team. Learn about our journey, special offers, and what\'s new in our kitchen.'
+    },
+    {
+      name: 'keywords',
+      content: 'blog, Buffs Chicken, restaurant news, food stories, Angeles City, updates'
+    },
+    { property: 'og:title', content: 'Blog - Buffs Chicken' },
+    { property: 'og:description', content: 'Stories, tips, and updates from the Buffs Chicken team' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: 'https://www.buffschicken.com/blogs' }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://www.buffschicken.com/blogs' }
+  ]
+})
+
 const handleSearch = () => {
     activeSearchQuery.value = searchQuery.value
     currentPage.value = 1 // Reset to first page on search
@@ -184,6 +206,7 @@ const handlePrevious = () => {
 const updateTotalBlogs = (total) => {
   totalBlogs.value = total
 }
+
 </script>
 
 <style scoped>

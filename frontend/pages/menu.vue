@@ -348,7 +348,11 @@ export default {
         },
         { name: 'keywords', content: 'menu, chicken wings, combos, pasta, food menu, order online, Angeles City' },
         { property: 'og:title', content: 'Menu - Buffs Chicken' },
-        { property: 'og:type', content: 'website' }
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: 'https://www.buffschicken.com/menu' }
+      ],
+      link: [
+        { rel: 'canonical', href: 'https://www.buffschicken.com/menu' }
       ]
     }
   },

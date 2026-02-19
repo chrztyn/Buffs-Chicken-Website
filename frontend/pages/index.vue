@@ -50,8 +50,11 @@ useHead({
     { property: 'og:title', content: 'Buffs Chicken - Crispy Wings & Comfort Food in Angeles City' },
     { property: 'og:description', content: 'Crispy and juicy signature OG Buffs wings, cheesy pastas, and loaded combos at The Hood, Angeles City' },
     { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: 'https://buffschicken.com' },
+    { property: 'og:url', content: 'https://www.buffschicken.com' },
     { name: 'twitter:card', content: 'summary_large_image' }
+  ],
+  link: [
+    { rel: 'canonical', href: 'https://www.buffschicken.com' }
   ]
 })
 
