@@ -49,12 +49,23 @@ export const useApi = () => {
     api.post('/admin/register', { name, username, password })
 
   // Product endpoints
-  const getProducts = (params?: { page?: number; limit?: number }) => 
-    api.get('/products', { params })
-  const getProduct = (id: string) => api.get(`/products/${id}`)
-  const getPopularPicks = () => api.get('/products/popular')
-  const getProductsByCategory = (categoryId: string) =>
-    api.get(`/products/category/${categoryId}`)
+  // Lightweight wrapper to make API calls resilient during build/SSR
+  const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
+    async (...args: any[]) => {
+      try {
+        return await fn(...args)
+      } catch (err) {
+        console.error('[useApi] request failed', err)
+        return { data: fallback }
+      }
+    }
+
+  const getProducts = wrap((params?: { page?: number; limit?: number }) =>
+    api.get('/products', { params }), [])
+  const getProduct = wrap((id: string) => api.get(`/products/${id}`), null)
+  const getPopularPicks = wrap(() => api.get('/products/popular'), [])
+  const getProductsByCategory = wrap((categoryId: string) =>
+    api.get(`/products/category/${categoryId}`), [])
   const createProduct = (data: any) => api.post('/products/admin/create', data)
   const updateProduct = (id: string, data: any) =>
     api.put(`/products/admin/${id}`, data)
@@ -62,17 +73,17 @@ export const useApi = () => {
   const getAllProductsAdmin = () => api.get('/products/admin/all', { params: { _t: Date.now() } })
 
   // Category endpoints
-  const getCategories = () => api.get('/categories')
-  const getCategory = (id: string) => api.get(`/categories/${id}`)
+  const getCategories = wrap(() => api.get('/categories'), [])
+  const getCategory = wrap((id: string) => api.get(`/categories/${id}`), null)
   const createCategory = (data: any) => api.post('/admin/categories', data)
   const updateCategory = (id: string, data: any) =>
     api.put(`/admin/categories/${id}`, data)
   const deleteCategory = (id: string) => api.delete(`/admin/categories/${id}`)
 
   // Order endpoints
-  const getAllOrders = () => api.get('/admin/orders')
-  const getUserOrders = (userId: string) => api.get(`/orders/user/${userId}`)
-  const getOrder = (id: string) => api.get(`/orders/${id}`)
+  const getAllOrders = wrap(() => api.get('/admin/orders'), [])
+  const getUserOrders = wrap((userId: string) => api.get(`/orders/user/${userId}`), [])
+  const getOrder = wrap((id: string) => api.get(`/orders/${id}`), null)
   const updateOrderStatus = (id: string, status: string) =>
     api.put(`/admin/orders/${id}/status`, { status })
   const verifyOrderStatus = (id: string) =>
@@ -80,20 +91,20 @@ export const useApi = () => {
   const cancelOrder = (id: string) => api.put(`/orders/${id}/cancel`, {})
 
   // Blog endpoints
-  const getBlogs = (params?: { page?: number; limit?: number }) => 
-    api.get('/blogs', { params })
-  const getBlogBySlug = (slug: string) => api.get(`/blogs/slug/${slug}`)
-  const getBlogsByCategory = (category: string) =>
-    api.get(`/blogs/category/${category}`)
+  const getBlogs = wrap((params?: { page?: number; limit?: number }) =>
+    api.get('/blogs', { params }), [])
+  const getBlogBySlug = wrap((slug: string) => api.get(`/blogs/slug/${slug}`), null)
+  const getBlogsByCategory = wrap((category: string) =>
+    api.get(`/blogs/category/${category}`), [])
   const createBlog = (data: any) => api.post('/admin/blogs', data)
   const updateBlog = (id: string, data: any) => api.put(`/admin/blogs/${id}`, data)
   const deleteBlog = (id: string) => api.delete(`/admin/blogs/${id}`)
 
   // Analytics endpoints
-  const getAnalytics = () => api.get('/admin/analytics/dashboard')
+  const getAnalytics = wrap(() => api.get('/admin/analytics/dashboard'), {})
 
   // Notification endpoints
-  const getAdminNotifications = () => api.get('/notifications/admin')
+  const getAdminNotifications = wrap(() => api.get('/notifications/admin'), [])
   const markNotificationRead = (id: string) =>
     api.put(`/notifications/${id}/read`, {})
   const deleteNotification = (id: string) => api.delete(`/notifications/${id}`)
@@ -114,8 +125,8 @@ export const useApi = () => {
   }
 
   // Store Settings endpoints
-  const getStoreSettings = () => api.get('/store-settings')
-  const getStoreStatus = () => api.get('/store-settings/status')
+  const getStoreSettings = wrap(() => api.get('/store-settings'), {})
+  const getStoreStatus = wrap(() => api.get('/store-settings/status'), {})
   const updateStoreSettings = (data: any) => api.put('/store-settings', data)
   const toggleStoreOverride = (data: any) => api.post('/store-settings/toggle-override', data)
   const addTemporaryClosure = (data: any) => api.post('/store-settings/temporary-closures', data)
