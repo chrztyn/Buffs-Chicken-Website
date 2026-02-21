@@ -15,7 +15,7 @@
                 <div
                     v-for="(faq, index) in faqs"
                     :key="faq.id"
-                    :ref="(el: any) => { if (el) (faqRefs.value as any)[index] = el }"
+                    :data-faq-item="index"
                     class="faq-item bg-white/80 rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg border-0 opacity-0 transform translate-y-12"
                     :class="[
                         faq.isOpen ? 'shadow-md' : '',
@@ -68,7 +68,6 @@ import { useHead } from '#imports'
 
 const titleVisible = ref(false)
 const title = ref<any>(null)
-const faqRefs = ref<any>([])
 const faqs = ref([
     {
         id: 1,
@@ -157,16 +156,22 @@ function setupScrollObserver() {
   // FAQ observer
   const faqObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      const index = faqRefs.value.indexOf(entry.target as HTMLElement)
+      const el = entry.target as HTMLElement
+      const index = parseInt(el.getAttribute('data-faq-item') || '-1', 10)
       if (index !== -1 && faqs.value[index]) {
         faqs.value[index].isVisible = entry.isIntersecting
       }
     })
   }, faqOptions)
 
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && process.client) {
     if (title.value) titleObserver.observe(title.value)
-    faqRefs.value.forEach((r: any) => { if (r) faqObserver.observe(r) })
+    
+    // Get FAQ items by data attribute
+    const faqItems = document.querySelectorAll('[data-faq-item]')
+    faqItems.forEach((item: Element) => {
+      faqObserver.observe(item)
+    })
   }
 
   // store observers to disconnect later
