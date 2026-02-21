@@ -353,6 +353,29 @@ export default {
       ],
       link: [
         { rel: 'canonical', href: 'https://www.buffschicken.com/menu' }
+      ],
+      script: [
+        {
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+              {
+                '@type': 'ListItem',
+                'position': 1,
+                'name': 'Home',
+                'item': 'https://www.buffschicken.com'
+              },
+              {
+                '@type': 'ListItem',
+                'position': 2,
+                'name': 'Menu',
+                'item': 'https://www.buffschicken.com/menu'
+              }
+            ]
+          }, null, 2)
+        }
       ]
     }
   },

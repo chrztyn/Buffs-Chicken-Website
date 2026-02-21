@@ -35,6 +35,9 @@ const Blog = defineAsyncComponent(() => import('~/components/Blog.vue'))
 const FAQ = defineAsyncComponent(() => import('~/components/FAQ.vue'))
 const Footer = defineAsyncComponent(() => import('~/components/Footer.vue'))
 
+// Add breadcrumbs
+useBreadcrumbs()
+
 // SEO Meta Tags
 useHead({
   title: 'Buffs Chicken - Crispy Wings & Comfort Food in Angeles City',
@@ -56,7 +59,7 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify({
+      innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Restaurant",
         "name": "Buffs Chicken",
@@ -71,17 +74,17 @@ useHead({
           "addressRegion": "Pampanga",
           "addressCountry": "PH"
         }
-      })
+      }, null, 2)
     },
     {
       type: 'application/ld+json',
-      children: JSON.stringify({
+      innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Buffs Chicken",
         "url": "https://www.buffschicken.com",
         "logo": "https://www.buffschicken.com/buffs-logo.webp"
-      })
+      }, null, 2)
     }
   ],
   link: [

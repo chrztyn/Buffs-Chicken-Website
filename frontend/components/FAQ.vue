@@ -62,13 +62,13 @@
     </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useHead } from '#imports'
 
 const titleVisible = ref(false)
-const title = ref(null)
-const faqRefs = ref([])
+const title = ref<any>(null)
+const faqRefs = ref<any>([])
 const faqs = ref([
     {
         id: 1,
@@ -112,7 +112,7 @@ useHead({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify({
+      innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
         'mainEntity': faqs.value.map(f => ({
@@ -123,13 +123,15 @@ useHead({
             'text': f.answer
           }
         }))
-      })
+      }, null, 2)
     }
   ]
 })
 
-function toggleFaq(index) {
-  faqs.value[index].isOpen = !faqs.value[index].isOpen
+function toggleFaq(index: number) {
+  if (faqs.value[index]) {
+    faqs.value[index].isOpen = !faqs.value[index].isOpen
+  }
 }
 
 function setupScrollObserver() {
@@ -155,17 +157,17 @@ function setupScrollObserver() {
   // FAQ observer
   const faqObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      const index = faqRefs.value.indexOf(entry.target)
-      if (index !== -1) {
+      const index = faqRefs.value.indexOf(entry.target as HTMLElement)
+      if (index !== -1 && faqs.value[index]) {
         faqs.value[index].isVisible = entry.isIntersecting
       }
     })
   }, faqOptions)
 
-    if (typeof window !== 'undefined') {
-        if (title.value) titleObserver.observe(title.value)
-        faqRefs.value.forEach(r => { if (r) faqObserver.observe(r) })
-    }
+  if (typeof window !== 'undefined') {
+    if (title.value) titleObserver.observe(title.value)
+    faqRefs.value.forEach((r: any) => { if (r) faqObserver.observe(r) })
+  }
 
   // store observers to disconnect later
   ;(globalThis as any).__faq_titleObserver = titleObserver

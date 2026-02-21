@@ -229,6 +229,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { useRoute, useRouter, useAsyncData, useHead } from '#app'
 import { useApi } from '~/composables/useApi'
 import BlogCard from '~/components/BlogCard.vue'
 import Navbar from '~/components/Navbar.vue'
@@ -251,6 +252,7 @@ const handleScroll = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
+  loadBlog()
 })
 
 onUnmounted(() => {
@@ -387,25 +389,27 @@ const fetchLatestBlogs = async () => {
   }
 }
 
-// Server-side fetch blog and latest blogs so JSON-LD is present in SSR
-const slug = route.params.slug as string
-if (!slug) {
-  error.value = 'No article specified'
-  loading.value = false
-} else {
+// Load blog data and set up metadata
+const loadBlog = async () => {
+  const slug = route.params.slug as string
+  if (!slug) {
+    error.value = 'No article specified'
+    loading.value = false
+    return
+  }
+
   try {
     loading.value = true
-    const { data: blogRes } = await useAsyncData(`blog-${slug}`, () => getBlogBySlug(slug))
+    const { data: blogRes } = await useAsyncData(`blog-${slug}`, () => getBlogBySlug(slug), {
+      watch: [route.params]
+    })
 
     if (!blogRes || !blogRes.value || !blogRes.value.data) {
       error.value = 'Article not found. It may have been deleted or the URL is incorrect.'
     } else {
       blog.value = blogRes.value.data
-
-      // Fetch latest blogs (client or server) to populate related posts
       await fetchLatestBlogs()
 
-      // Set page meta and JSON-LD (use children for proper injection)
       useHead({
         title: `${blog.value.title} | Buffs Chicken Blog`,
         meta: [
@@ -422,7 +426,7 @@ if (!slug) {
         script: [
           {
             type: 'application/ld+json',
-            children: JSON.stringify({
+            innerHTML: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'BlogPosting',
               headline: blog.value.title,
@@ -438,7 +442,34 @@ if (!slug) {
                 logo: { '@type': 'ImageObject', url: 'https://www.buffschicken.com/buffs-logo.png' }
               },
               mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.buffschicken.com/blogs/${slug}` }
-            })
+            }, null, 2)
+          },
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              'itemListElement': [
+                {
+                  '@type': 'ListItem',
+                  'position': 1,
+                  'name': 'Home',
+                  'item': 'https://www.buffschicken.com'
+                },
+                {
+                  '@type': 'ListItem',
+                  'position': 2,
+                  'name': 'Blogs',
+                  'item': 'https://www.buffschicken.com/blogs'
+                },
+                {
+                  '@type': 'ListItem',
+                  'position': 3,
+                  'name': blog.value.title,
+                  'item': `https://www.buffschicken.com/blogs/${slug}`
+                }
+              ]
+            }, null, 2)
           }
         ]
       })

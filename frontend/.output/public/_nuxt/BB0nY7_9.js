@@ -1,1 +1,0 @@
-import{y as s,z as i,A as c,g as u,B as r,o as _,C as m}from"./Yq0m7TZy.js";import{u as p}from"./DPn6VgwJ.js";const h=s({__name:"admin",setup(d){const n=r(),{isAuthenticated:t,initToken:o}=p(),a=()=>n.currentRoute.value.path==="/admin/login";return i(async()=>{await o(),!a()&&!t.value&&await c("/admin/login")}),(g,l)=>{const e=m;return _(),u(e)}}});export{h as default};
