@@ -420,7 +420,7 @@ const loadBlog = async () => {
           { property: 'og:title', content: blog.value.title },
           { property: 'og:description', content: blog.value.metaDescription || blog.value.excerpt || blog.value.title },
           { property: 'og:type', content: 'article' },
-          { property: 'og:image', content: blog.value.image || 'https://www.buffschicken.com/buffs-logo.png' },
+          { property: 'og:image', content: blog.value.image || 'https://www.buffschicken.com/buffs-logo.webp' },
           { property: 'article:published_time', content: blog.value.publishedAt || blog.value.createdAt }
         ],
         script: [
@@ -439,7 +439,7 @@ const loadBlog = async () => {
                 '@type': 'Organization',
                 name: 'Buffs Chicken',
                 url: 'https://www.buffschicken.com',
-                logo: { '@type': 'ImageObject', url: 'https://www.buffschicken.com/buffs-logo.png' }
+                logo: { '@type': 'ImageObject', url: 'https://www.buffschicken.com/buffs-logo.webp' }
               },
               mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.buffschicken.com/blogs/${slug}` }
             }, null, 2)

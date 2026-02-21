@@ -16,7 +16,7 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
   ],
   link: [
-    { rel: 'icon', href: '/buffs-logo.png' },
+    { rel: 'icon', href: '/icon.png' },
     // Preconnect to Google Tag Manager for faster analytics loading
     { rel: 'preconnect', href: 'https://www.googletagmanager.com' },
     // Preload critical LCP images
