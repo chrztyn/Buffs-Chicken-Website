@@ -15,7 +15,7 @@
                 <div
                     v-for="(faq, index) in faqs"
                     :key="faq.id"
-                    :ref="el => { if (el) faqRefs.value[index] = el }"
+                    :ref="(el: any) => { if (el) (faqRefs.value as any)[index] = el }"
                     class="faq-item bg-white/80 rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg border-0 opacity-0 transform translate-y-12"
                     :class="[
                         faq.isOpen ? 'shadow-md' : '',
