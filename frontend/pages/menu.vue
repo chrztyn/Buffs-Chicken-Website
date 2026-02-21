@@ -303,25 +303,29 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-7 menu-grid">
-                        <MenuCard
-                            v-for="item in filteredMenuItems"
-                            :key="item.id"
-                            :product="item"
-                            :disabled="storeStatus && !storeStatus.isOpen"
-                            @add-to-cart="handleAddToCart"
-                        />
+                        <ClientOnly>
+                            <MenuCard
+                                v-for="item in filteredMenuItems"
+                                :key="item.id"
+                                :product="item"
+                                :disabled="storeStatus && !storeStatus.isOpen"
+                                @add-to-cart="handleAddToCart"
+                            />
+                        </ClientOnly>
                     </div>
 
                     <!-- Empty State -->
-                    <div v-if="filteredMenuItems.length === 0" class="text-center py-24">
-                        <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
-                            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
+                    <ClientOnly>
+                        <div v-if="filteredMenuItems.length === 0" class="text-center py-24">
+                            <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-xl font-semibold font-['Unbounded'] text-gray-600 mb-2">No items found</p>
+                            <p class="text-gray-400">Try adjusting your search or filter options</p>
                         </div>
-                        <p class="text-xl font-semibold font-['Unbounded'] text-gray-600 mb-2">No items found</p>
-                        <p class="text-gray-400">Try adjusting your search or filter options</p>
-                    </div>
+                    </ClientOnly>
                 </div>
             </div>
         </div>

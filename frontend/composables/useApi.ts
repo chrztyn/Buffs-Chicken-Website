@@ -50,20 +50,18 @@ export const useApi = () => {
 
   // Product endpoints
   // Lightweight wrapper to make API calls resilient during build/SSR
-  const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
-    async (...args: any[]) => {
-      try {
-        const res = await fn(...args)
-        // If axios response, return its data; otherwise return value directly
-        if (res && typeof res === 'object' && 'data' in res) return res.data
-        return res
-      } catch (err: any) {
-        const message = err?.message || String(err)
-        const url = err?.config?.url || ''
-        console.warn(`[useApi] request failed (returning fallback) ${url} — ${message}`)
-        return fallback
-      }
+const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
+  async (...args: any[]) => {
+    try {
+      return await fn(...args)
+    } catch (err: any) {
+      const message = err?.message || String(err)
+      const url = err?.config?.url || ''
+      console.warn(`[useApi] request failed (returning fallback) ${url} — ${message}`)
+      // Return fallback wrapped in axios-like shape so components don't break
+      return { data: fallback }
     }
+  }
 
   const getProducts = wrap((params?: { page?: number; limit?: number }) =>
     api.get('/products', { params }), [])
