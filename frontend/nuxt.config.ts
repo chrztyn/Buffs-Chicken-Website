@@ -8,27 +8,33 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   ssr: true,
   devtools: {
-    enabled: process.env.NODE_ENV === 'development',
+    enabled: false, // Disable devtools for faster builds
+  },
+  
+  experimental: {
+    payloadExtraction: false, // Disable payload extraction for faster builds
   },
   
   features: {
-    inlineStyles: true, // Inline critical CSS for faster LCP
+    inlineStyles: true,
   },
   
   build: {
     transpile: ['@nuxt/image'],
-    analyze: false, // Disable bundle analyzer in production
+    analyze: false,
   },
   vite: {
     build: {
-      cssCodeSplit: false, // Bundle all CSS into one file to reduce requests
-      cssMinify: 'esbuild', // Less memory than lightningcss, still good compression
+      cssCodeSplit: false,
+      cssMinify: 'esbuild',
+      minify: 'esbuild', // Esbuild is faster than terser
       rollupOptions: {
         output: {
-          manualChunks: undefined, // Prevent code splitting for better initial load
+          manualChunks: undefined,
         }
       },
-      chunkSizeWarningLimit: 1000, // Suppress warnings for server builds
+      chunkSizeWarningLimit: 1000,
+      reportCompressedSize: false, // Skip size reporting for faster builds
     },
     css: {
       devSourcemap: false,
@@ -39,14 +45,25 @@ export default defineNuxtConfig({
   },
   nitro: {
     compressPublicAssets: true,
-    minify: true, // Minify server code for smaller output
-    sourceMap: false, // Disable source maps in production for smaller size
+    minify: true,
+    sourceMap: false,
+    timing: false, // Disable timing info for faster builds
+    externals: {
+      inline: ['defu'] // Inline small dependencies
+    },
     routeRules: {
       '/': {
+        swr: 3600,
+        isr: true,
         headers: {
           'Link': '</buffs-logo.webp>; rel=preload; as=image; fetchpriority=high, </hero-main.webp>; rel=preload; as=image; fetchpriority=high'
         }
       },
+      '/menu': { swr: 3600, isr: true },
+      '/about': { swr: 3600, isr: true },
+      '/contact': { swr: 3600, isr: true },
+      '/blogs': { swr: 3600, isr: true },
+      '/blogs/**': { swr: 3600, isr: true },
       '/_nuxt/**': {
         headers: {
           'cache-control': 'public, max-age=31536000, immutable'
@@ -66,19 +83,12 @@ export default defineNuxtConfig({
         headers: {
           'cache-control': 'public, max-age=2592000'
         }
-      },
-      // ISR for blog pages - regenerate every hour instead of prerendering all
-      '/blogs/**': {
-        swr: 3600, // Cache for 1 hour, then regenerate in background
-        isr: true
       }
     },
     prerender: {
       crawlLinks: false,
-      // Only prerender in production builds to speed up dev
-      routes: process.env.NODE_ENV === 'production' 
-        ? ['/', '/menu', '/about', '/contact', '/blogs']
-        : []
+      // Disable prerendering - use ISR instead for faster builds
+      routes: []
     }
   } as any,
   runtimeConfig: {
@@ -118,10 +128,11 @@ export default defineNuxtConfig({
     quality: 80,
   },
 
-  // Sitemap configuration - explicit routes to ensure all pages are included
+  // Sitemap configuration - static routes only for fast builds
+  // Google will discover blog posts by crawling the /blogs page
   sitemap: {
-    urls: async () => {
-      const staticRoutes = [
+    urls: () => {
+      return [
         {
           loc: '/',
           lastmod: new Date().toISOString(),
@@ -149,46 +160,12 @@ export default defineNuxtConfig({
         {
           loc: '/blogs',
           lastmod: new Date().toISOString(),
-          changefreq: 'weekly',
-          priority: 0.8
+          changefreq: 'daily',
+          priority: 0.9
         }
       ]
-
-      // Fetch blog posts and add them to sitemap (only in production)
-      if (process.env.NODE_ENV !== 'production') {
-        return staticRoutes
-      }
-
-      try {
-        const apiBase = process.env.NUXT_PUBLIC_API_BASE || 'https://www.buffschicken.com/api'
-        const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 5000) // 5 second timeout
-        
-        const response = await fetch(`${apiBase}/blogs`, {
-          signal: controller.signal
-        })
-        clearTimeout(timeout)
-        
-        const data = await response.json()
-        const blogs = data.data || []
-
-        const blogRoutes = blogs.map((blog: any) => ({
-          loc: `/blogs/${blog.slug}`,
-          lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
-          changefreq: 'monthly',
-          priority: 0.7
-        }))
-
-        return [...staticRoutes, ...blogRoutes]
-      } catch (error) {
-        console.error('Error fetching blogs for sitemap (skipping):', error)
-        return staticRoutes
-      }
     },
-    exclude: ['/admin/**', '/cart', '/checkout'],
-    sitemapSize: 50000,
-    gzip: false,
-    baseURL: 'https://www.buffschicken.com'
+    exclude: ['/admin/**', '/cart', '/checkout']
   },
   router: {
     options: {
