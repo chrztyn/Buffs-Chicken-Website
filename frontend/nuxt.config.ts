@@ -67,10 +67,18 @@ export default defineNuxtConfig({
           'cache-control': 'public, max-age=2592000'
         }
       },
+      // ISR for blog pages - regenerate every hour instead of prerendering all
+      '/blogs/**': {
+        swr: 3600, // Cache for 1 hour, then regenerate in background
+        isr: true
+      }
     },
     prerender: {
-      crawlLinks: false, // Disabled for memory efficiency
-      routes: ['/', '/menu', '/about', '/contact', '/blogs'], // Only prerender key pages
+      crawlLinks: false,
+      // Only prerender in production builds to speed up dev
+      routes: process.env.NODE_ENV === 'production' 
+        ? ['/', '/menu', '/about', '/contact', '/blogs']
+        : []
     }
   } as any,
   runtimeConfig: {
@@ -146,10 +154,21 @@ export default defineNuxtConfig({
         }
       ]
 
-      // Fetch blog posts and add them to sitemap
+      // Fetch blog posts and add them to sitemap (only in production)
+      if (process.env.NODE_ENV !== 'production') {
+        return staticRoutes
+      }
+
       try {
         const apiBase = process.env.NUXT_PUBLIC_API_BASE || 'https://www.buffschicken.com/api'
-        const response = await fetch(`${apiBase}/blogs`)
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+        
+        const response = await fetch(`${apiBase}/blogs`, {
+          signal: controller.signal
+        })
+        clearTimeout(timeout)
+        
         const data = await response.json()
         const blogs = data.data || []
 
@@ -162,7 +181,7 @@ export default defineNuxtConfig({
 
         return [...staticRoutes, ...blogRoutes]
       } catch (error) {
-        console.error('Error fetching blogs for sitemap:', error)
+        console.error('Error fetching blogs for sitemap (skipping):', error)
         return staticRoutes
       }
     },
