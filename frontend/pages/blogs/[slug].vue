@@ -228,8 +228,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted } from 'vue'
-import { useRoute, useRouter, useAsyncData, useHead } from '#app'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter, useSeoMeta } from '#app'
 import { useApi } from '~/composables/useApi'
 import BlogCard from '~/components/BlogCard.vue'
 import Navbar from '~/components/Navbar.vue'
@@ -237,13 +237,167 @@ import Footer from '~/components/Footer.vue'
 
 const route = useRoute()
 const router = useRouter()
-const blog = ref<any>(null)
-const latestBlogs = ref<any[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
 const scrollY = ref(0)
 
 const { getBlogBySlug, getBlogs } = useApi()
+
+// Get slug from route params
+const slug = computed(() => route.params.slug as string)
+
+// Fetch blog data with proper SSR support and dynamic key
+const { data: blogData, error: fetchError, refresh: refreshBlog } = await useAsyncData(
+  () => `blog-${slug.value}`, // Dynamic key function
+  async () => {
+    console.log('Fetching blog with slug:', slug.value)
+    const response = await getBlogBySlug(slug.value)
+    console.log('Blog response:', response)
+    // Backend returns { data: blog }, axios wraps in response.data
+    const blog = response?.data?.data || null
+    console.log('Extracted blog:', blog)
+    
+    if (!blog) {
+      throw new Error('Blog not found')
+    }
+    
+    return blog
+  },
+  { 
+    watch: [() => route.params.slug], // Watch the route param directly
+    server: true,
+    lazy: false
+  }
+)
+
+// Fetch latest blogs with SSR support
+const { data: latestBlogsData } = await useAsyncData(
+  () => `latest-blogs-${slug.value}`,
+  async () => {
+    const response = await getBlogs()
+    const allBlogs = response?.data?.data || response?.data || []
+    
+    // Filter out current blog and show only published ones
+    return allBlogs
+      .filter((b: any) => 
+        b.slug !== slug.value && 
+        b.isPublished !== false
+      )
+      .sort((a: any, b: any) => {
+        const dateA = new Date(a.publishedAt || a.createdAt).getTime()
+        const dateB = new Date(b.publishedAt || b.createdAt).getTime()
+        return dateB - dateA
+      })
+      .slice(0, 3)
+  },
+  { 
+    watch: [() => route.params.slug],
+    server: true,
+    lazy: false
+  }
+)
+
+const blog = computed(() => blogData.value)
+const latestBlogs = computed(() => latestBlogsData.value || [])
+const loading = computed(() => !blogData.value && !fetchError.value)
+const error = computed(() => {
+  if (fetchError.value) return 'Failed to load the article. Please try again later.'
+  if (!blogData.value) return 'Article not found. It may have been deleted or the URL is incorrect.'
+  return null
+})
+
+// Set up SEO meta tags - these work with SSR for proper crawling
+useSeoMeta({
+  title: () => blog.value ? `${blog.value.title} | Buffs Chicken Blog` : 'Buffs Chicken Blog',
+  description: () => blog.value?.metaDescription || blog.value?.excerpt || 'Read the latest from Buffs Chicken',
+  ogTitle: () => blog.value?.title || 'Buffs Chicken Blog',
+  ogDescription: () => blog.value?.metaDescription || blog.value?.excerpt || '',
+  ogType: 'article',
+  ogImage: () => blog.value?.image || 'https://www.buffschicken.com/buffs-logo.webp',
+  ogUrl: () => `https://www.buffschicken.com/blogs/${slug.value}`,
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => blog.value?.title || 'Buffs Chicken Blog',
+  twitterDescription: () => blog.value?.metaDescription || blog.value?.excerpt || '',
+  twitterImage: () => blog.value?.image || 'https://www.buffschicken.com/buffs-logo.webp',
+})
+
+// Add canonical URL and JSON-LD structured data for SEO
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: `https://www.buffschicken.com/blogs/${slug.value}`
+    }
+  ],
+  script: blog.value ? [
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: blog.value.title,
+        description: blog.value.metaDescription || blog.value.excerpt || '',
+        image: {
+          '@type': 'ImageObject',
+          url: blog.value.image || 'https://www.buffschicken.com/buffs-logo.webp',
+          width: 1200,
+          height: 630
+        },
+        datePublished: blog.value.publishedAt || blog.value.createdAt,
+        dateModified: blog.value.updatedAt || blog.value.createdAt,
+        author: { 
+          '@type': 'Organization', 
+          name: 'Buffs Chicken', 
+          url: 'https://www.buffschicken.com' 
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Buffs Chicken',
+          url: 'https://www.buffschicken.com',
+          logo: { 
+            '@type': 'ImageObject', 
+            url: 'https://www.buffschicken.com/buffs-logo.webp',
+            width: 600,
+            height: 60
+          }
+        },
+        mainEntityOfPage: { 
+          '@type': 'WebPage', 
+          '@id': `https://www.buffschicken.com/blogs/${slug.value}` 
+        },
+        articleBody: (blog.value.content || '').substring(0, 500) + '...',
+        wordCount: (blog.value.content || '').split(/\s+/).length,
+        inLanguage: 'en-PH',
+        keywords: blog.value.category || 'food, chicken, restaurant, Philippines'
+      })
+    },
+    {
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          {
+            '@type': 'ListItem',
+            'position': 1,
+            'name': 'Home',
+            'item': 'https://www.buffschicken.com'
+          },
+          {
+            '@type': 'ListItem',
+            'position': 2,
+            'name': 'Blogs',
+            'item': 'https://www.buffschicken.com/blogs'
+          },
+          {
+            '@type': 'ListItem',
+            'position': 3,
+            'name': blog.value.title,
+            'item': `https://www.buffschicken.com/blogs/${slug.value}`
+          }
+        ]
+      })
+    }
+  ] : []
+}))
 
 // Handle scroll for parallax effect
 const handleScroll = () => {
@@ -251,12 +405,15 @@ const handleScroll = () => {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-  loadBlog()
+  if (process.client) {
+    window.addEventListener('scroll', handleScroll)
+  }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  if (process.client) {
+    window.removeEventListener('scroll', handleScroll)
+  }
 })
 
 // Calculate read time
@@ -302,195 +459,16 @@ const parseContent = (content: string) => {
   return html
 }
 
-// Fetch latest blogs
-const fetchLatestBlogs = async () => {
-  try {
-    console.log('Fetching latest blogs from API...')
-    const response = await getBlogs()
-    console.log('Full API response:', response)
-    console.log('Response type:', typeof response)
-    console.log('Response.data:', response?.data)
-    console.log('Response.data type:', typeof response?.data)
-    
-    // Extract blogs array from axios response
-    // Axios returns response.data as the actual response body
-    let allBlogs = []
-    
-    if (response?.data) {
-      // Check if response.data is the array directly
-      if (Array.isArray(response.data)) {
-        allBlogs = response.data
-        console.log('Blogs found in response.data (array)')
-      }
-      // Or if it's wrapped in response.data.data
-      else if (response.data.data && Array.isArray(response.data.data)) {
-        allBlogs = response.data.data
-        console.log('Blogs found in response.data.data')
-      }
-      // Or if it's in response.data.blogs
-      else if (response.data.blogs && Array.isArray(response.data.blogs)) {
-        allBlogs = response.data.blogs
-        console.log('Blogs found in response.data.blogs')
-      }
-      // Log the structure if we can't find it
-      else {
-        console.error('Unable to find blogs array. Response.data structure:', Object.keys(response.data))
-      }
-    }
-    
-    console.log('Total blogs extracted:', allBlogs.length)
-    console.log('All blogs:', allBlogs)
-    console.log('Current blog:', { id: blog.value?._id, slug: blog.value?.slug, title: blog.value?.title })
-
-    if (allBlogs.length === 0) {
-      console.warn('No blogs found in API response')
-      latestBlogs.value = []
-      return
-    }
-
-    // Filter: exclude current blog and only show published ones
-    const filtered = allBlogs
-      .filter((b: any) => {
-        const isNotCurrentById = b._id !== blog.value?._id
-        const isNotCurrentBySlug = b.slug !== blog.value?.slug
-        const isNotCurrent = isNotCurrentById || isNotCurrentBySlug
-        const isPublished = b.isPublished !== false // Default to true if field doesn't exist
-        
-        console.log(`Blog "${b.title}":`, {
-          id: b._id,
-          slug: b.slug,
-          currentBlogId: blog.value?._id,
-          currentBlogSlug: blog.value?.slug,
-          isNotCurrentById,
-          isNotCurrentBySlug,
-          isNotCurrent,
-          isPublished,
-          publishedField: b.isPublished,
-          willShow: isNotCurrent && isPublished
-        })
-        return isNotCurrent && isPublished
-      })
-      .sort((a: any, b: any) => {
-        // Sort by most recent first
-        const dateA = new Date(a.publishedAt || a.createdAt).getTime()
-        const dateB = new Date(b.publishedAt || b.createdAt).getTime()
-        return dateB - dateA
-      })
-      .slice(0, 3) // Limit to 3 blogs
-    
-    console.log('Filtered blogs:', filtered)
-    console.log('Number of blogs to display:', filtered.length)
-    
-    latestBlogs.value = filtered
-  } catch (err) {
-    console.error('Error fetching latest blogs:', err)
-    console.error('Error details:', err)
-    latestBlogs.value = []
-  }
-}
-
-// Load blog data and set up metadata
-const loadBlog = async () => {
-  const slug = route.params.slug as string
-  if (!slug) {
-    error.value = 'No article specified'
-    loading.value = false
-    return
-  }
-
-  try {
-    loading.value = true
-    const { data: blogRes } = await useAsyncData(`blog-${slug}`, () => getBlogBySlug(slug), {
-      watch: [route.params]
-    })
-
-    if (!blogRes || !blogRes.value || !blogRes.value.data) {
-      error.value = 'Article not found. It may have been deleted or the URL is incorrect.'
-    } else {
-      blog.value = blogRes.value.data
-      await fetchLatestBlogs()
-
-      useHead({
-        title: `${blog.value.title} | Buffs Chicken Blog`,
-        meta: [
-          {
-            name: 'description',
-            content: blog.value.metaDescription || blog.value.excerpt || `Read about ${blog.value.title} on Buffs Chicken blog`
-          },
-          { property: 'og:title', content: blog.value.title },
-          { property: 'og:description', content: blog.value.metaDescription || blog.value.excerpt || blog.value.title },
-          { property: 'og:type', content: 'article' },
-          { property: 'og:image', content: blog.value.image || 'https://www.buffschicken.com/buffs-logo.webp' },
-          { property: 'article:published_time', content: blog.value.publishedAt || blog.value.createdAt }
-        ],
-        script: [
-          {
-            type: 'application/ld+json',
-            innerHTML: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'BlogPosting',
-              headline: blog.value.title,
-              description: blog.value.metaDescription || blog.value.excerpt || '',
-              image: blog.value.image || '',
-              datePublished: blog.value.publishedAt || blog.value.createdAt,
-              dateModified: blog.value.updatedAt || blog.value.createdAt,
-              author: { '@type': 'Organization', name: 'Buffs Chicken', url: 'https://www.buffschicken.com' },
-              publisher: {
-                '@type': 'Organization',
-                name: 'Buffs Chicken',
-                url: 'https://www.buffschicken.com',
-                logo: { '@type': 'ImageObject', url: 'https://www.buffschicken.com/buffs-logo.webp' }
-              },
-              mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.buffschicken.com/blogs/${slug}` }
-            }, null, 2)
-          },
-          {
-            type: 'application/ld+json',
-            innerHTML: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'BreadcrumbList',
-              'itemListElement': [
-                {
-                  '@type': 'ListItem',
-                  'position': 1,
-                  'name': 'Home',
-                  'item': 'https://www.buffschicken.com'
-                },
-                {
-                  '@type': 'ListItem',
-                  'position': 2,
-                  'name': 'Blogs',
-                  'item': 'https://www.buffschicken.com/blogs'
-                },
-                {
-                  '@type': 'ListItem',
-                  'position': 3,
-                  'name': blog.value.title,
-                  'item': `https://www.buffschicken.com/blogs/${slug}`
-                }
-              ]
-            }, null, 2)
-          }
-        ]
-      })
-    }
-  } catch (err) {
-    console.error('Failed to load blog:', err)
-    error.value = 'Failed to load the article. Please try again later.'
-  } finally {
-    loading.value = false
-  }
-}
-
+// Navigation functions
 const goBack = () => {
   router.push('/blogs')
 }
 
-const goToRelatedBlog = (slug: string) => {
-  router.push(`/blogs/${slug}`)
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-  // Reload blog data for new slug
-  loadBlog()
+const goToRelatedBlog = async (newSlug: string) => {
+  await router.push(`/blogs/${newSlug}`)
+  if (process.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 }
 </script>
 

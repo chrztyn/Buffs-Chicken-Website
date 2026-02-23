@@ -113,7 +113,7 @@ export default defineNuxtConfig({
   // Sitemap configuration - explicit routes to ensure all pages are included
   sitemap: {
     urls: async () => {
-      return [
+      const staticRoutes = [
         {
           loc: '/',
           lastmod: new Date().toISOString(),
@@ -145,6 +145,26 @@ export default defineNuxtConfig({
           priority: 0.8
         }
       ]
+
+      // Fetch blog posts and add them to sitemap
+      try {
+        const apiBase = process.env.NUXT_PUBLIC_API_BASE || 'https://www.buffschicken.com/api'
+        const response = await fetch(`${apiBase}/blogs`)
+        const data = await response.json()
+        const blogs = data.data || []
+
+        const blogRoutes = blogs.map((blog: any) => ({
+          loc: `/blogs/${blog.slug}`,
+          lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
+          changefreq: 'monthly',
+          priority: 0.7
+        }))
+
+        return [...staticRoutes, ...blogRoutes]
+      } catch (error) {
+        console.error('Error fetching blogs for sitemap:', error)
+        return staticRoutes
+      }
     },
     exclude: ['/admin/**', '/cart', '/checkout'],
     sitemapSize: 50000,

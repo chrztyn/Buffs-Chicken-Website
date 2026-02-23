@@ -43,7 +43,7 @@ router.get('/slug/:slug', async (req, res) => {
     blog.views += 1;
     await blog.save();
 
-    res.json(blog);
+    res.json({ data: blog });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

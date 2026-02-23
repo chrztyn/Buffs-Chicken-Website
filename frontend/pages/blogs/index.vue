@@ -181,6 +181,26 @@ useHead({
       type: 'application/ld+json',
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
+        '@type': 'Blog',
+        'name': 'Buffs Chicken Blog',
+        'description': 'Stories, tips, and updates from the Buffs Chicken team in the Philippines',
+        'url': 'https://www.buffschicken.com/blogs',
+        'publisher': {
+          '@type': 'Organization',
+          'name': 'Buffs Chicken',
+          'url': 'https://www.buffschicken.com',
+          'logo': {
+            '@type': 'ImageObject',
+            'url': 'https://www.buffschicken.com/buffs-logo.webp'
+          }
+        },
+        'inLanguage': 'en-PH'
+      }, null, 2)
+    },
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         'itemListElement': [
           {

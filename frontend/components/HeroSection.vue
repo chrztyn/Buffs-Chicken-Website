@@ -37,8 +37,9 @@
             <!-- Description -->
             <p class="font-['Unbounded'] text-black/85 leading-relaxed max-w-xl text-base sm:text-lg animate-fade-in-up" 
                 style="animation-delay: 0.4s;">
-                Welcome to Buffs Chicken, your go-to spot at The Hood, Angeles City for the crispiest and juiciest chicken around. From signature OG Buffs wings to cheesy pastas and loaded combos, every meal is cooked fresh and packed with flavor.
-
+                Welcome to Buffs Chicken Philippines — home of the crispiest chicken pops and wings, pasta, and affordable comfort meals loved by Filipinos.
+                Explore our menu, discover our best-selling flavors, and find Buffs Chicken
+                branches near you.
             </p>
 
             <!-- CTA Button -->

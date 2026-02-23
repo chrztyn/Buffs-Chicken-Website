@@ -93,12 +93,12 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     api.get(`/admin/orders/${id}/verify`)
   const cancelOrder = (id: string) => api.put(`/orders/${id}/cancel`, {})
 
-  // Blog endpoints
-  const getBlogs = wrap((params?: { page?: number; limit?: number }) =>
-    api.get('/blogs', { params }), [])
-  const getBlogBySlug = wrap((slug: string) => api.get(`/blogs/slug/${slug}`), null)
-  const getBlogsByCategory = wrap((category: string) =>
-    api.get(`/blogs/category/${category}`), [])
+  // Blog endpoints - NOT wrapped so they can properly fail/succeed for SSR
+  const getBlogs = (params?: { page?: number; limit?: number }) =>
+    api.get('/blogs', { params })
+  const getBlogBySlug = (slug: string) => api.get(`/blogs/slug/${slug}`)
+  const getBlogsByCategory = (category: string) =>
+    api.get(`/blogs/category/${category}`)
   const createBlog = (data: any) => api.post('/admin/blogs', data)
   const updateBlog = (id: string, data: any) => api.put(`/admin/blogs/${id}`, data)
   const deleteBlog = (id: string) => api.delete(`/admin/blogs/${id}`)
