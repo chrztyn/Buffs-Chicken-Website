@@ -10,7 +10,7 @@
 <script setup>
 // Root app component
 useHead({
-  title: "Buffs Chicken - Crispy Wings & Comfort Food in Angeles City",
+  title: "Buffs Chicken - Crispy Wings & Comfort Food",
   meta: [
     { charset: 'utf-8' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -34,7 +34,7 @@ useHead({
     { name: 'twitter:image', content: 'https://www.buffschicken.com/buffs-logo.webp' }
   ],
   link: [
-    { rel: 'icon', href: '/favicon.ico' },
+    { rel: 'icon', href: '/favicon.ico?v=4' },
     { rel: 'apple-touch-icon', href: '/icon.png' },
     { rel: 'manifest', href: '/site.webmanifest' },
     // Preconnect to Google Tag Manager for faster analytics loading

@@ -7,7 +7,9 @@ declare global {
 }
 
 export default defineNuxtPlugin(async (nuxtApp) => {
+  // Service Worker disabled - uncomment when PWA module is properly configured
   // Only register service worker in production and if it's supported
+  /*
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     try {
       const wb = new Workbox('/sw.js')
@@ -42,4 +44,5 @@ export default defineNuxtPlugin(async (nuxtApp) => {
       console.error('Service Worker registration failed:', error)
     }
   }
+  */
 })
