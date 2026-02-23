@@ -34,11 +34,8 @@ useHead({
     { name: 'twitter:image', content: 'https://www.buffschicken.com/buffs-logo.webp' }
   ],
   link: [
-    { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico?v=2' },
-    { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/icon.png?v=2' },
-    { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/icon.png?v=2' },
-    { rel: 'apple-touch-icon', sizes: '180x180', href: '/icon.png?v=2' },
-    { rel: 'shortcut icon', href: '/favicon.ico?v=2' },
+    { rel: 'icon', href: '/favicon.ico' },
+    { rel: 'apple-touch-icon', href: '/icon.png' },
     { rel: 'manifest', href: '/site.webmanifest' },
     // Preconnect to Google Tag Manager for faster analytics loading
     { rel: 'preconnect', href: 'https://www.googletagmanager.com' },
