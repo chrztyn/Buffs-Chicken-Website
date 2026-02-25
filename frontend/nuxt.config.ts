@@ -53,13 +53,6 @@ export default defineNuxtConfig({
     externals: {
       inline: ['defu']
     },
-    // Optimize for low memory builds
-    rollupConfig: {
-      output: {
-        chunkFileNames: '_nuxt/[name].js',
-        entryFileNames: '_nuxt/[name].js',
-      }
-    },
     routeRules: {
       '/': {
         swr: 3600,
