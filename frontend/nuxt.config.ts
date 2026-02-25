@@ -46,7 +46,7 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
-    compressPublicAssets: true,
+    compressPublicAssets: false, // Disabled - too memory intensive for 1GB RAM
     minify: true,
     sourceMap: false,
     timing: false,
