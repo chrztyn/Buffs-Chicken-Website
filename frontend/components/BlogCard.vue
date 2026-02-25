@@ -6,10 +6,14 @@
   >
     <!-- Image Container with Overlay -->
     <div class="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-      <img
+      <NuxtImg
         v-if="blog.image"
         :src="blog.image"
         :alt="blog.title"
+        width="640"
+        height="400"
+        sizes="sm:100vw md:50vw lg:33vw"
+        format="webp"
         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
         loading="lazy"
       />

@@ -114,6 +114,10 @@ export default defineNuxtConfig({
       googleAnalytics: {
         id: 'G-P48SW3GZ05'
       }
+    },
+    // Defer all scripts for better performance
+    defaultScriptOptions: {
+      trigger: 'onNuxtReady'
     }
   },
 
@@ -124,9 +128,20 @@ export default defineNuxtConfig({
     description: 'Buffs Chicken at The Hood, Angeles City serves crispy and juicy signature OG Buffs wings, cheesy pastas, and loaded combos.'
   },
 
-  // Minimal image config
+  // Runtime image optimization (no build-time memory impact)
   image: {
     quality: 80,
+    format: ['webp'],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+    },
+    densities: [1, 2],
+    // Use ipx for runtime optimization (zero build impact)
+    provider: 'ipx',
   },
 
   // Sitemap configuration - static routes only for fast builds
@@ -197,7 +212,18 @@ export default defineNuxtConfig({
           href: 'https://fonts.gstatic.com',
           crossorigin: 'anonymous',
         },
+        {
+          rel: 'dns-prefetch',
+          href: 'https://www.buffschicken.com',
+        },
         // Non-blocking font loading with media trick
+        {
+          rel: 'preload',
+          as: 'style',
+          href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap',
+          onload: "this.onload=null;this.rel='stylesheet'"
+        },
+        // Fallback for browsers without JS
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap',

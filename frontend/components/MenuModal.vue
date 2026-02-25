@@ -35,9 +35,14 @@
                         <div class="modal-header">
                             <!-- Image Section -->
                             <div class="modal-image">
-                                <img 
+                                <NuxtImg 
                                     :src="item.image" 
                                     :alt="item.name"
+                                    width="600"
+                                    height="600"
+                                    sizes="sm:100vw md:600px"
+                                    format="webp"
+                                    loading="lazy"
                                     class="w-full h-full object-contain transition-transform duration-300 hover:scale-110"
                                 />
                                 </div>
