@@ -133,18 +133,9 @@ export default defineNuxtConfig({
     description: 'Buffs Chicken at The Hood, Angeles City serves crispy and juicy signature OG Buffs wings, cheesy pastas, and loaded combos.'
   },
 
-  // Runtime image optimization (no build-time memory impact)
+  // Minimal image config
   image: {
     quality: 80,
-    format: ['webp'],
-    screens: {
-      xs: 320,
-      sm: 640,
-      md: 768,
-      lg: 1024,
-      xl: 1280,
-    },
-    densities: [1, 2],
   },
 
   // Sitemap temporarily disabled to speed up builds

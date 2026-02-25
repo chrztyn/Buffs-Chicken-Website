@@ -11,14 +11,12 @@
         >
             <!-- Image Section -->
             <div class="image-container rounded-xl p-1 sm:p-1.5 mb-2 sm:mb-2.5 flex items-center justify-center overflow-hidden transition-colors duration-300">
-                <NuxtImg 
+                <img 
                     :src="image" 
                     :alt="name" 
                     width="300"
                     height="300"
                     loading="lazy"
-                    sizes="sm:100vw md:50vw lg:33vw"
-                    format="webp"
                     :class="[
                         'w-full h-32 sm:h-40 object-contain transition-transform duration-300',
                         disabled ? 'grayscale' : 'group-hover:scale-105'

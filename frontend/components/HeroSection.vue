@@ -57,15 +57,13 @@
             <!-- Main image container -->
             <div class="image-container group">
                 <div class="image-frame">
-                <NuxtImg 
+                <img 
                     src="/hero-main.webp" 
                     alt="Buffs Chicken" 
                     width="800"
                     height="600"
                     fetchpriority="high"
                     loading="eager"
-                    sizes="sm:100vw md:50vw lg:800px"
-                    format="webp"
                     class="main-image"
                 />
                 
@@ -90,7 +88,7 @@
 
             <!-- Decorative star -->
             <div class="floating-star">
-                <NuxtImg src="/hero-star.png" alt="Star" width="80" height="80" loading="lazy" class="w-20 h-20 animate-spin-slow" />
+                <img src="/hero-star.png" alt="Star" class="w-20 h-20 animate-spin-slow" />
             </div>
             </div>
 

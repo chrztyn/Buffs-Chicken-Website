@@ -19,14 +19,12 @@
         
         <!-- Image -->
         <div class="food-card-img-wrap">
-        <NuxtImg 
+        <img 
     	    :src="image" 
     	    :alt="name" 
     	    width="400"
     	    height="400"
     	    loading="lazy"
-    	    sizes="sm:100vw md:50vw lg:25vw"
-    	    format="webp"
     	    class="w-full h-64 object-contain"
     	/>
         </div>
