@@ -13,6 +13,7 @@ export default defineNuxtConfig({
   
   experimental: {
     payloadExtraction: false, // Disable payload extraction for faster builds
+    inlineSSRStyles: true, // Inline critical CSS to prevent render blocking
   },
   
   features: {
