@@ -28,14 +28,15 @@ export default defineNuxtConfig({
     build: {
       cssCodeSplit: false,
       cssMinify: 'esbuild',
-      minify: 'esbuild', // Esbuild is faster than terser
+      minify: 'esbuild',
       rollupOptions: {
         output: {
           manualChunks: undefined,
         }
       },
       chunkSizeWarningLimit: 1000,
-      reportCompressedSize: false, // Skip size reporting for faster builds
+      reportCompressedSize: false,
+      sourcemap: false, // Disable sourcemaps to save memory
     },
     css: {
       devSourcemap: false,
@@ -48,9 +49,16 @@ export default defineNuxtConfig({
     compressPublicAssets: true,
     minify: true,
     sourceMap: false,
-    timing: false, // Disable timing info for faster builds
+    timing: false,
     externals: {
-      inline: ['defu'] // Inline small dependencies
+      inline: ['defu']
+    },
+    // Optimize for low memory builds
+    rollupConfig: {
+      output: {
+        chunkFileNames: '_nuxt/[name].js',
+        entryFileNames: '_nuxt/[name].js',
+      }
     },
     routeRules: {
       '/': {
@@ -144,44 +152,12 @@ export default defineNuxtConfig({
     provider: 'ipx',
   },
 
-  // Sitemap configuration - static routes only for fast builds
-  // Google will discover blog posts by crawling the /blogs page
+  // Sitemap configuration - zero runtime mode for faster builds
   sitemap: {
-    urls: () => {
-      return [
-        {
-          loc: '/',
-          lastmod: new Date().toISOString(),
-          changefreq: 'weekly',
-          priority: 1.0
-        },
-        {
-          loc: '/menu',
-          lastmod: new Date().toISOString(),
-          changefreq: 'weekly',
-          priority: 0.9
-        },
-        {
-          loc: '/about',
-          lastmod: new Date().toISOString(),
-          changefreq: 'monthly',
-          priority: 0.8
-        },
-        {
-          loc: '/contact',
-          lastmod: new Date().toISOString(),
-          changefreq: 'monthly',
-          priority: 0.8
-        },
-        {
-          loc: '/blogs',
-          lastmod: new Date().toISOString(),
-          changefreq: 'daily',
-          priority: 0.9
-        }
-      ]
-    },
-    exclude: ['/admin/**', '/cart', '/checkout']
+    strictNuxtContentPaths: true,
+    exclude: ['/admin/**', '/cart', '/checkout'],
+    // Enable zero runtime mode (no server bundle)
+    zeroRuntime: true,
   },
   router: {
     options: {
