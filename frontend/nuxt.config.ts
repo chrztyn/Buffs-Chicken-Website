@@ -89,8 +89,10 @@ export default defineNuxtConfig({
     },
     prerender: {
       crawlLinks: false,
-      // Disable prerendering - use ISR instead for faster builds
-      routes: []
+      routes: [],
+      // Completely disable prerendering during build
+      ignore: ['/'],
+      failOnError: false,
     }
   } as any,
   runtimeConfig: {
@@ -108,7 +110,9 @@ export default defineNuxtConfig({
   },
   pages: true,
   css: ['~/assets/css/main.css'],
-  modules: ['@nuxt/image', '@nuxtjs/sitemap', '@nuxt/scripts'],
+  modules: ['@nuxt/image', '@nuxt/scripts'],
+  // Sitemap temporarily disabled for faster builds
+  // modules: ['@nuxt/image', '@nuxtjs/sitemap', '@nuxt/scripts'],
   
   scripts: {
     registry: {
@@ -145,13 +149,12 @@ export default defineNuxtConfig({
     provider: 'ipx',
   },
 
-  // Sitemap configuration - zero runtime mode for faster builds
-  sitemap: {
-    strictNuxtContentPaths: true,
-    exclude: ['/admin/**', '/cart', '/checkout'],
-    // Enable zero runtime mode (no server bundle)
-    zeroRuntime: true,
-  },
+  // Sitemap temporarily disabled to speed up builds
+  // sitemap: {
+  //   strictNuxtContentPaths: true,
+  //   exclude: ['/admin/**', '/cart', '/checkout'],
+  //   zeroRuntime: true,
+  // },
   router: {
     options: {
       strict: false
