@@ -36,7 +36,7 @@ export default defineNuxtConfig({
       },
       chunkSizeWarningLimit: 1000,
       reportCompressedSize: false,
-      sourcemap: false, // Disable sourcemaps to save memory
+      sourcemap: false,
     },
     css: {
       devSourcemap: false,
@@ -46,8 +46,8 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
-    compressPublicAssets: false, // Disabled - too memory intensive for 1GB RAM
-    minify: true,
+    compressPublicAssets: false,
+    minify: false, // Disabled for faster builds on 1GB RAM
     sourceMap: false,
     timing: false,
     externals: {
@@ -145,8 +145,6 @@ export default defineNuxtConfig({
       xl: 1280,
     },
     densities: [1, 2],
-    // Use ipx for runtime optimization (zero build impact)
-    provider: 'ipx',
   },
 
   // Sitemap temporarily disabled to speed up builds
