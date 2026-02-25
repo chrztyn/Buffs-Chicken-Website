@@ -21,7 +21,7 @@ useHead({
     { property: 'og:type', content: 'business.business' },
     { property: 'og:url', content: 'https://www.buffschicken.com' },
     { property: 'og:title', content: 'Buffs Chicken - Crispy Wings & Comfort Food' },
-    { property: 'og:description', content: "Welcome to Buffs Chicken Philippines — home of the crispiest chicken pops and wings, pasta, and affordable comfort meals loved by Filipinos. Explore our menu, discover our best-selling flavors, and find Buffs Chicken branches near you." },
+    { property: 'og:description', content: "Welcome to Buffs Chicken Philippines — home of the crispiest chicken poppers and chicken wings, pasta, and affordable comfort food loved by Filipinos. Explore our menu, discover our homemade sauces, and find Buffs Chicken branches near you." },
     { property: 'og:image', content: 'https://www.buffschicken.com/buffs-logo.webp' },
     { property: 'og:image:width', content: '1200' },
     { property: 'og:image:height', content: '630' },
@@ -30,7 +30,7 @@ useHead({
     // Twitter Card tags
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: 'Buffs Chicken - Crispy Wings & Comfort Food' },
-    { name: 'twitter:description', content: "Welcome to Buffs Chicken Philippines — home of the crispiest chicken pops and wings, pasta, and affordable comfort meals loved by Filipinos. Explore our menu, discover our best-selling flavors, and find Buffs Chicken branches near you." },
+    { name: 'twitter:description', content: "Welcome to Buffs Chicken Philippines — home of the crispiest chicken poppers and chicken wings, pasta, and affordable comfort food loved by Filipinos. Explore our menu, discover our homemade sauces, and find Buffs Chicken branches near you." },
     { name: 'twitter:image', content: 'https://www.buffschicken.com/buffs-logo.webp' }
   ],
   link: [

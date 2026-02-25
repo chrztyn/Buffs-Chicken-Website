@@ -38,6 +38,12 @@
             About
           </NuxtLink>
           <NuxtLink 
+            to="/calendar" 
+            class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] transition-colors duration-200"
+          >
+            Events
+          </NuxtLink>
+          <NuxtLink 
             to="/contact" 
             class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] transition-colors duration-200"
           >
@@ -105,6 +111,14 @@
               style="animation-delay: 0.2s"
             >
               About
+            </NuxtLink>
+            <NuxtLink 
+              to="/calendar" 
+              @click="menuOpen = false"
+              class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
+              style="animation-delay: 0.225s"
+            >
+              Events
             </NuxtLink>
             <NuxtLink 
               to="/contact" 

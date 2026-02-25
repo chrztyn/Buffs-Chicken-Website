@@ -14,7 +14,7 @@
                     Get In Touch
                 </h2>
                 <p class="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-                    Have a question or planning something special? We'd love to hear from you. Drop us a message and we'll get back to you as soon as possible.
+                    Planning a special event? We offer food carts and catering services for birthdays, weddings, corporate events, and more! Reach out to us and let's make your celebration delicious and memorable.
                 </p>
             </div>
 
@@ -136,7 +136,7 @@
                     <div class="contact-form-container">
                         <div class="form-header">
                             <h3 class="form-title">Send Us a Message</h3>
-                            <p class="form-subtitle">Fill out the form below and we'll respond within 24 hours</p>
+                            <p class="form-subtitle">Inquire about our food cart and catering services for your event, or reach out for any questions</p>
                         </div>
 
                         <form @submit.prevent="submitForm" class="contact-form">
@@ -189,7 +189,7 @@
                                     <textarea
                                         v-model="form.message"
                                         id="message"
-                                        placeholder="Tell us about your inquiry or feedback..."
+                                        placeholder="Tell us about your event, catering needs, or any questions you have..."
                                         rows="6"
                                         class="form-textarea"
                                         required

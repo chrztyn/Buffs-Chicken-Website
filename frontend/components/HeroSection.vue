@@ -37,9 +37,7 @@
             <!-- Description -->
             <p class="font-['Unbounded'] text-black/85 leading-relaxed max-w-xl text-base sm:text-lg animate-fade-in-up" 
                 style="animation-delay: 0.4s;">
-                Welcome to Buffs Chicken Philippines — home of the crispiest chicken pops and wings, pasta, and affordable comfort meals loved by Filipinos.
-                Explore our menu, discover our best-selling flavors, and find Buffs Chicken
-                branches near you.
+                Welcome to Buffs Chicken Philippines — home of the crispiest chicken poppers and chicken wings, pasta, and affordable comfort food loved by Filipinos. Explore our menu, discover our homemade sauces, and find Buffs Chicken branches near you.
             </p>
 
             <!-- CTA Button -->

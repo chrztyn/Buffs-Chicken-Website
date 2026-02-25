@@ -192,17 +192,26 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
                             </div>
-                            <button 
-                                @click="goToCart"
-                                class="w-9 h-9 sm:w-10 sm:h-10 bg-[#FEB90E] rounded-full text-[#1A4189] hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 flex items-center justify-center flex-shrink-0 shadow-sm hover:shadow-md"
-                                aria-label="View Cart"
-                            >
-                                <svg class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                                <line x1="3" y1="6" x2="21" y2="6"></line>
-                                <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                </svg>
-                            </button>
+                            <div class="relative flex-shrink-0">
+                                <button 
+                                    @click="goToCart"
+                                    class="w-11 h-11 sm:w-12 sm:h-12 bg-[#FEB90E] rounded-full text-[#1A4189] hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 flex items-center justify-center shadow-md hover:shadow-lg"
+                                    aria-label="View Cart"
+                                >
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                </button>
+                                <!-- Cart Badge -->
+                                <transition name="badge-pop">
+                                    <div 
+                                        v-if="cartCount > 0"
+                                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-lg border-2 border-white"
+                                    >
+                                        {{ cartCount > 99 ? '99+' : cartCount }}
+                                    </div>
+                                </transition>
+                            </div>
                         </div>
                     </div>
 
@@ -748,6 +757,29 @@ export default {
 .toast-fade-leave-to {
     opacity: 0;
     transform: translateX(100%);
+}
+
+/* Cart Badge Animations */
+.badge-pop-enter-active,
+.badge-pop-leave-active {
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .badge-pop-enter-active,
+    .badge-pop-leave-active {
+        transition: none;
+    }
+}
+
+.badge-pop-enter-from {
+    opacity: 0;
+    transform: scale(0);
+}
+
+.badge-pop-leave-to {
+    opacity: 0;
+    transform: scale(0);
 }
 
 /* Mobile Filter Dropdown Animation */

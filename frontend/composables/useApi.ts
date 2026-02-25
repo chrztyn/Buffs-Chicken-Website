@@ -135,6 +135,25 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
   const addTemporaryClosure = (data: any) => api.post('/store-settings/temporary-closures', data)
   const deleteTemporaryClosure = (id: string) => api.delete(`/store-settings/temporary-closures/${id}`)
 
+  // Event endpoints
+  const getEvents = wrap(() => api.get('/events'), [])
+  const getEventsByMonth = wrap((year: number, month: number) => 
+    api.get(`/events/month/${year}/${month}`), [])
+  const getEvent = wrap((id: string) => api.get(`/events/${id}`), null)
+  const createEvent = (formData: FormData) => 
+    api.post('/events', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  const updateEvent = (id: string, formData: FormData) => 
+    api.put(`/events/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  const deleteEvent = (id: string) => api.delete(`/events/${id}`)
+
   return {
     api,
     adminLogin,
@@ -175,6 +194,12 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     updateStoreSettings,
     toggleStoreOverride,
     addTemporaryClosure,
-    deleteTemporaryClosure
+    deleteTemporaryClosure,
+    getEvents,
+    getEventsByMonth,
+    getEvent,
+    createEvent,
+    updateEvent,
+    deleteEvent
   }
 }

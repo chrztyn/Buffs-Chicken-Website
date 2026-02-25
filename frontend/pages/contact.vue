@@ -78,9 +78,9 @@ export default {
       meta: [
         {
           name: 'description',
-          content: 'Contact Buffs Chicken at The Hood, Angeles City. Send us a message for inquiries, feedback, or orders. We love hearing from you!'
+          content: 'Contact Buffs Chicken for food cart and catering services in Angeles City. Perfect for birthdays, weddings, corporate events, and more. Get a quote today!'
         },
-        { name: 'keywords', content: 'contact, Buffs Chicken, Angeles City, customer support, inquiries' },
+        { name: 'keywords', content: 'contact, Buffs Chicken, Angeles City, catering, food cart, events, birthdays, weddings, corporate catering' },
         { property: 'og:title', content: 'Contact Us - Buffs Chicken' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://www.buffschicken.com/contact' }

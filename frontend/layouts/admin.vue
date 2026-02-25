@@ -43,6 +43,13 @@
           Blogs
         </NuxtLink>
         <NuxtLink
+          to="/admin/events"
+          class="block px-4 py-2 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
+          @click="menuOpen = false"
+        >
+          Events
+        </NuxtLink>
+        <NuxtLink
           to="/admin/store-hours"
           class="block px-4 py-2 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
           @click="menuOpen = false"
@@ -88,6 +95,12 @@
               class="block px-4 py-3 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
             >
               Blogs
+            </NuxtLink>
+            <NuxtLink
+              to="/admin/events"
+              class="block px-4 py-3 rounded-lg font-['Unbounded'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
+            >
+              Events
             </NuxtLink>
             <NuxtLink
               to="/admin/store-hours"
