@@ -3,12 +3,12 @@
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div>
-        <h1 class="font-['Caprasimo'] text-4xl text-[#1A4189] mb-2">Events</h1>
-        <p class="font-['Unbounded'] text-gray-600">Manage calendar events</p>
+        <h1 class="font-['Poppins'] font-bold text-4xl text-[#1A4189] mb-2">Events</h1>
+        <p class="font-['Poppins'] text-gray-600">Manage calendar events</p>
       </div>
       <button
         @click="openAddEvent"
-        class="px-6 py-2 bg-[#FE601C] text-white font-['Unbounded'] font-bold rounded-lg hover:bg-[#e5551a] transition"
+        class="px-6 py-2 bg-[#FE601C] text-white font-['Poppins'] font-bold rounded-lg hover:bg-[#e5551a] transition"
       >
         + Add Event
       </button>
@@ -20,19 +20,19 @@
         v-model="searchQuery"
         type="text"
         placeholder="Search events..."
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] font-['Unbounded']"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] font-['Poppins']"
       />
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A4189]"></div>
-      <p class="mt-4 text-gray-600 font-['Unbounded']">Loading events...</p>
+      <p class="mt-4 text-gray-600 font-['Poppins']">Loading events...</p>
     </div>
 
     <!-- Events List -->
     <div v-else-if="filteredEvents.length === 0" class="text-center py-12">
-      <p class="text-gray-500 font-['Unbounded'] text-lg">No events found</p>
+      <p class="text-gray-500 font-['Poppins'] text-lg">No events found</p>
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -53,10 +53,10 @@
         <!-- Event Info -->
         <div class="p-5 flex flex-col flex-grow">
           <!-- Title -->
-          <h3 class="font-['Caprasimo'] text-lg text-[#1A4189] mb-2">{{ event.name }}</h3>
+          <h3 class="font-['Poppins'] font-bold text-lg text-[#1A4189] mb-2">{{ event.name }}</h3>
           
           <!-- Date Range -->
-          <div class="mb-3 space-y-2 text-sm font-['Unbounded']">
+          <div class="mb-3 space-y-2 text-sm font-['Poppins']">
             <div class="flex items-center gap-2 text-gray-700">
               <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -81,7 +81,7 @@
           </div>
 
           <!-- Description -->
-          <p v-if="event.description" class="text-gray-600 text-xs font-['Unbounded'] mb-4 line-clamp-3 flex-grow">
+          <p v-if="event.description" class="text-gray-600 text-xs font-['Poppins'] mb-4 line-clamp-3 flex-grow">
             {{ event.description }}
           </p>
 
@@ -89,13 +89,13 @@
           <div class="flex gap-3 mt-auto">
             <button
               @click="openEditEvent(event)"
-              class="flex-1 px-4 py-2 bg-[#1A4189] text-white font-['Unbounded'] font-bold rounded-lg hover:bg-[#153066] transition"
+              class="flex-1 px-4 py-2 bg-[#1A4189] text-white font-['Poppins'] font-bold rounded-lg hover:bg-[#153066] transition"
             >
               Edit
             </button>
             <button
               @click="confirmDelete(event)"
-              class="px-4 py-2 bg-red-500 text-white font-['Unbounded'] font-bold rounded-lg hover:bg-red-600 transition"
+              class="px-4 py-2 bg-red-500 text-white font-['Poppins'] font-bold rounded-lg hover:bg-red-600 transition"
             >
               Delete
             </button>

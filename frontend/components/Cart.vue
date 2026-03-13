@@ -506,7 +506,10 @@ export default {
                     subtotal: this.subtotal,
                     deliveryFee: this.deliveryFee,
                     total: this.total,
-                    notes: customerData.notes || ''
+                    notes: customerData.notes || '',
+                    paymentMethod: customerData.paymentMethod || 'cash_on_delivery',
+                    paymentReference: customerData.paymentReference || null,
+                    gcashReference: customerData.gcashReference || null
                 };
 
                 const response = await fetch(`${API_BASE_URL}/orders/submit`, {
@@ -522,7 +525,7 @@ export default {
                     
                     // Check if store is closed
                     if (errorData.storeClosed) {
-                        alert('⚠️ Store is Currently Closed\n\n' + errorData.message + '\n\nPlease check our operating hours and try again when we\'re open.');
+                        alert('Store is Currently Closed\n\n' + errorData.message + '\n\nPlease check our operating hours and try again when we\'re open.');
                         // Refresh the page to show updated store status
                         window.location.reload();
                         return;
@@ -532,6 +535,10 @@ export default {
                 }
                 
                 const data = await response.json();
+
+                // Track successful order confirmation
+                const { trackOrderConfirmed } = useTracking()
+                trackOrderConfirmed(data.orderNumber, this.total)
 
                 const orderData = {
                     orderId: data.order._id,
@@ -602,6 +609,9 @@ export default {
         this.loadCart();
         this.checkForActiveOrder();
         this.loadStoreStatus();
+        // Track cart view
+        const { trackCartViewed } = useTracking()
+        trackCartViewed(this.cartItems.length, this.subtotal)
     }
 };
 </script>

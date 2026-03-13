@@ -25,6 +25,7 @@ export default {
           content: 'Learn about Buffs Chicken at The Hood, Angeles City. We serve fresh, crispy wings and comfort food with passion. Discover our story and what makes us special.'
         },
         { name: 'keywords', content: 'about us, Buffs Chicken, Angeles City, The Hood, restaurant story' },
+        { name: 'robots', content: 'index, follow' },
         { property: 'og:title', content: 'About Us - Buffs Chicken' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://www.buffschicken.com/about' }

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "NODE_OPTIONS='--max-old-space-size=950' nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --host",
     "generate": "NODE_OPTIONS='--max-old-space-size=950' nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"

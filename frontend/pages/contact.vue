@@ -81,6 +81,7 @@ export default {
           content: 'Contact Buffs Chicken for food cart and catering services in Angeles City. Perfect for birthdays, weddings, corporate events, and more. Get a quote today!'
         },
         { name: 'keywords', content: 'contact, Buffs Chicken, Angeles City, catering, food cart, events, birthdays, weddings, corporate catering' },
+        { name: 'robots', content: 'index, follow' },
         { property: 'og:title', content: 'Contact Us - Buffs Chicken' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://www.buffschicken.com/contact' }

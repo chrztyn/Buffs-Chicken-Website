@@ -6,23 +6,15 @@ const authenticateAdmin = require('../middleware/authenticateAdmin');
 // Get all published blogs (for public viewing) with pagination
 router.get('/', async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
     const blogs = await Blog.find({ isPublished: true })
       .select('-content')
-      .sort({ publishedAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ publishedAt: -1 });
 
-    const total = await Blog.countDocuments({ isPublished: true });
+    const total = blogs.length;
 
     res.json({
       data: blogs,
-      total,
-      page,
-      pages: Math.ceil(total / limit)
+      total
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

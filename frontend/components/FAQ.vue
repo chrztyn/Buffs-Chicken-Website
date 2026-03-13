@@ -149,17 +149,23 @@ function setupScrollObserver() {
   // Title observer
   const titleObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      titleVisible.value = entry.isIntersecting
+      if (entry.isIntersecting) {
+        titleVisible.value = true
+        titleObserver.disconnect()
+      }
     })
   }, titleOptions)
 
   // FAQ observer
   const faqObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      const el = entry.target as HTMLElement
-      const index = parseInt(el.getAttribute('data-faq-item') || '-1', 10)
-      if (index !== -1 && faqs.value[index]) {
-        faqs.value[index].isVisible = entry.isIntersecting
+      if (entry.isIntersecting) {
+        const el = entry.target as HTMLElement
+        const index = parseInt(el.getAttribute('data-faq-item') || '-1', 10)
+        if (index !== -1 && faqs.value[index]) {
+          faqs.value[index].isVisible = true
+          faqObserver.unobserve(el)
+        }
       }
     })
   }, faqOptions)

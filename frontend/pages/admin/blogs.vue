@@ -3,12 +3,12 @@
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div>
-        <h1 class="font-['Caprasimo'] text-4xl text-[#1A4189] mb-2">Blog</h1>
-        <p class="font-['Unbounded'] text-gray-600">Manage your blog posts</p>
+        <h1 class="font-['Poppins'] font-bold text-4xl text-[#1A4189] mb-2">Blog</h1>
+        <p class="font-['Poppins'] text-gray-600">Manage your blog posts</p>
       </div>
       <button
         @click="openAddBlog"
-        class="px-6 py-2 bg-[#FE601C] text-white font-['Unbounded'] font-bold rounded-lg hover:bg-[#e5551a] transition"
+        class="px-6 py-2 bg-[#FE601C] text-white font-['Poppins'] font-bold rounded-lg hover:bg-[#e5551a] transition"
       >
         + New Post
       </button>
@@ -16,10 +16,10 @@
 
     <!-- Published Blogs -->
     <div>
-      <h2 class="font-['Unbounded'] text-xl font-bold text-[#1A4189] mb-4">Published Posts</h2>
+      <h2 class="font-['Poppins'] text-xl font-bold text-[#1A4189] mb-4">Published Posts</h2>
 
       <div v-if="publishedBlogs.length === 0" class="text-center py-12">
-        <p class="text-gray-500 font-['Unbounded'] text-lg">No published blogs yet</p>
+        <p class="text-gray-500 font-['Poppins'] text-lg">No published blogs yet</p>
       </div>
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -36,23 +36,23 @@
               :alt="blog.title"
               class="w-full h-full object-cover"
             />
-            <div v-else class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600 font-['Unbounded']">
+            <div v-else class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600 font-['Poppins']">
               No Image
             </div>
           </div>
 
           <!-- Blog Info -->
           <div class="p-4 lg:p-6">
-            <h3 class="font-['Caprasimo'] text-xl text-[#1A4189] mb-2">{{ blog.title }}</h3>
-            <p class="text-gray-600 text-sm font-['Unbounded'] mb-3 line-clamp-2">{{ blog.excerpt }}</p>
+            <h3 class="font-['Poppins'] font-bold text-xl text-[#1A4189] mb-2">{{ blog.title }}</h3>
+            <p class="text-gray-600 text-sm font-['Poppins'] mb-3 line-clamp-2">{{ blog.excerpt }}</p>
 
-            <div class="flex items-center justify-between mb-4 text-xs font-['Unbounded'] text-gray-600">
+            <div class="flex items-center justify-between mb-4 text-xs font-['Poppins'] text-gray-600">
               <span>{{ formatDate(blog.publishedAt) }}</span>
-              <span>👁️ {{ blog.views }} views</span>
+              <span>{{ blog.views }} views</span>
             </div>
 
             <!-- Image Status Indicator -->
-            <div class="mb-4 p-2 bg-gray-50 rounded text-xs font-['Unbounded']">
+            <div class="mb-4 p-2 bg-gray-50 rounded text-xs font-['Poppins']">
               <span v-if="blog.image" class="text-green-600">✓ Image: Uploaded</span>
               <span v-else class="text-red-600">✗ No Image</span>
             </div>
@@ -61,13 +61,13 @@
             <div class="flex flex-col sm:flex-row gap-2">
               <button
                 @click="openEditBlog(blog)"
-                class="flex-1 px-3 py-2.5 sm:py-2 bg-blue-100 text-blue-700 font-['Unbounded'] font-bold text-sm rounded-lg hover:bg-blue-200 transition"
+                class="flex-1 px-3 py-2.5 sm:py-2 bg-blue-100 text-blue-700 font-['Poppins'] font-bold text-sm rounded-lg hover:bg-blue-200 transition"
               >
                 Edit
               </button>
               <button
                 @click="deleteBlog(blog._id)"
-                class="flex-1 px-3 py-2.5 sm:py-2 bg-red-100 text-red-700 font-['Unbounded'] font-bold text-sm rounded-lg hover:bg-red-200 transition"
+                class="flex-1 px-3 py-2.5 sm:py-2 bg-red-100 text-red-700 font-['Poppins'] font-bold text-sm rounded-lg hover:bg-red-200 transition"
               >
                 Delete
               </button>
@@ -87,7 +87,7 @@
       <div class="space-y-4">
         <!-- Title -->
         <div>
-          <label class="block font-['Unbounded'] font-semibold text-[#1A4189] mb-2">
+          <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-2">
             Blog Title *
           </label>
           <input
@@ -101,7 +101,7 @@
 
         <!-- Excerpt -->
         <div>
-          <label class="block font-['Unbounded'] font-semibold text-[#1A4189] mb-2">
+          <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-2">
             Excerpt *
           </label>
           <textarea
@@ -115,7 +115,7 @@
 
         <!-- Blog Content -->
         <div>
-          <label class="block font-['Unbounded'] font-semibold text-[#1A4189] mb-2">
+          <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-2">
             Blog Content *
           </label>
           <textarea
@@ -125,19 +125,19 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE601C] resize-none font-mono text-sm"
             placeholder="Write your blog content here..."
           ></textarea>
-          <p class="text-xs text-gray-500 font-['Unbounded'] mt-1">Supports HTML and Markdown</p>
+          <p class="text-xs text-gray-500 font-['Poppins'] mt-1">Supports HTML and Markdown</p>
         </div>
 
         <!-- Image Upload -->
         <div>
-          <label class="block font-['Unbounded'] font-semibold text-[#1A4189] mb-2">
+          <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-2">
             Featured Image
           </label>
           <div
             @click="triggerFileInput"
             class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#FE601C] transition"
           >
-            <div v-if="!blogForm.imagePreview" class="text-gray-500 font-['Unbounded']">
+            <div v-if="!blogForm.imagePreview" class="text-gray-500 font-['Poppins']">
               <p class="mb-2">Click to upload or drag and drop</p>
               <p class="text-sm">PNG, JPG, GIF up to 10MB</p>
             </div>
@@ -151,7 +151,7 @@
                 @click.stop="blogForm.imagePreview = ''; blogForm.image = ''"
                 class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
               >
-                ✕
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
           </div>
@@ -166,11 +166,11 @@
 
         <!-- SEO Section -->
         <div class="border-t pt-4">
-          <h3 class="font-['Unbounded'] font-bold text-[#1A4189] mb-3">SEO Settings</h3>
+          <h3 class="font-['Poppins'] font-bold text-[#1A4189] mb-3">SEO Settings</h3>
 
           <!-- Meta Description -->
           <div class="mb-4">
-            <label class="block font-['Unbounded'] font-semibold text-[#1A4189] mb-2">
+            <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-2">
               Meta Description *
             </label>
             <textarea
@@ -181,7 +181,7 @@
               placeholder="Brief description for search engines (150-160 chars)"
               maxlength="160"
             ></textarea>
-            <p class="text-xs text-gray-500 font-['Unbounded'] mt-1">
+            <p class="text-xs text-gray-500 font-['Poppins'] mt-1">
               {{ blogForm.metaDescription?.length || 0 }}/160 characters
             </p>
           </div>
@@ -195,7 +195,7 @@
               type="checkbox"
               class="w-4 h-4 rounded"
             />
-            <span class="font-['Unbounded'] font-semibold text-[#1A4189]">
+            <span class="font-['Poppins'] font-semibold text-[#1A4189]">
               Publish this post
             </span>
           </label>

@@ -152,6 +152,55 @@
             </div>
           </div>
 
+          <!-- Items Ordered Section -->
+          <div v-if="orderItems.length > 0" class="mb-10 pb-8 border-b border-gray-200/50">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="w-1 h-8 bg-gradient-to-b from-[#1A4189] to-[#2356b4] rounded-full"></div>
+              <h3 class="section-title">Items Ordered</h3>
+            </div>
+            <div class="space-y-3">
+              <div
+                v-for="(item, index) in orderItems"
+                :key="index"
+                class="bg-white/60 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200/50"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-gray-800 text-sm" style="font-family: 'Unbounded', sans-serif;">{{ item.name }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Qty: {{ item.quantity }}</p>
+                    <!-- Variants -->
+                    <div v-if="item.selectedVariants && Object.keys(item.selectedVariants).length > 0" class="flex flex-wrap gap-1 mt-2">
+                      <span
+                        v-for="(variant, key) in item.selectedVariants"
+                        :key="key"
+                        class="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold"
+                      >{{ variant }}</span>
+                    </div>
+                    <!-- Sauces -->
+                    <div v-if="item.selectedSauces && item.selectedSauces.length > 0" class="flex flex-wrap gap-1 mt-1">
+                      <span
+                        v-for="sauce in item.selectedSauces"
+                        :key="typeof sauce === 'object' ? sauce.name : sauce"
+                        class="inline-block bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full text-xs font-semibold"
+                      >{{ typeof sauce === 'object' ? sauce.name : sauce }}</span>
+                    </div>
+                    <!-- Addons -->
+                    <div v-if="item.selectedAddons && item.selectedAddons.length > 0" class="flex flex-wrap gap-1 mt-1">
+                      <span
+                        v-for="addon in item.selectedAddons"
+                        :key="typeof addon === 'object' ? addon.name : addon"
+                        class="inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-xs font-semibold"
+                      >{{ typeof addon === 'object' ? addon.name : addon }}</span>
+                    </div>
+                    <!-- Notes -->
+                    <p v-if="item.notes" class="text-xs text-gray-500 mt-1 italic">"{{ item.notes }}"</p>
+                  </div>
+                  <p class="font-bold text-[#1A4189] text-sm whitespace-nowrap flex-shrink-0">₱{{ item.totalPrice }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Order Details Card with Premium Design -->
           <div class="mb-10 pb-8 border-b border-gray-200/50">
             <div class="flex items-center gap-3 mb-8">
@@ -359,6 +408,8 @@ import io from 'socket.io-client'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 
+useSeoMeta({ robots: 'noindex, nofollow' })
+
 const router = useRouter()
 
 const orderId = ref('')
@@ -370,6 +421,7 @@ const userAddress = ref('Loading address...')
 const subtotal = ref(0)
 const deliveryFee = ref(40)
 const itemsCount = ref(0)
+const orderItems = ref([])
 
 // Toast notification state
 const toastMessage = ref('')
@@ -515,7 +567,7 @@ const fetchOrderFromBackend = async (orderId) => {
   }
 }
 
-const loadOrder = () => {
+const loadOrder = async () => {
   const saved = localStorage.getItem('buffs_order')
   if (saved) {
     const order = JSON.parse(saved)
@@ -525,6 +577,7 @@ const loadOrder = () => {
     deliveryFee.value = order.deliveryFee
     itemsCount.value = order.itemsCount
     userEmail.value = order.customerEmail || ''
+    orderItems.value = order.items || []
     hasOrder.value = true
     
     // Use the delivery address from the order if available
@@ -540,8 +593,15 @@ const loadOrder = () => {
       address: userAddress.value
     })
     
-    // Fetch latest order details from backend to get updated address
-    fetchOrderFromBackend(orderId.value)
+    // Always fetch latest status from backend (authoritative source).
+    // Awaiting ensures currentStatus reflects the real DB value before the
+    // socket listener is set up, so a refresh never shows a stale status.
+    await fetchOrderFromBackend(orderId.value)
+
+    // Persist the freshly-fetched status back to localStorage so that the
+    // next refresh also starts with the correct value even if no socket
+    // event is received.
+    saveOrderStatus()
   }
 }
 
@@ -626,9 +686,9 @@ const goToBlogs = () => {
   }, 500)
 }
 
-onMounted(() => {
+onMounted(async () => {
   console.log('=== ORDER STATUS PAGE MOUNTED ===')
-  loadOrder()
+  await loadOrder()
   
   // If order is already delivered, redirect to home
   if (hasOrder.value && currentStatus.value === 'delivered') {
@@ -651,23 +711,23 @@ onMounted(() => {
 
     // Set up connection listeners
     directSocket.on('connect', () => {
-      console.log('✅ Socket connected! ID:', directSocket.id)
+      console.log('Socket connected! ID:', directSocket.id)
       // Join the specific order room
       directSocket.emit('join-order', orderId.value.toString())
-      console.log('✅ Emitted join-order for orderId:', orderId.value)
+      console.log('Emitted join-order for orderId:', orderId.value)
     })
 
     directSocket.on('order-status', (data) => {
-      console.log('🔔 Socket event received - order-status:', data)
+      console.log('Socket event received - order-status:', data)
       handleOrderStatusUpdate(data)
     })
 
     directSocket.on('disconnect', () => {
-      console.log('❌ Socket disconnected')
+      console.log('Socket disconnected')
     })
 
     directSocket.on('error', (error) => {
-      console.error('❌ Socket error:', error)
+      console.error('Socket error:', error)
     })
 
     // Clean up on unmount

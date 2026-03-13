@@ -1,6 +1,7 @@
 <template>
   <div 
-    class="event-sticker group cursor-pointer relative z-10"
+    class="event-sticker group cursor-pointer relative"
+    :class="isPopoverVisible ? 'z-50' : 'z-10'"
     @mouseenter="showPopover"
     @mouseleave="hidePopover"
     @click="togglePopover"
@@ -9,7 +10,7 @@
     <img
       :src="imageUrl"
       :alt="event.name"
-      class="w-[110px] h-[110px] object-contain transition-transform duration-200 group-hover:scale-110 mb-1"
+      class="w-[110px] h-[110px] object-contain transition-transform duration-200 group-hover:scale-110 mb-1 z-0"
       :style="imageStyle"
       loading="lazy"
       decoding="async"

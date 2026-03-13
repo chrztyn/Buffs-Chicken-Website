@@ -6,7 +6,7 @@
         <!-- Logo -->
         <NuxtLink to="/" class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-[#1A4189] flex items-center justify-center overflow-hidden border-2 border-white shadow-lg hover:scale-105 transition-transform">
-            <img src="/buffs-logo.webp" alt="Buff's Chicken Logo" fetchpriority="high" class="w-full h-full object-contain p-1.5" />
+            <img src="/buffs-logo.webp" alt="Buffs Chicken Logo" fetchpriority="high" class="w-full h-full object-contain p-1.5" />
           </div>
           <span class="font-['Unbounded'] font-semibold text-xl text-[#1A4189] hidden sm:block">Buffs Chicken</span>
         </NuxtLink>
@@ -56,8 +56,8 @@
             class="relative font-['Unbounded'] font-semibold text-sm bg-[#1A4189] text-[#FEB90E] py-2 px-6 rounded-full hover:bg-[#15306d] transition-all duration-200 hover:shadow-lg"
           >
             Cart
-            <span v-if="cartCount > 0" class="absolute -top-2 -right-2 bg-[#FEB90E] text-gray-900 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md">
-              {{ cartCount }}
+            <span v-if="cartCount > 0" class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-[#FEB90E] flex items-center justify-center text-xs font-bold text-[#1A4189] font-['Unbounded']">
+              {{ cartCount > 99 ? '99+' : cartCount }}
             </span>
           </NuxtLink>
         </div>
@@ -84,7 +84,7 @@
               to="/" 
               @click="menuOpen = false"
               class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
-              style="animation-delay: 0.05s"
+              style="animation-delay: 0.02s"
             >
               Home
             </NuxtLink>
@@ -92,7 +92,7 @@
               to="/blogs" 
               @click="menuOpen = false"
               class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
-              style="animation-delay: 0.1s"
+              style="animation-delay: 0.04s"
             >
               Blogs
             </NuxtLink>
@@ -100,7 +100,7 @@
               to="/menu" 
               @click="menuOpen = false"
               class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
-              style="animation-delay: 0.15s"
+              style="animation-delay: 0.06s"
             >
               Menu
             </NuxtLink>
@@ -108,7 +108,7 @@
               to="/about" 
               @click="menuOpen = false"
               class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
-              style="animation-delay: 0.2s"
+              style="animation-delay: 0.08s"
             >
               About
             </NuxtLink>
@@ -116,7 +116,7 @@
               to="/calendar" 
               @click="menuOpen = false"
               class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
-              style="animation-delay: 0.225s"
+              style="animation-delay: 0.09s"
             >
               Events
             </NuxtLink>
@@ -124,7 +124,7 @@
               to="/contact" 
               @click="menuOpen = false"
               class="font-['Unbounded'] font-normal text-sm text-gray-700 hover:text-[#FE601C] hover:bg-gray-50 py-3 px-4 rounded-lg transition-colors duration-200 menu-item"
-              style="animation-delay: 0.25s"
+              style="animation-delay: 0.10s"
             >
               Contact
             </NuxtLink>
@@ -132,7 +132,7 @@
               to="/cart" 
               @click="menuOpen = false"
               class="relative font-['Unbounded'] font-semibold text-sm bg-[#1A4189] text-[#FEB90E] py-3 px-4 rounded-lg hover:bg-[#15306d] transition-all duration-200 text-center menu-item"
-              style="animation-delay: 0.3s"
+              style="animation-delay: 0.12s"
             >
               Cart
               <span v-if="cartCount > 0" class="ml-2 bg-[#FEB90E] text-gray-900 text-xs font-bold rounded-full px-2 py-0.5">
@@ -157,7 +157,7 @@ const loadCartCount = () => {
     const cart = localStorage.getItem('buffs_cart')
     if (cart) {
       const cartItems = JSON.parse(cart)
-      cartCount.value = Array.isArray(cartItems) ? cartItems.length : 0
+      cartCount.value = Array.isArray(cartItems) ? cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0
     } else {
       cartCount.value = 0
     }
@@ -197,7 +197,7 @@ onMounted(() => {
   height: 2.5px;
   background-color: #374151;
   border-radius: 2px;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.15s ease-in-out;
   transform-origin: center;
 }
 
@@ -219,11 +219,11 @@ onMounted(() => {
 
 /* Mobile menu transition */
 .mobile-menu-enter-active {
-  animation: slideDown 3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-menu-leave-active {
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideDown {
@@ -257,7 +257,7 @@ onMounted(() => {
 
 /* Staggered menu items animation */
 .mobile-menu-enter-active .menu-item {
-  animation: fadeInSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  animation: fadeInSlide 0.15s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
 @keyframes fadeInSlide {

@@ -25,7 +25,9 @@ router.post('/check-email', async (req, res) => {
     if (user) {
       // User exists - update info if provided from the form
       const updatedFields = {};
-      
+
+      user.isVerified = true;
+
       if (name) {
         user.name = name;
         updatedFields.name = name;

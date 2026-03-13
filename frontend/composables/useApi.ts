@@ -64,11 +64,11 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
   }
 
   const getProducts = wrap((params?: { page?: number; limit?: number }) =>
-    api.get('/products', { params }), [])
-  const getProduct = wrap((id: string) => api.get(`/products/${id}`), null)
-  const getPopularPicks = wrap(() => api.get('/products/popular'), [])
+    api.get('/products', { params: { ...params, _t: Date.now() } }), [])
+  const getProduct = wrap((id: string) => api.get(`/products/${id}`, { params: { _t: Date.now() } }), null)
+  const getPopularPicks = wrap(() => api.get('/products/popular', { params: { _t: Date.now() } }), [])
   const getProductsByCategory = wrap((categoryId: string) =>
-    api.get(`/products/category/${categoryId}`), [])
+    api.get(`/products/category/${categoryId}`, { params: { _t: Date.now() } }), [])
   const createProduct = (data: any) => api.post('/products/admin/create', data)
   const updateProduct = (id: string, data: any) =>
     api.put(`/products/admin/${id}`, data)
@@ -105,6 +105,7 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
 
   // Analytics endpoints
   const getAnalytics = wrap(() => api.get('/admin/analytics/dashboard'), {})
+  const getSummaryToday = () => api.get('/orders/summary/today')
 
   // Notification endpoints
   const getAdminNotifications = wrap(() => api.get('/notifications/admin'), [])
@@ -126,6 +127,12 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
       }
     })
   }
+
+  // Modifier Group endpoints
+  const getModifierGroups = wrap(() => api.get('/modifier-groups', { params: { _t: Date.now() } }), [])
+  const createModifierGroup = (data: any) => api.post('/modifier-groups', data)
+  const updateModifierGroup = (id: string, data: any) => api.put(`/modifier-groups/${id}`, data)
+  const deleteModifierGroup = (id: string) => api.delete(`/modifier-groups/${id}`)
 
   // Store Settings endpoints
   const getStoreSettings = wrap(() => api.get('/store-settings'), {})
@@ -183,6 +190,7 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     updateBlog,
     deleteBlog,
     getAnalytics,
+    getSummaryToday,
     getAdminNotifications,
     markNotificationRead,
     deleteNotification,
@@ -200,6 +208,10 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     getEvent,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getModifierGroups,
+    createModifierGroup,
+    updateModifierGroup,
+    deleteModifierGroup
   }
 }

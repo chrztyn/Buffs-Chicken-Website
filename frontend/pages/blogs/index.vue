@@ -157,6 +157,7 @@ const totalPages = computed(() => {
 })
 
 // SEO Meta Tags
+useSeoMeta({ robots: 'index, follow' })
 useHead({
   title: 'Blog - Buffs Chicken | Behind The Scenes, Stories & Updates',
   meta: [

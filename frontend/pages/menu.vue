@@ -4,7 +4,8 @@
         <transition name="toast-fade">
             <div 
                 v-if="notification.show"
-                class="fixed top-6 right-6 z-100 flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg shadow-lg px-6 py-4 max-w-sm"
+                @click="$router.push('/cart'); notification.show = false"
+                class="fixed top-6 right-6 z-100 flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg shadow-lg px-6 py-4 max-w-sm cursor-pointer hover:shadow-xl transition-shadow"
             >
                 <div class="flex-shrink-0">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,9 +15,10 @@
                 <div class="flex-1">
                     <p class="font-semibold text-gray-800">{{ notification.title }}</p>
                     <p class="text-sm text-gray-600">{{ notification.message }}</p>
+                    <p class="text-xs text-green-600 font-semibold mt-0.5">Tap to view cart →</p>
                 </div>
                 <button 
-                    @click="notification.show = false"
+                    @click.stop="notification.show = false"
                     class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -318,7 +320,7 @@
                                 :key="item.id"
                                 :product="item"
                                 :disabled="storeStatus && !storeStatus.isOpen"
-                                @add-to-cart="handleAddToCart"
+                                @added="handleAdded"
                             />
                         </ClientOnly>
                     </div>
@@ -343,6 +345,80 @@
     </div>
 </template>
 
+<!-- This <script setup> block is purely for SSR-resolved MenuItem JSON-LD schema.
+     It runs server-side so Google's rich results crawler sees structured data in
+     the initial HTML. The Options API block below handles all UI logic. -->
+<script setup>
+import { useApi } from '~/composables/useApi'
+
+const { getProducts } = useApi()
+const _menuConfig = useRuntimeConfig()
+
+// Fetch available products for schema — resolved during SSR without blocking the UI
+const { data: _menuSchemaData } = useAsyncData('menu-schema-products', async () => {
+  try {
+    const r = await getProducts()
+    return r?.data?.data || []
+  } catch {
+    return []
+  }
+})
+
+function _buildMenuSections(products) {
+  if (!products || !products.length) return []
+  const categoryMap = {}
+  for (const p of products) {
+    if (!p.isAvailable) continue
+    const cat = p.category || 'Other'
+    if (!categoryMap[cat]) categoryMap[cat] = []
+    const rawImage = p.image
+    const imageUrl = rawImage
+      ? rawImage.startsWith('http') ? rawImage : `${_menuConfig.public.socketUrl}${rawImage}`
+      : null
+    const item = {
+      '@type': 'MenuItem',
+      'name': p.name,
+      'description': p.description || '',
+      'offers': {
+        '@type': 'Offer',
+        'price': String(p.price),
+        'priceCurrency': 'PHP',
+        'availability': 'https://schema.org/InStock'
+      }
+    }
+    if (imageUrl) item.image = imageUrl
+    categoryMap[cat].push(item)
+  }
+  return Object.entries(categoryMap).map(([cat, items]) => ({
+    '@type': 'MenuSection',
+    'name': cat.charAt(0).toUpperCase() + cat.slice(1),
+    'hasMenuItem': items
+  }))
+}
+
+useHead({
+  script: [{
+    type: 'application/ld+json',
+    innerHTML: computed(() => {
+      const products = _menuSchemaData.value || []
+      if (!products.length) return ''
+      return JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FoodEstablishment',
+        'name': 'Buffs Chicken',
+        'url': 'https://www.buffschicken.com/menu',
+        'hasMenu': {
+          '@type': 'Menu',
+          'name': 'Buffs Chicken Menu',
+          'url': 'https://www.buffschicken.com/menu',
+          'hasMenuSection': _buildMenuSections(products)
+        }
+      })
+    })
+  }]
+})
+</script>
+
 <script>
 import Navbar from '~/components/Navbar.vue'
 import Footer from '~/components/Footer.vue'
@@ -360,6 +436,7 @@ export default {
           content: 'Browse our full menu of crispy wings, loaded combos, and cheesy pastas. Order online from Buffs Chicken at The Hood, Angeles City for fresh, flavorful comfort food.'
         },
         { name: 'keywords', content: 'menu, chicken wings, combos, pasta, food menu, order online, Angeles City' },
+        { name: 'robots', content: 'index, follow' },
         { property: 'og:title', content: 'Menu - Buffs Chicken' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://www.buffschicken.com/menu' }
@@ -436,6 +513,10 @@ export default {
       console.error('[Menu] mounted -> loadProducts threw', e)
     }
 
+    // Track menu page view
+    const { trackMenuViewed } = useTracking()
+    trackMenuViewed()
+
     // Load store status
     try {
       await this.loadStoreStatus()
@@ -501,15 +582,8 @@ export default {
         console.log('[Menu] getProducts response:', response.data)
 
         const newProducts = response.data.data.map(product => ({
+          ...product,
           id: product._id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          category: product.category,
-          description: product.description,
-          variants: product.variants || [],
-          addons: product.addons || [],
-          sauces: product.sauces || []
         }))
 
         // Append new products (infinite scroll) or replace (initial load)
@@ -564,6 +638,15 @@ export default {
         console.error('Error loading categories:', error)
       }
     },
+    handleAdded() {
+      const saved = localStorage.getItem('buffs_cart');
+      const cartItems = saved ? JSON.parse(saved) : [];
+      this.cartCount = cartItems.length;
+      const last = cartItems[cartItems.length - 1];
+      if (last) {
+        this.showNotification(last.name, `Added ${last.quantity} item${last.quantity > 1 ? 's' : ''} to cart`);
+      }
+    },
     handleAddToCart(item) {
       // Load existing cart
       const savedCart = localStorage.getItem('buffs_cart');
@@ -608,6 +691,7 @@ export default {
 
       // Save updated cart to localStorage
       localStorage.setItem('buffs_cart', JSON.stringify(cartItems));
+      window.dispatchEvent(new Event('cart-updated'));
       
       this.cartCount = cartItems.length;
       console.log('Added to cart:', item);

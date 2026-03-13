@@ -66,7 +66,25 @@ const orderSchema = new mongoose.Schema(
     isVerified: {
       type: Boolean,
       default: false
-    }
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['cash_on_delivery', 'gcash', 'maya', 'maribank', 'bpi'],
+      default: 'cash_on_delivery'
+    },
+    gcashReference: {
+      type: String,
+      default: null
+    },
+    paymentReference: { type: String, default: null },
+    receiptImage: {
+      filename: { type: String, default: null },
+      path: { type: String, default: null },
+      uploadedAt: { type: Date, default: null },
+      deletedAt: { type: Date, default: null },
+    },
+    receiptVerified: { type: Boolean, default: false },
+    receiptVerifiedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

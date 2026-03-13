@@ -486,6 +486,14 @@ router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
       { $group: { _id: '$status', count: { $sum: 1 } } }
     ]);
 
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayOrders = await Order.countDocuments({ createdAt: { $gte: startOfToday } });
+
+    const activeOrders = await Order.countDocuments({
+      status: { $in: ['pending', 'preparing', 'out for delivery'] }
+    });
+
     const recentOrders = await Order.find()
       .populate('user', 'name email phone')
       .sort({ createdAt: -1 })
@@ -497,6 +505,8 @@ router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
     res.json({
       totalOrders,
       totalRevenue: totalRevenue[0]?.total || 0,
+      todayOrders,
+      activeOrders,
       ordersByStatus,
       recentOrders,
       totalProducts,

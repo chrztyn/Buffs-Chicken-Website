@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
@@ -7,6 +8,15 @@ const Payment = require('../models/Payment');
 const Notification = require('../models/Notification');
 const StoreSettings = require('../models/StoreSettings');
 const { sendOrderNotification, sendAdminOrderNotification } = require('../config/mailer');
+const { sendOrderReceipt } = require('../utils/sendOrderReceipt');
+const { saveReceipt, deleteReceipt } = require('../utils/receiptStorage');
+const authenticateAdmin = require('../middleware/authenticateAdmin');
+
+// Multer instance — memory storage; never writes raw files to disk
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB hard limit
+});
 
 // Create order from cart
 router.post('/', async (req, res) => {
@@ -68,12 +78,8 @@ router.post('/', async (req, res) => {
     // Re-fetch user to ensure latest data is available
     const freshUser = await User.findById(userId);
 
-    // Send notification to user via email
-    try {
-      await sendOrderNotification(freshUser.email, order.orderNumber, 'pending');
-    } catch (error) {
-      console.log('User email notification failed, but order created:', error);
-    }
+    // Send branded receipt email (fire-and-forget — never blocks the order response)
+    sendOrderReceipt(order, freshUser).catch(() => {});
 
     // Send admin notification email
     try {
@@ -147,6 +153,72 @@ router.get('/user/:userId', async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET /summary/today — today's order summary (Philippines time UTC+8)
+router.get('/summary/today', authenticateAdmin, async (req, res) => {
+  try {
+    const PH_OFFSET_MS = 8 * 60 * 60 * 1000;
+    const now = new Date();
+    const phNow = new Date(now.getTime() + PH_OFFSET_MS);
+
+    // Midnight today in PH time, converted back to UTC for MongoDB query
+    const phStartOfDay = new Date(
+      Date.UTC(phNow.getUTCFullYear(), phNow.getUTCMonth(), phNow.getUTCDate(), 0, 0, 0, 0) - PH_OFFSET_MS
+    );
+    const phEndOfDay = new Date(
+      Date.UTC(phNow.getUTCFullYear(), phNow.getUTCMonth(), phNow.getUTCDate(), 23, 59, 59, 999) - PH_OFFSET_MS
+    );
+
+    const todayOrders = await Order.find({
+      createdAt: { $gte: phStartOfDay, $lte: phEndOfDay }
+    })
+      .populate('user', 'name')
+      .sort({ createdAt: -1 });
+
+    const totalOrders = todayOrders.length;
+    const totalRevenue = todayOrders.reduce(
+      (sum, o) => (o.status !== 'cancelled' ? sum + o.totalAmount : sum),
+      0
+    );
+
+    const paymentMethods = ['cash_on_delivery', 'gcash', 'maya', 'maribank', 'bpi'];
+    const paymentBreakdown = {};
+    paymentMethods.forEach(m => { paymentBreakdown[m] = { count: 0, total: 0 }; });
+    todayOrders.forEach(order => {
+      const m = order.paymentMethod || 'cash_on_delivery';
+      if (paymentBreakdown[m]) {
+        paymentBreakdown[m].count += 1;
+        if (order.status !== 'cancelled') paymentBreakdown[m].total += order.totalAmount;
+      }
+    });
+
+    const formatTimePH = (date) => {
+      const d = new Date(new Date(date).getTime() + PH_OFFSET_MS);
+      let h = d.getUTCHours();
+      const min = d.getUTCMinutes().toString().padStart(2, '0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${h}:${min} ${ampm}`;
+    };
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const dateStr = `${MONTHS[phNow.getUTCMonth()]} ${phNow.getUTCDate()}, ${phNow.getUTCFullYear()}`;
+
+    const orders = todayOrders.map(o => ({
+      orderNumber: o.orderNumber,
+      customerName: o.user?.name || 'Guest',
+      paymentMethod: o.paymentMethod || 'cash_on_delivery',
+      totalAmount: o.totalAmount,
+      status: o.status,
+      createdAt: formatTimePH(o.createdAt)
+    }));
+
+    res.json({ date: dateStr, totalOrders, totalRevenue, paymentBreakdown, orders });
+  } catch (error) {
+    console.error('Error fetching today\'s summary:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -270,7 +342,10 @@ router.post('/submit', async (req, res) => {
       subtotal, 
       deliveryFee, 
       total,
-      notes 
+      notes,
+      paymentMethod,
+      paymentReference,
+      gcashReference
     } = req.body;
 
     // Verify user
@@ -307,7 +382,10 @@ router.post('/submit', async (req, res) => {
       deliveryAddress: address,
       status: 'pending',
       notes: notes || '',
-      isVerified: true
+      isVerified: true,
+      paymentMethod: paymentMethod || 'cash_on_delivery',
+      paymentReference: ['gcash', 'maya', 'maribank', 'bpi'].includes(paymentMethod) ? (paymentReference || gcashReference) : null,
+      gcashReference: paymentMethod === 'gcash' ? (gcashReference || paymentReference) : null
     });
 
     await order.save();
@@ -315,7 +393,7 @@ router.post('/submit', async (req, res) => {
     // Re-fetch user to ensure latest data is available
     const freshUser = await User.findById(userId);
 
-    // Create database notification for user
+    // Create database notification for user (order received)
     await Notification.create({
       user: userId,
       order: order._id,
@@ -324,59 +402,9 @@ router.post('/submit', async (req, res) => {
       message: `Your order ${order.orderNumber} has been received.`
     });
 
-    // Create database notification for admin
-    await Notification.create({
-      type: 'new_order',
-      order: order._id,
-      title: 'New Order Received',
-      message: `New order ${order.orderNumber} from ${freshUser.name}`
-    });
-
-    // Send notification to user via email
-    try {
-      await sendOrderNotification(freshUser.email, order.orderNumber, 'pending');
-    } catch (error) {
-      console.log('User email notification failed, but order created:', error);
-    }
-
-    // Send admin notification email
-    try {
-      await sendAdminOrderNotification(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, order, {
-        name: freshUser.name,
-        email: freshUser.email,
-        phone: freshUser.phone,
-        address: order.deliveryAddress
-      });
-    } catch (error) {
-      console.log('Admin email notification failed, but order created:', error);
-    }
-
-    // Emit real-time notification to admin
-    if (req.io) {
-      req.io.to('admin-orders').emit('new-order', {
-        orderId: order._id,
-        orderNumber: order.orderNumber,
-        userId: freshUser._id,
-        customerName: freshUser.name || 'Unknown Customer',
-        customerEmail: freshUser.email,
-        customerPhone: freshUser.phone,
-        items: orderItems,
-        subtotal: order.subtotal,
-        tax: order.tax,
-        deliveryFee: order.deliveryFee,
-        totalAmount: order.totalAmount,
-        deliveryAddress: order.deliveryAddress,
-        status: 'pending',
-        timestamp: new Date()
-      });
-
-      // Emit to specific user
-      req.io.to(`user-${userId}`).emit('order-status', {
-        orderId: order._id,
-        status: 'pending',
-        message: 'Order received'
-      });
-    }
+    // NOTE: Admin notifications and customer receipt email are deferred.
+    // They fire from POST /:orderId/receipt once the user uploads their receipt
+    // and completes the full checkout flow (lands on order-status page).
 
     res.status(201).json({
       message: 'Order submitted successfully',
@@ -430,6 +458,123 @@ router.put('/:id/cancel', async (req, res) => {
 
     res.json({ message: 'Order cancelled successfully', order });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST /orders/:orderId/receipt — upload payment receipt (customer-facing)
+router.post('/:orderId/receipt', upload.single('receipt'), async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Receipt image is required.' });
+    }
+
+    // Validate MIME type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Invalid file type. Please upload an image.' });
+    }
+
+    // Validate raw size (multer limit covers >5 MB, but double-check here)
+    if (req.file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({ message: 'Receipt image must be under 5MB.' });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    const { filename, path: filePath } = await saveReceipt(req.file.buffer, orderId);
+
+    order.receiptImage = {
+      filename,
+      path: filePath,
+      uploadedAt: new Date(),
+      deletedAt: null,
+    };
+    await order.save();
+
+    // Populate user for notifications
+    const user = await User.findById(order.user);
+
+    // 1. Send branded receipt email to customer
+    sendOrderReceipt(order, user).catch(() => {});
+
+    // 2. Create admin DB notification
+    Notification.create({
+      type: 'new_order',
+      order: order._id,
+      title: 'New Order Received',
+      message: `New order ${order.orderNumber} from ${user?.name || 'customer'}`
+    }).catch(() => {});
+
+    // 3. Send admin notification email
+    sendAdminOrderNotification(
+      process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+      order,
+      {
+        name: user?.name,
+        email: user?.email,
+        phone: user?.phone,
+        address: order.deliveryAddress
+      }
+    ).catch((err) => console.log('Admin email failed:', err));
+
+    // 4. Notify admin in real-time with full order data
+    if (req.io) {
+      req.io.to('admin-orders').emit('new-order', {
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        userId: user?._id,
+        customerName: user?.name || 'Unknown Customer',
+        customerEmail: user?.email,
+        customerPhone: user?.phone,
+        items: order.items,
+        subtotal: order.subtotal,
+        tax: order.tax,
+        deliveryFee: order.deliveryFee,
+        totalAmount: order.totalAmount,
+        deliveryAddress: order.deliveryAddress,
+        paymentMethod: order.paymentMethod,
+        receiptImage: order.receiptImage,
+        status: 'pending',
+        timestamp: new Date()
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error uploading receipt:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PATCH /orders/:orderId/verify-receipt — admin verifies and deletes receipt image
+router.patch('/:orderId/verify-receipt', authenticateAdmin, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId).populate('user');
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    if (order.receiptImage && order.receiptImage.filename) {
+      deleteReceipt(order.receiptImage.filename);
+    }
+
+    order.receiptImage = order.receiptImage || {};
+    order.receiptImage.deletedAt = new Date();
+    order.receiptVerified = true;
+    order.receiptVerifiedAt = new Date();
+    await order.save();
+
+    res.json({ order });
+  } catch (error) {
+    console.error('Error verifying receipt:', error);
     res.status(500).json({ message: error.message });
   }
 });

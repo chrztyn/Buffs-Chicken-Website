@@ -6,6 +6,7 @@ const Product = require('../models/Product');
 router.get('/admin/all', async (req, res) => {
   try {
     const products = await Product.find()
+      .populate('modifierGroups.group')
       .sort({ createdAt: -1 });
     res.json(products);
   } catch (error) {
@@ -17,6 +18,7 @@ router.get('/admin/all', async (req, res) => {
 router.get('/popular', async (req, res) => {
   try {
     const products = await Product.find({ isPopularPick: true, isAvailable: true })
+      .populate('modifierGroups.group')
       .sort({ createdAt: -1 });
     res.json(products);
   } catch (error) {
@@ -32,6 +34,7 @@ router.get('/', async (req, res) => {
     const skip = (page - 1) * limit;
 
     const products = await Product.find({ isAvailable: true })
+      .populate('modifierGroups.group')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -52,7 +55,7 @@ router.get('/', async (req, res) => {
 // Get product by ID with variants and addons
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('modifierGroups.group');
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -78,7 +81,7 @@ router.get('/category/:categoryId', async (req, res) => {
 // Admin: Create product
 router.post('/admin/create', async (req, res) => {
   try {
-    const { name, description, price, category, image, variants, sauces, addons } = req.body;
+    const { name, description, price, category, image, isAvailable, isPopularPick, allowSpecialRequests, modifierGroups } = req.body;
 
     // Validation
     if (!name || !price || !category) {
@@ -91,10 +94,10 @@ router.post('/admin/create', async (req, res) => {
       price,
       category,
       image,
-      variants: variants || [],
-      sauces: sauces || [],
-      addons: addons || [],
-      isAvailable: true
+      isAvailable: isAvailable !== undefined ? isAvailable : true,
+      isPopularPick: isPopularPick || false,
+      allowSpecialRequests: allowSpecialRequests || false,
+      modifierGroups: modifierGroups || []
     });
 
     const savedProduct = await product.save();
@@ -107,24 +110,20 @@ router.post('/admin/create', async (req, res) => {
 // Admin: Update product
 router.put('/admin/:id', async (req, res) => {
   try {
-    const { name, description, price, category, image, variants, sauces, addons, isAvailable, isPopularPick } = req.body;
+    const { name, description, price, category, image, isAvailable, isPopularPick, allowSpecialRequests, modifierGroups } = req.body;
+
+    const updates = { name, description, price, category, image,
+      isAvailable: isAvailable !== undefined ? isAvailable : true,
+      isPopularPick: isPopularPick !== undefined ? isPopularPick : false,
+      allowSpecialRequests: allowSpecialRequests !== undefined ? allowSpecialRequests : false
+    };
+    if (modifierGroups !== undefined) updates.modifierGroups = modifierGroups;
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      {
-        name,
-        description,
-        price,
-        category,
-        image,
-        variants: variants || [],
-        sauces: sauces || [],
-        addons: addons || [],
-        isAvailable: isAvailable !== undefined ? isAvailable : true,
-        isPopularPick: isPopularPick !== undefined ? isPopularPick : false
-      },
+      updates,
       { new: true }
-    );
+    ).populate('modifierGroups.group');
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });

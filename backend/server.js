@@ -23,6 +23,9 @@ const notificationRoutes = require('./routes/notifications');
 const paymentRoutes = require('./routes/payments');
 const contactRoutes = require('./routes/contact');
 const storeSettingsRoutes = require('./routes/storeSettings');
+const modifierGroupRoutes = require('./routes/modifierGroups');
+const authenticateAdmin = require('./middleware/authenticateAdmin');
+const { startReceiptCleanupJob } = require('./utils/receiptStorage');
 
 // Initialize Express app
 const app = express();
@@ -53,8 +56,13 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // HTTP Caching Middleware
 app.use((req, res, next) => {
-  // Don't cache admin API endpoints - they need real-time updates
-  if (req.url.startsWith('/api/admin') || req.url.includes('/admin/')) {
+  // Don't cache admin API endpoints or admin-managed content
+  if (
+    req.url.startsWith('/api/admin') ||
+    req.url.includes('/admin/') ||
+    req.url.startsWith('/api/modifier-groups') ||
+    req.url.startsWith('/api/products')
+  ) {
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
@@ -90,9 +98,15 @@ app.use(express.static(path.join(__dirname, 'public'), {
   etag: false // Let Cache-Control headers handle freshness
 }));
 
+// Authenticated static route for receipt images — admin JWT required
+app.use('/uploads/receipts', authenticateAdmin, express.static(path.join(__dirname, 'uploads', 'receipts')));
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(() => {
+    console.log('MongoDB connected');
+    startReceiptCleanupJob();
+  })
   .catch(err => console.log('MongoDB connection error:', err));
 
 // Routes
@@ -108,6 +122,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/store-settings', storeSettingsRoutes);
+app.use('/api/modifier-groups', modifierGroupRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

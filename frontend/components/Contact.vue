@@ -515,10 +515,11 @@ export default {
 }
 
 .form-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: #1A4189;
     margin-bottom: 0.5rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 .form-subtitle {
@@ -528,10 +529,19 @@ export default {
 
 @media (min-width: 640px) {
     .form-title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
     .form-subtitle {
         font-size: 0.9375rem;
+    }
+    .form-label {
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .form-title {
+        font-size: 1.875rem;
     }
 }
 
@@ -553,6 +563,7 @@ export default {
     font-weight: 600;
     color: #374151;
     letter-spacing: 0.01em;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* ===== INPUT WRAPPER ===== */
@@ -751,50 +762,108 @@ export default {
 /* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 640px) {
     .contact-card {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 
     .icon-wrapper {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 2rem;
+        height: 2rem;
     }
 
     .icon-wrapper svg {
-        width: 1.125rem;
-        height: 1.125rem;
+        width: 1rem;
+        height: 1rem;
     }
 
     .contact-label {
-        font-size: 0.6875rem;
+        font-size: 0.625rem;
     }
 
     .contact-value {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
     }
 
     .map-container {
-        height: 220px;
+        height: 160px;
+    }
+
+    .social-section {
+        padding: 1rem;
     }
 
     .social-icon {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 2.25rem;
+        height: 2.25rem;
     }
 
     .social-icon svg {
-        width: 1.125rem;
-        height: 1.125rem;
+        width: 1rem;
+        height: 1rem;
     }
 
+    /* ---- Form container ---- */
     .contact-form-container {
-        padding: 1.5rem;
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .form-header {
+        margin-bottom: 1rem;
     }
 
     .form-title {
-        font-size: 1.25rem;
+        font-size: 1rem;
     }
 
     .form-subtitle {
+        font-size: 0.75rem;
+    }
+
+    /* ---- Form fields ---- */
+    .contact-form {
+        gap: 0.75rem;
+    }
+
+    .form-group {
+        gap: 0.25rem;
+    }
+
+    .form-label {
+        font-size: 0.75rem;
+    }
+
+    .form-input,
+    .form-textarea {
+        padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+        font-size: 0.8125rem;
+        border-radius: 0.625rem;
+    }
+
+    .form-textarea {
+        min-height: 90px;
+    }
+
+    .input-icon {
+        left: 0.625rem;
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* ---- Submit button ---- */
+    .submit-button {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    /* ---- Privacy notice ---- */
+    .privacy-notice {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    /* ---- Alert ---- */
+    .alert {
+        padding: 0.75rem;
         font-size: 0.8125rem;
     }
 }

@@ -3,7 +3,7 @@
     <div class="w-full max-w-md">
       <!-- Logo/Title -->
       <div class="text-center mb-8">
-        <h1 class="font-['Caprasimo'] text-5xl text-[#1A4189] mb-2">Buffs</h1>
+        <h1 class="font-['Poppins'] font-bold text-5xl text-[#1A4189] mb-2">Buffs</h1>
         <p class="font-['Unbounded'] text-[#FE601C] text-lg font-bold">Admin Dashboard</p>
       </div>
 

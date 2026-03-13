@@ -150,7 +150,7 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [adminEmail],
-      subject: `🔔 New Order #${order.orderNumber} - Buffs Restaurant`,
+      subject: `New Order #${order.orderNumber} - Buffs Restaurant`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #1A4189 0%, #2356b4 100%); padding: 30px; border-radius: 12px 12px 0 0; color: white; text-align: center;">
@@ -203,7 +203,7 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
 
             <!-- Delivery Address -->
             <div style="background-color: #ebeff7; padding: 20px; border-radius: 8px; border-left: 4px solid #1A4189;">
-              <h3 style="margin-top: 0; color: #1A4189;">📍 Delivery Address</h3>
+              <h3 style="margin-top: 0; color: #1A4189;">Delivery Address</h3>
               <p style="margin: 0; line-height: 1.6;">${order.deliveryAddress}</p>
             </div>
 

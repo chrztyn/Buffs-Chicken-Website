@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
+    "dev:host": "concurrently \"npm run frontend\" \"npm run backend\"",
     "start": "concurrently \"npm run frontend\" \"npm run backend\"",
     "frontend": "cd frontend && npm run dev",
     "backend": "cd backend && npm run dev",

@@ -43,7 +43,7 @@
             <!-- CTA Button -->
             <div class="cta-wrapper animate-fade-in-up" style="animation-delay: 0.6s;">
                 <NuxtLink to="/menu" class="cta-button group">
-                <span class="relative z-10 font-['Unbounded'] font-semibold text-sm">Order Now</span>
+                <span class="relative z-10 font-['Unbounded'] font-semibold text-base">Order Now</span>
                 <div class="cta-glow"></div>
                 <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -250,11 +250,11 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
+    gap: 10px;
+    padding: 16px 36px;
     background: linear-gradient(135deg, #FE601C 30%, #FEB90E 100%);
-    color: #1A4189;
-    border-radius: 12px;
+    color: #FBF4E5;
+    border-radius: 14px;
     overflow: hidden;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(254, 96, 28, 0.25);
@@ -283,9 +283,9 @@
     }
 
     .arrow-icon {
-    width: 18px;
-    height: 18px;
-    color: #1A4189;
+    width: 20px;
+    height: 20px;
+    color: #FBF4E5;
     transition: transform 0.3s ease;
     }
 

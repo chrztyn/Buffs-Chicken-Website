@@ -85,7 +85,7 @@
             </div>
 
             <!-- Title -->
-            <h1 class="blog-title-slug text-s sm:text-l md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight mb-4 sm:mb-6 font-['Unbounded'] drop-shadow-2xl">
+            <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight mb-4 sm:mb-6 font-['Unbounded'] drop-shadow-2xl">
               {{ blog.title }}
             </h1>
 
@@ -105,7 +105,7 @@
             <!-- Article Content -->
             <div class="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none">
               <!-- Main Content -->
-              <div v-html="parseContent(blog.content)" class="article-content font-['Unbounded'] text-base sm:text-lg leading-7 sm:leading-8 text-gray-800 space-y-5"></div>
+              <div v-html="parseContent(blog.content)" class="article-content font-['Poppins'] text-sm sm:text-base leading-7 sm:leading-8 text-gray-800 space-y-5"></div>
             </div>
 
             <!-- Article Meta -->
@@ -231,6 +231,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, useSeoMeta } from '#app'
 import { useApi } from '~/composables/useApi'
+
+definePageMeta({
+  validate: (route) => typeof route.params.slug === 'string' && route.params.slug.length > 0
+})
 import BlogCard from '~/components/BlogCard.vue'
 import Navbar from '~/components/Navbar.vue'
 import Footer from '~/components/Footer.vue'
@@ -256,7 +260,7 @@ const { data: blogData, error: fetchError, refresh: refreshBlog } = await useAsy
     console.log('Extracted blog:', blog)
     
     if (!blog) {
-      throw new Error('Blog not found')
+      throw createError({ statusCode: 404, statusMessage: 'Blog post not found' })
     }
     
     return blog
@@ -317,6 +321,10 @@ useSeoMeta({
   twitterTitle: () => blog.value?.title || 'Buffs Chicken Blog',
   twitterDescription: () => blog.value?.metaDescription || blog.value?.excerpt || '',
   twitterImage: () => blog.value?.image || 'https://www.buffschicken.com/buffs-logo.webp',
+  robots: 'index, follow',
+  ogSiteName: 'Buffs Chicken',
+  articlePublishedTime: () => blog.value?.publishedAt,
+  articleModifiedTime: () => blog.value?.updatedAt,
 })
 
 // Add canonical URL and JSON-LD structured data for SEO

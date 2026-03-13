@@ -12,7 +12,7 @@
     <div class="relative z-10 bg-white">
       <!-- Event Logo -->
       <div class="mb-3 flex justify-center">
-        <div class="bg-white p-3 rounded-md shadow-lg border-2 border-white">
+        <div class="relative z-0 overflow-hidden bg-white p-3 rounded-md shadow-lg border-2 border-white">
           <img
             :src="imageUrl"
             :alt="event.name"
@@ -22,7 +22,7 @@
       </div>
 
       <!-- Event Details -->
-      <div class="space-y-2">
+      <div class="relative z-10 space-y-2">
         <h3 class="font-['Unbounded'] font-bold text-base text-[#1A4189] mb-2">
           {{ event.name }}
         </h3>

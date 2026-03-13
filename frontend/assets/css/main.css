@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* ============ GLOBAL FONT ASSIGNMENTS ============ */
+/* All paragraph text uses Poppins */
+p {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Nav links use Poppins (overrides Unbounded where explicitly set) */
+nav a,
+nav button {
+  font-family: 'Poppins', sans-serif !important;
+}
+
 /* ============ GLOBAL RESETS & BASE STYLES ============ */
 html,
 body,
@@ -1011,10 +1023,6 @@ body,
     padding-left: 1rem;
     padding-right: 1rem;
     margin-bottom: 6px;
-  }
-
-  .blog-title-slug {
-    font-size: 1.25rem;
   }
 
   .blog-excerpt-slug {

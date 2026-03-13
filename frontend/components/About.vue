@@ -551,7 +551,7 @@ export default {
 
 .section-title {
     font-family: 'Unbounded', sans-serif;
-    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1A4189;
     margin-bottom: 1.25rem;
@@ -559,7 +559,7 @@ export default {
 }
 
 .section-description {
-    font-size: 1rem;
+    font-size: 0.875rem;
     line-height: 1.7;
     color: #4B5563;
     margin-bottom: 1.25rem;
@@ -771,14 +771,14 @@ export default {
 
 .mv-item-title {
     font-family: 'Unbounded', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: #1A4189;
     margin-bottom: 1rem;
 }
 
 .mv-item-description {
-    font-size: 1rem;
+    font-size: 0.875rem;
     line-height: 1.7;
     color: #4B5563;
 }
@@ -973,6 +973,35 @@ export default {
     background: #1A4189;
     color: white;
     transform: translateY(-2px);
+}
+
+/* ============== RESPONSIVE FONT SIZES (mobile-first) ============= */
+@media (min-width: 640px) {
+    .section-label {
+        font-size: 0.875rem;
+    }
+
+    .section-title {
+        font-size: 1.875rem;
+    }
+
+    .section-description {
+        font-size: 1rem;
+    }
+
+    .mv-item-title {
+        font-size: 1.25rem;
+    }
+
+    .mv-item-description {
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .section-title {
+        font-size: 2.25rem;
+    }
 }
 
 /* ============== RESPONSIVE DESIGN ============= */

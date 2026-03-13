@@ -61,6 +61,9 @@ export default defineNuxtConfig({
           'Link': '</buffs-logo.webp>; rel=preload; as=image; fetchpriority=high, </hero-main.webp>; rel=preload; as=image; fetchpriority=high'
         }
       },
+      '/admin/**': { robots: 'noindex, nofollow' },
+      '/cart': { robots: 'noindex, nofollow' },
+      '/order-status': { robots: 'noindex, nofollow' },
       '/menu': { swr: 3600, isr: true },
       '/about': { swr: 3600, isr: true },
       '/contact': { swr: 3600, isr: true },
@@ -110,9 +113,9 @@ export default defineNuxtConfig({
   },
   pages: true,
   css: ['~/assets/css/main.css'],
-  modules: ['@nuxt/image', '@nuxt/scripts'],
+  modules: ['@nuxt/image', '@nuxtjs/sitemap', '@nuxt/scripts'],
   // Sitemap temporarily disabled for faster builds
-  // modules: ['@nuxt/image', '@nuxtjs/sitemap', '@nuxt/scripts'],
+  // modules: ['@nuxt/image', '@nuxt/scripts'],
   
   scripts: {
     registry: {
@@ -138,12 +141,13 @@ export default defineNuxtConfig({
     quality: 80,
   },
 
-  // Sitemap temporarily disabled to speed up builds
-  // sitemap: {
-  //   strictNuxtContentPaths: true,
-  //   exclude: ['/admin/**', '/cart', '/checkout'],
-  //   zeroRuntime: true,
-  // },
+  // Sitemap configuration
+  sitemap: {
+    exclude: ['/admin/**', '/cart', '/order-status'],
+    sources: [
+      '/api/__sitemap__/urls'
+    ]
+  },
   router: {
     options: {
       strict: false
@@ -181,17 +185,28 @@ export default defineNuxtConfig({
         {
           rel: 'preload',
           as: 'style',
-          href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Poppins:wght@300;400;500;600;700&family=Unbounded:wght@400;600;700&display=swap',
           onload: "this.onload=null;this.rel='stylesheet'"
         },
         // Fallback for browsers without JS
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Unbounded:wght@400;600;700&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Caprasimo&family=Poppins:wght@300;400;500;600;700&family=Unbounded:wght@400;600;700&display=swap',
           media: 'print',
           onload: "this.media='all'"
         },
-      ]
+      ],
+      script: [
+        // TODO: Replace CLARITY_ID_HERE with your actual Microsoft Clarity project ID from https://clarity.microsoft.com
+        // Only injected in production builds to avoid polluting dev analytics.
+        ...(process.env.NODE_ENV === 'production'
+          ? [
+              {
+                innerHTML: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","CLARITY_ID_HERE");`,
+              },
+            ]
+          : []),
+      ],
     }
   },
 })

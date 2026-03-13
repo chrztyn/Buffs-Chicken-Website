@@ -53,10 +53,9 @@
         <!-- Modal -->
         <MenuModal
             :isOpen="isModalOpen"
-            :item="product"
-            :disabled="disabled"
+            :product="product"
             @close="closeModal"
-            @add-to-cart="handleAddToCart"
+            @added="handleAdded"
         />
     </div>
 </template>
@@ -115,8 +114,8 @@ export default {
         closeModal() {
             this.isModalOpen = false;
         },
-        handleAddToCart(itemData) {
-            this.$emit('add-to-cart', itemData);
+        handleAdded() {
+            this.$emit('added');
         }
     }
 };

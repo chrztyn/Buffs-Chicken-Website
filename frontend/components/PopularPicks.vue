@@ -1,4 +1,32 @@
 <template>
+    <!-- Toast Notification -->
+    <transition name="toast-fade">
+        <div
+            v-if="notification.show"
+            @click="$router.push('/menu'); notification.show = false"
+            class="fixed top-6 right-6 z-[200] flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg shadow-lg px-6 py-4 max-w-sm cursor-pointer hover:shadow-xl transition-shadow"
+        >
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-gray-800">{{ notification.title }}</p>
+                <p class="text-sm text-gray-600">{{ notification.message }}</p>
+                <p class="text-xs text-green-600 font-semibold mt-0.5">Tap to view menu →</p>
+            </div>
+            <button
+                @click.stop="notification.show = false"
+                class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </transition>
+
     <section class="popular-picks-section relative overflow-hidden">
         <!-- Decorative background layers -->
         <div class="popular-picks-bg" aria-hidden="true" />
@@ -37,9 +65,9 @@
     <MenuModal 
       v-if="isModalOpen && selectedProduct"
       :is-open="isModalOpen" 
-      :item="selectedProduct" 
+      :product="selectedProduct" 
       @close="closeMenuModal"
-      @add-to-cart="handleAddToCart"
+      @added="handleAfterAdd"
     />
     </template>
 
@@ -53,6 +81,8 @@
     const selectedProduct = ref(null);
     const isModalOpen = ref(false);
     const loading = ref(true);
+    const notification = ref({ show: false, title: '', message: '' });
+    let notifTimer = null;
 
     const { getPopularPicks } = useApi();
 
@@ -80,24 +110,9 @@
       selectedProduct.value = null;
     };
 
-    const handleAddToCart = (cartData) => {
-      // Get existing cart from localStorage
-      const existingCart = localStorage.getItem('buffs_cart');
-      const cart = existingCart ? JSON.parse(existingCart) : [];
-      
-      // Add new item to cart
-      cart.push(cartData);
-      
-      // Save back to localStorage
-      localStorage.setItem('buffs_cart', JSON.stringify(cart));
-      
-      // Dispatch custom event to notify navbar of cart changes
-      if (process.client) {
-        window.dispatchEvent(new Event('cart-updated'));
-      }
-      
-      // Close modal
+    const handleAfterAdd = () => {
       closeMenuModal();
+      navigateTo('/menu');
     };
 
     onMounted(() => {
@@ -106,6 +121,17 @@
     </script>
 
 <style scoped>
+/* Toast transition */
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+}
+
 .popular-picks-section {
   padding: 2rem 1rem;
   padding-left: 1rem;

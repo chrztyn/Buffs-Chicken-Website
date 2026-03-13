@@ -39,6 +39,7 @@ const Footer = defineAsyncComponent(() => import('~/components/Footer.vue'))
 useBreadcrumbs()
 
 // SEO Meta Tags
+useSeoMeta({ robots: 'index, follow' })
 useHead({
   title: 'Buffs Chicken - Crispy Wings & Comfort Food in Angeles City',
   meta: [
@@ -67,6 +68,24 @@ useHead({
         "url": "https://www.buffschicken.com",
         "logo": "https://www.buffschicken.com/buffs-logo.webp",
         "image": "https://www.buffschicken.com/hero-main.webp",
+        "priceRange": "\u20B1\u20B1",
+        "servesCuisine": ["Filipino", "Chicken Wings", "Comfort Food"],
+        "hasMenu": "https://www.buffschicken.com/menu",
+        "acceptsReservations": false,
+        "currenciesAccepted": "PHP",
+        "paymentAccepted": "Cash, GCash, Maya, BPI, Maribank",
+        "areaServed": {
+          "@type": "City",
+          "name": "Angeles City"
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "15:30",
+            "closes": "22:00"
+          }
+        ],
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "The Hood",
@@ -78,12 +97,23 @@ useHead({
     },
     {
       type: 'application/ld+json',
+      // TODO: Confirm logo URL matches the file actually served from the backend
       innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Buffs Chicken",
         "url": "https://www.buffschicken.com",
-        "logo": "https://www.buffschicken.com/buffs-logo.webp"
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.buffschicken.com/buffs-logo.webp"
+        },
+        "sameAs": [
+          "https://www.facebook.com/buffschickenangelescity"
+        ],
+        "foundingLocation": {
+          "@type": "Place",
+          "name": "Angeles City, Pampanga, Philippines"
+        }
       }, null, 2)
     }
   ],

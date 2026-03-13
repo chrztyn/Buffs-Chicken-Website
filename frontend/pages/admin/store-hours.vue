@@ -2,15 +2,15 @@
   <div class="p-4 lg:p-8">
     <!-- Page Header -->
     <div class="mb-8">
-      <h1 class="font-['Unbounded'] text-4xl text-[#1A4189] mb-2">Store Hours Management</h1>
-      <p class="font-['Unbounded'] text-gray-600">Manage your store operating hours and availability</p>
+      <h1 class="font-['Poppins'] text-4xl text-[#1A4189] mb-2">Store Hours Management</h1>
+      <p class="font-['Poppins'] text-gray-600">Manage your store operating hours and availability</p>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center py-20">
       <div class="text-center">
         <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-[#FE601C] border-t-transparent"></div>
-        <p class="mt-4 text-gray-600 font-['Unbounded']">Loading settings...</p>
+        <p class="mt-4 text-gray-600 font-['Poppins']">Loading settings...</p>
       </div>
     </div>
 
@@ -20,13 +20,13 @@
       <div class="bg-white rounded-xl shadow-md p-6 mb-8 border-2" :class="manualOverride.isActive ? (manualOverride.isClosed ? 'border-red-500' : 'border-green-500') : 'border-gray-200'">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="font-['Unbounded'] text-2xl text-[#1A4189] mb-2">Manual Override</h2>
-            <p class="font-['Unbounded'] text-sm text-gray-600">Override scheduled hours and control store status manually</p>
+            <h2 class="font-['Poppins'] text-2xl text-[#1A4189] mb-2">Manual Override</h2>
+            <p class="font-['Poppins'] text-sm text-gray-600">Override scheduled hours and control store status manually</p>
           </div>
           <div class="text-right">
             <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full" :class="manualOverride.isActive ? (manualOverride.isClosed ? 'bg-red-100' : 'bg-green-100') : 'bg-gray-100'">
               <span class="w-3 h-3 rounded-full animate-pulse" :class="manualOverride.isActive ? (manualOverride.isClosed ? 'bg-red-500' : 'bg-green-500') : 'bg-gray-400'"></span>
-              <span class="font-['Unbounded'] text-sm font-bold" :class="manualOverride.isActive ? (manualOverride.isClosed ? 'text-red-700' : 'text-green-700') : 'text-gray-700'">
+              <span class="font-['Poppins'] text-sm font-bold" :class="manualOverride.isActive ? (manualOverride.isClosed ? 'text-red-700' : 'text-green-700') : 'text-gray-700'">
                 {{ manualOverride.isActive ? (manualOverride.isClosed ? 'CLOSED' : 'OPEN') : 'FOLLOWING SCHEDULE' }}
               </span>
             </div>
@@ -39,12 +39,12 @@
             <input type="checkbox" v-model="manualOverride.isActive" class="sr-only peer" @change="handleOverrideChange">
             <div class="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FE601C]"></div>
           </label>
-          <span class="font-['Unbounded'] text-sm font-semibold text-gray-700">Enable Manual Override</span>
+          <span class="font-['Poppins'] text-sm font-semibold text-gray-700">Enable Manual Override</span>
         </div>
 
         <!-- Info message when override is disabled -->
         <div v-if="!manualOverride.isActive" class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
-          <p class="font-['Unbounded'] text-sm text-blue-800">
+          <p class="font-['Poppins'] text-sm text-blue-800">
             <strong>Following scheduled hours:</strong> Store status is automatically determined by your weekly schedule.<br>
             <span class="text-xs mt-1 inline-block">Current day: {{ new Date().toLocaleDateString('en-US', { weekday: 'long' }) }}</span>
           </p>
@@ -53,39 +53,39 @@
         <!-- Override Status (when active) -->
         <div v-if="manualOverride.isActive" class="space-y-4">
           <div class="flex items-center gap-4">
-            <label class="font-['Unbounded'] text-sm font-semibold text-gray-700 min-w-[120px]">Store Status:</label>
+            <label class="font-['Poppins'] text-sm font-semibold text-gray-700 min-w-[120px]">Store Status:</label>
             <div class="flex gap-3">
               <button 
                 @click="setOverrideStatus(false)" 
-                class="px-6 py-2 rounded-lg font-['Unbounded'] font-semibold transition-all"
+                class="px-6 py-2 rounded-lg font-['Poppins'] font-semibold transition-all"
                 :class="!manualOverride.isClosed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
               >
-                🟢 OPEN
+                OPEN
               </button>
               <button 
                 @click="setOverrideStatus(true)" 
-                class="px-6 py-2 rounded-lg font-['Unbounded'] font-semibold transition-all"
+                class="px-6 py-2 rounded-lg font-['Poppins'] font-semibold transition-all"
                 :class="manualOverride.isClosed ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
               >
-                🔴 CLOSED
+                CLOSED
               </button>
             </div>
           </div>
 
           <div>
-            <label class="block font-['Unbounded'] text-sm font-semibold text-gray-700 mb-2">Custom Message (Optional):</label>
+            <label class="block font-['Poppins'] text-sm font-semibold text-gray-700 mb-2">Custom Message (Optional):</label>
             <textarea 
               v-model="manualOverride.message" 
               rows="3" 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Unbounded'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Poppins'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
               placeholder="Example: We're at a pop-up event at SM Clark! Come visit us there."
             ></textarea>
-            <p class="mt-1 text-xs text-gray-500 font-['Unbounded']">This message will be displayed to customers on the menu page</p>
+            <p class="mt-1 text-xs text-gray-500 font-['Poppins']">This message will be displayed to customers on the menu page</p>
             
             <button 
               @click="saveManualOverride" 
               :disabled="saving"
-              class="mt-3 w-full px-4 py-2 bg-blue-500 text-white font-['Unbounded'] font-semibold rounded-lg hover:bg-blue-600 transition disabled:opacity-50 text-sm"
+              class="mt-3 w-full px-4 py-2 bg-blue-500 text-white font-['Poppins'] font-semibold rounded-lg hover:bg-blue-600 transition disabled:opacity-50 text-sm"
             >
               {{ saving ? 'Saving...' : 'Save Message' }}
             </button>
@@ -97,12 +97,12 @@
       <div class="bg-white rounded-xl shadow-md p-6 mb-8">
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h2 class="font-['Unbounded'] text-2xl text-[#1A4189] mb-2">Weekly Schedule</h2>
-            <p class="font-['Unbounded'] text-sm text-gray-600">Set your regular operating hours and custom messages for each day</p>
+            <h2 class="font-['Poppins'] text-2xl text-[#1A4189] mb-2">Weekly Schedule</h2>
+            <p class="font-['Poppins'] text-sm text-gray-600">Set your regular operating hours and custom messages for each day</p>
           </div>
           <button 
             @click="copyToAllDays" 
-            class="px-4 py-2 bg-blue-500 text-white font-['Unbounded'] font-semibold rounded-lg hover:bg-blue-600 transition text-sm"
+            class="px-4 py-2 bg-blue-500 text-white font-['Poppins'] font-semibold rounded-lg hover:bg-blue-600 transition text-sm"
           >
             Copy Monday to All Days
           </button>
@@ -115,8 +115,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-              <p class="font-['Unbounded'] text-sm text-blue-800 font-semibold mb-1">Custom Messages</p>
-              <p class="font-['Unbounded'] text-xs text-blue-700">
+              <p class="font-['Poppins'] text-sm text-blue-800 font-semibold mb-1">Custom Messages</p>
+              <p class="font-['Poppins'] text-xs text-blue-700">
                 Add special notes to any day without changing hours. Examples: "Happy Hour 5-7 PM!", "Limited menu today", "Special: Buy 1 Get 1". 
                 These messages appear on the menu page for customers to see.
               </p>
@@ -128,7 +128,7 @@
           <div v-for="day in daysOfWeek" :key="day" class="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
             <div class="flex flex-col sm:flex-row sm:items-center gap-4">
               <div class="min-w-[120px]">
-                <span class="font-['Unbounded'] text-sm font-bold text-gray-700 uppercase">{{ day }}</span>
+                <span class="font-['Poppins'] text-sm font-bold text-gray-700 uppercase">{{ day }}</span>
               </div>
 
               <div class="flex items-center gap-2">
@@ -136,47 +136,47 @@
                   <input type="checkbox" v-model="operatingHours[day].isOpen" class="sr-only peer">
                   <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                 </label>
-                <span class="font-['Unbounded'] text-xs font-semibold" :class="operatingHours[day].isOpen ? 'text-green-600' : 'text-red-600'">
+                <span class="font-['Poppins'] text-xs font-semibold" :class="operatingHours[day].isOpen ? 'text-green-600' : 'text-red-600'">
                   {{ operatingHours[day].isOpen ? 'Open' : 'Closed' }}
                 </span>
               </div>
 
               <div v-if="operatingHours[day].isOpen" class="flex items-center gap-3 flex-1">
                 <div class="flex items-center gap-2">
-                  <label class="font-['Unbounded'] text-xs text-gray-600 font-semibold">Opens:</label>
+                  <label class="font-['Poppins'] text-xs text-gray-600 font-semibold">Opens:</label>
                   <input 
                     type="time" 
                     v-model="operatingHours[day].openTime" 
-                    class="px-3 py-2 border border-gray-300 rounded-lg font-['Unbounded'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
+                    class="px-3 py-2 border border-gray-300 rounded-lg font-['Poppins'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
                   >
                 </div>
                 <span class="text-gray-400">—</span>
                 <div class="flex items-center gap-2">
-                  <label class="font-['Unbounded'] text-xs text-gray-600 font-semibold">Closes:</label>
+                  <label class="font-['Poppins'] text-xs text-gray-600 font-semibold">Closes:</label>
                   <input 
                     type="time" 
                     v-model="operatingHours[day].closeTime" 
-                    class="px-3 py-2 border border-gray-300 rounded-lg font-['Unbounded'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
+                    class="px-3 py-2 border border-gray-300 rounded-lg font-['Poppins'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
                   >
                 </div>
               </div>
               <div v-else class="flex-1">
-                <span class="font-['Unbounded'] text-sm text-gray-400 italic">Store closed this day</span>
+                <span class="font-['Poppins'] text-sm text-gray-400 italic">Store closed this day</span>
               </div>
             </div>
 
             <!-- Custom Message for this day -->
             <div class="pl-0 sm:pl-[120px]">
-              <label class="block font-['Unbounded'] text-xs text-gray-600 font-semibold mb-1">
+              <label class="block font-['Poppins'] text-xs text-gray-600 font-semibold mb-1">
                 Custom Message (Optional):
               </label>
               <input 
                 type="text" 
                 v-model="operatingHours[day].customMessage" 
                 placeholder="e.g., Happy Hour 5-7 PM!, Limited menu today, Special: Buy 1 Get 1"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Unbounded'] text-xs focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Poppins'] text-xs focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
               >
-              <p class="mt-1 text-xs text-gray-500 font-['Unbounded']">
+              <p class="mt-1 text-xs text-gray-500 font-['Poppins']">
                 This message will show on the menu page when viewing hours for {{ day }}
               </p>
             </div>
@@ -186,7 +186,7 @@
         <button 
           @click="saveSchedule" 
           :disabled="saving"
-          class="w-full mt-6 px-6 py-3 bg-[#1A4189] text-white font-['Unbounded'] font-bold rounded-lg hover:bg-[#15306d] transition disabled:opacity-50"
+          class="w-full mt-6 px-6 py-3 bg-[#1A4189] text-white font-['Poppins'] font-bold rounded-lg hover:bg-[#15306d] transition disabled:opacity-50"
         >
           {{ saving ? 'Saving...' : 'Save Weekly Schedule' }}
         </button>
@@ -195,8 +195,8 @@
       <!-- Temporary Closures Section -->
       <div class="bg-white rounded-xl shadow-md p-6 mb-8">
         <div class="mb-6">
-          <h2 class="font-['Unbounded'] text-2xl text-[#1A4189] mb-2">Temporary Closures</h2>
-          <p class="font-['Unbounded'] text-sm text-gray-600">Schedule future closures for holidays, renovations, or special events</p>
+          <h2 class="font-['Poppins'] text-2xl text-[#1A4189] mb-2">Temporary Closures</h2>
+          <p class="font-['Poppins'] text-sm text-gray-600">Schedule future closures for holidays, renovations, or special events</p>
         </div>
 
         <!-- Info box -->
@@ -206,8 +206,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
             <div>
-              <p class="font-['Unbounded'] text-sm text-purple-800 font-semibold mb-1">Temporary Closures</p>
-              <p class="font-['Unbounded'] text-xs text-purple-700">
+              <p class="font-['Poppins'] text-sm text-purple-800 font-semibold mb-1">Temporary Closures</p>
+              <p class="font-['Poppins'] text-xs text-purple-700">
                 Schedule closures in advance. Examples: "Closed Feb 15-17 for renovation", "Closed for National Holiday". 
                 These take priority over all other settings during the scheduled dates.
               </p>
@@ -217,39 +217,39 @@
 
         <!-- Add New Closure Form -->
         <div class="bg-gray-50 rounded-lg p-4 mb-6">
-          <h3 class="font-['Unbounded'] text-sm font-bold text-gray-800 mb-4">Add New Temporary Closure</h3>
+          <h3 class="font-['Poppins'] text-sm font-bold text-gray-800 mb-4">Add New Temporary Closure</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label class="block font-['Unbounded'] text-xs text-gray-600 font-semibold mb-2">Start Date:</label>
+              <label class="block font-['Poppins'] text-xs text-gray-600 font-semibold mb-2">Start Date:</label>
               <input 
                 type="date" 
                 v-model="newClosure.startDate"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Unbounded'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Poppins'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
               >
             </div>
             <div>
-              <label class="block font-['Unbounded'] text-xs text-gray-600 font-semibold mb-2">End Date:</label>
+              <label class="block font-['Poppins'] text-xs text-gray-600 font-semibold mb-2">End Date:</label>
               <input 
                 type="date" 
                 v-model="newClosure.endDate"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Unbounded'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Poppins'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
               >
             </div>
           </div>
           <div class="mb-4">
-            <label class="block font-['Unbounded'] text-xs text-gray-600 font-semibold mb-2">Closure Message:</label>
+            <label class="block font-['Poppins'] text-xs text-gray-600 font-semibold mb-2">Closure Message:</label>
             <input 
               type="text" 
               v-model="newClosure.message"
               placeholder="e.g., Closed for kitchen renovation, Closed for National Holiday"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Unbounded'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg font-['Poppins'] text-sm focus:ring-2 focus:ring-[#FE601C] focus:border-transparent"
             >
           </div>
           <button 
             @click.prevent="addClosure"
             type="button"
             :disabled="!newClosure.startDate || !newClosure.endDate || saving"
-            class="w-full px-4 py-2 bg-purple-600 text-white font-['Unbounded'] font-semibold rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full px-4 py-2 bg-purple-600 text-white font-['Poppins'] font-semibold rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ saving ? 'Adding...' : 'Add Closure' }}
           </button>
@@ -257,7 +257,7 @@
 
         <!-- List of Scheduled Closures -->
         <div v-if="temporaryClosures.length > 0">
-          <h3 class="font-['Unbounded'] text-sm font-bold text-gray-800 mb-3">Scheduled Closures</h3>
+          <h3 class="font-['Poppins'] text-sm font-bold text-gray-800 mb-3">Scheduled Closures</h3>
           <div class="space-y-3">
             <div 
               v-for="closure in sortedClosures" 
@@ -268,17 +268,17 @@
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
                   <span 
-                    class="px-2 py-1 text-xs font-bold font-['Unbounded'] rounded-full"
+                    class="px-2 py-1 text-xs font-bold font-['Poppins'] rounded-full"
                     :class="isClosureActive(closure) ? 'bg-red-200 text-red-800' : isClosurePast(closure) ? 'bg-gray-200 text-gray-600' : 'bg-blue-200 text-blue-800'"
                   >
                     {{ getClosureStatus(closure) }}
                   </span>
-                  <span class="text-xs font-semibold font-['Unbounded'] text-gray-600">
+                  <span class="text-xs font-semibold font-['Poppins'] text-gray-600">
                     {{ formatDate(closure.startDate) }} - {{ formatDate(closure.endDate) }}
                   </span>
                 </div>
-                <p class="text-sm font-['Unbounded'] text-gray-700">{{ closure.message || 'No message' }}</p>
-                <p v-if="!isClosurePast(closure)" class="text-xs font-['Unbounded'] text-gray-500 mt-1">
+                <p class="text-sm font-['Poppins'] text-gray-700">{{ closure.message || 'No message' }}</p>
+                <p v-if="!isClosurePast(closure)" class="text-xs font-['Poppins'] text-gray-500 mt-1">
                   {{ getClosureCountdown(closure) }}
                 </p>
               </div>
@@ -299,18 +299,18 @@
           <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
-          <p class="font-['Unbounded'] text-sm text-gray-500">No temporary closures scheduled</p>
+          <p class="font-['Poppins'] text-sm text-gray-500">No temporary closures scheduled</p>
         </div>
       </div>
 
       <!-- Success Message -->
       <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-        <p class="font-['Unbounded'] text-green-800 font-semibold">✓ {{ successMessage }}</p>
+        <p class="font-['Poppins'] text-green-800 font-semibold">✓ {{ successMessage }}</p>
       </div>
 
       <!-- Error Message -->
       <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-        <p class="font-['Unbounded'] text-red-800 font-semibold">✗ {{ errorMessage }}</p>
+        <p class="font-['Poppins'] text-red-800 font-semibold">✗ {{ errorMessage }}</p>
       </div>
     </div>
   </div>

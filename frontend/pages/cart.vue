@@ -6,6 +6,10 @@
     </div>
 </template>
 
+<script setup>
+useSeoMeta({ robots: 'noindex, nofollow' })
+</script>
+
     <script>
     import Navbar from '~/components/Navbar.vue';
     import Cart from '~/components/Cart.vue';
