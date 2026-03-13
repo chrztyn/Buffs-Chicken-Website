@@ -345,89 +345,82 @@
     </div>
 </template>
 
-<!-- This <script setup> block is purely for SSR-resolved MenuItem JSON-LD schema.
-     It runs server-side so Google's rich results crawler sees structured data in
-     the initial HTML. The Options API block below handles all UI logic. -->
-<script setup>
-import MenuCard from '~/components/MenuCard.vue'
-import { useApi } from '~/composables/useApi'
-
-const { getProducts } = useApi()
-const _menuConfig = useRuntimeConfig()
-
-// Fetch available products for schema — resolved during SSR without blocking the UI
-const { data: _menuSchemaData } = useAsyncData('menu-schema-products', async () => {
-  try {
-    const r = await getProducts()
-    return r?.data?.data || []
-  } catch {
-    return []
-  }
-})
-
-function _buildMenuSections(products) {
-  if (!products || !products.length) return []
-  const categoryMap = {}
-  for (const p of products) {
-    if (!p.isAvailable) continue
-    const cat = p.category || 'Other'
-    if (!categoryMap[cat]) categoryMap[cat] = []
-    const rawImage = p.image
-    const imageUrl = rawImage
-      ? rawImage.startsWith('http') ? rawImage : `${_menuConfig.public.socketUrl}${rawImage}`
-      : null
-    const item = {
-      '@type': 'MenuItem',
-      'name': p.name,
-      'description': p.description || '',
-      'offers': {
-        '@type': 'Offer',
-        'price': String(p.price),
-        'priceCurrency': 'PHP',
-        'availability': 'https://schema.org/InStock'
-      }
-    }
-    if (imageUrl) item.image = imageUrl
-    categoryMap[cat].push(item)
-  }
-  return Object.entries(categoryMap).map(([cat, items]) => ({
-    '@type': 'MenuSection',
-    'name': cat.charAt(0).toUpperCase() + cat.slice(1),
-    'hasMenuItem': items
-  }))
-}
-
-useHead({
-  script: [{
-    type: 'application/ld+json',
-    innerHTML: computed(() => {
-      const products = _menuSchemaData.value || []
-      if (!products.length) return ''
-      return JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'FoodEstablishment',
-        'name': 'Buffs Chicken',
-        'url': 'https://www.buffschicken.com/menu',
-        'hasMenu': {
-          '@type': 'Menu',
-          'name': 'Buffs Chicken Menu',
-          'url': 'https://www.buffschicken.com/menu',
-          'hasMenuSection': _buildMenuSections(products)
-        }
-      })
-    })
-  }]
-})
-</script>
-
 <script>
+import { computed, ref } from 'vue'
+import { useApi } from '~/composables/useApi'
 import Navbar from '~/components/Navbar.vue'
 import Footer from '~/components/Footer.vue'
 import MenuCard from '~/components/MenuCard.vue'
-import { useApi } from '~/composables/useApi'
 
 export default {
   name: 'MenuPage',
+  setup() {
+    const { getProducts } = useApi()
+    const config = useRuntimeConfig()
+
+    function buildMenuSections(products) {
+      if (!products || !products.length) return []
+      const categoryMap = {}
+      for (const p of products) {
+        if (!p.isAvailable) continue
+        const cat = p.category || 'Other'
+        if (!categoryMap[cat]) categoryMap[cat] = []
+        const rawImage = p.image
+        const imageUrl = rawImage
+          ? rawImage.startsWith('http') ? rawImage : `${config.public.socketUrl}${rawImage}`
+          : null
+        const item = {
+          '@type': 'MenuItem',
+          'name': p.name,
+          'description': p.description || '',
+          'offers': {
+            '@type': 'Offer',
+            'price': String(p.price),
+            'priceCurrency': 'PHP',
+            'availability': 'https://schema.org/InStock'
+          }
+        }
+        if (imageUrl) item.image = imageUrl
+        categoryMap[cat].push(item)
+      }
+      return Object.entries(categoryMap).map(([cat, items]) => ({
+        '@type': 'MenuSection',
+        'name': cat.charAt(0).toUpperCase() + cat.slice(1),
+        'hasMenuItem': items
+      }))
+    }
+
+    const { data: menuSchemaData } = useAsyncData('menu-schema-products', async () => {
+      try {
+        const r = await getProducts()
+        return r?.data?.data || []
+      } catch {
+        return []
+      }
+    })
+
+    useHead({
+      script: [{
+        type: 'application/ld+json',
+        innerHTML: computed(() => {
+          const products = menuSchemaData.value || []
+          if (!products.length) return ''
+          return JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FoodEstablishment',
+            'name': 'Buffs Chicken',
+            'url': 'https://www.buffschicken.com/menu',
+            'hasMenu': {
+              '@type': 'Menu',
+              'name': 'Buffs Chicken Menu',
+              'url': 'https://www.buffschicken.com/menu',
+              'hasMenuSection': buildMenuSections(products)
+            }
+          })
+        })
+      }]
+    })
+  },
   head() {
     return {
       title: 'Menu - Buffs Chicken | Order Wings, Combos & Pastas Online',
