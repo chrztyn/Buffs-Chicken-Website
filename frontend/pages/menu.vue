@@ -349,6 +349,7 @@
      It runs server-side so Google's rich results crawler sees structured data in
      the initial HTML. The Options API block below handles all UI logic. -->
 <script setup>
+import MenuCard from '~/components/MenuCard.vue'
 import { useApi } from '~/composables/useApi'
 
 const { getProducts } = useApi()
