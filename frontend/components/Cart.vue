@@ -245,16 +245,6 @@
                             </div>
                         </div>
 
-                        <!-- Payment Method -->
-                        <div class="mb-5 pb-5 border-b border-white/20">
-                            <div class="payment-method flex items-center gap-2 sm:gap-3">
-                                <div class="w-2.5 h-2.5 bg-green-400 rounded-full flex-shrink-0"></div>
-                                <span class="text-xs sm:text-sm font-medium text-white/90">
-                                    Cash on Delivery
-                                </span>
-                            </div>
-                        </div>
-
                         <!-- Buttons -->
                         <div class="flex flex-col gap-3">
                             <!-- Store Closed Warning -->
