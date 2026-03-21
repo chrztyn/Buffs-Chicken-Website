@@ -285,10 +285,6 @@
               <span>Tax:</span>
               <span class="font-bold">₱{{ selectedOrder.tax }}</span>
             </div>
-            <div class="flex justify-between text-sm">
-              <span>Delivery Fee:</span>
-              <span class="font-bold">₱{{ selectedOrder.deliveryFee }}</span>
-            </div>
             <div class="border-t border-white/30 pt-3 flex justify-between font-bold text-lg">
               <span>Total:</span>
               <span>₱{{ selectedOrder.totalAmount }}</span>
@@ -701,7 +697,6 @@ onMounted(async () => {
         items: data.items || [],
         subtotal: data.subtotal || 0,
         tax: data.tax || 0,
-        deliveryFee: data.deliveryFee || 0,
         totalAmount: data.totalAmount,
         status: data.status || 'pending',
         deliveryAddress: data.deliveryAddress,

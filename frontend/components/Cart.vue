@@ -4,7 +4,6 @@
         <OrderConfirmModal
             :isOpen="showOrderConfirmModal"
             :subtotal="subtotal"
-            :deliveryFee="deliveryFee"
             :total="total"
             :itemsCount="cartItems.length"
             :cartItems="cartItems"
@@ -232,10 +231,6 @@
                                 <span>Subtotal</span>
                                 <span class="font-semibold">₱{{ subtotal.toFixed(2) }}</span>
                             </div>
-                            <div class="flex justify-between text-xs sm:text-sm text-white/90">
-                                <span>Delivery Fee</span>
-                                <span class="font-semibold">₱{{ deliveryFee.toFixed(2) }}</span>
-                            </div>
                         </div>
 
                         <!-- Total -->
@@ -326,7 +321,6 @@ export default {
     data() {
         return {
             cartItems: [],
-            deliveryFee: 40,
             hasActiveOrder: false,
             showOrderConfirmModal: false,
             orderStatus: '',
@@ -356,7 +350,7 @@ export default {
             }, 0);
         },
         total() {
-            return this.subtotal + this.deliveryFee;
+            return this.subtotal;
         }
     },
     methods: {
@@ -504,7 +498,6 @@ export default {
                     address: customerData.address,
                     cartItems: transformedCartItems,
                     subtotal: this.subtotal,
-                    deliveryFee: this.deliveryFee,
                     total: this.total,
                     notes: customerData.notes || '',
                     paymentMethod: customerData.paymentMethod || 'cash_on_delivery',
@@ -546,7 +539,6 @@ export default {
                     userId: customerData.userId,
                     items: this.cartItems,
                     subtotal: this.subtotal,
-                    deliveryFee: this.deliveryFee,
                     total: this.total,
                     itemsCount: this.cartItems.length,
                     status: 'pending',

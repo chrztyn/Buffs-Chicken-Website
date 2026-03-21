@@ -69,7 +69,6 @@ async function sendOrderReceipt(order, user) {
 
     const orderNumber = order.orderNumber || String(order._id);
     const subtotal = Number(order.subtotal || 0).toFixed(2);
-    const deliveryFee = Number(order.deliveryFee || 0).toFixed(2);
     const total = Number(order.totalAmount || 0).toFixed(2);
     const deliveryAddress = order.deliveryAddress || 'N/A';
     const trackingUrl = `https://buffschicken.com/order-status?order=${encodeURIComponent(orderNumber)}`;
@@ -178,12 +177,6 @@ async function sendOrderReceipt(order, user) {
                   <td style="padding:4px 0;font-size:13px;color:#555;">Subtotal</td>
                   <td style="padding:4px 0;font-size:13px;color:#555;text-align:right;">
                     &#8369;${subtotal}
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:4px 0;font-size:13px;color:#555;">Delivery Fee</td>
-                  <td style="padding:4px 0;font-size:13px;color:#555;text-align:right;">
-                    &#8369;${deliveryFee}
                   </td>
                 </tr>
                 <tr>

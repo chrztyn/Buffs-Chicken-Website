@@ -191,10 +191,6 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
                 </tr>
                 ` : ''}
                 <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Delivery Fee:</strong></td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">₱${order.deliveryFee.toFixed(2)}</td>
-                </tr>
-                <tr>
                   <td style="padding: 12px 0; font-size: 16px;"><strong>Total:</strong></td>
                   <td style="padding: 12px 0; text-align: right; font-size: 16px; color: #FE601C;"><strong>₱${order.totalAmount.toFixed(2)}</strong></td>
                 </tr>

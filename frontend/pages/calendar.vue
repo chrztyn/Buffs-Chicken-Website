@@ -111,6 +111,58 @@
             <template v-if="selectedDayEvents.length === 0">No events on {{ selectedDayLabel }}</template>
             <template v-else>{{ selectedDayEvents.length }} event{{ selectedDayEvents.length > 1 ? 's' : '' }} on {{ selectedDayLabel }} — tap a date to view</template>
           </p>
+
+          <!-- ── Upcoming Events Section (Mobile Only) ── -->
+          <div class="mt-6 border-t border-gray-200 pt-4">
+            <!-- Section Header -->
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-lg">🗓</span>
+              <h3 class="font-['Unbounded'] font-bold text-sm text-[#FE601C]">
+                Upcoming Events
+              </h3>
+            </div>
+
+            <!-- Event Cards or Empty State -->
+            <template v-if="upcomingEvents.length > 0">
+              <div 
+                v-for="event in upcomingEvents" 
+                :key="event.id || event._id"
+                @click="selectDay(new Date(event.date_start))"
+                class="bg-white rounded-xl shadow-sm p-4 mb-3 border border-gray-100 cursor-pointer hover:shadow-md transition-shadow duration-200 active:scale-95"
+              >
+                <!-- Left side: colored dot + event name -->
+                <div class="flex items-start gap-3 mb-2">
+                  <h4 class="font-['Poppins'] font-semibold text-sm text-[#1A4189]">
+                    {{ event.name }}
+                  </h4>
+                </div>
+
+                <!-- Date -->
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-xs text-gray-500 font-['Poppins']">
+                    {{ formatUpcomingEventDate(event) }}
+                  </span>
+                </div>
+
+                <!-- Description (if available) -->
+                <p v-if="event.description" class="text-xs text-gray-600 font-['Poppins'] mt-1 line-clamp-2">
+                  {{ event.description }}
+                </p>
+              </div>
+            </template>
+
+            <!-- Empty State -->
+            <template v-else>
+              <div class="border border-dashed border-gray-300 rounded-xl p-6 text-center">
+                <p class="text-sm text-gray-400 font-['Poppins'] font-medium">
+                  No upcoming events right now
+                </p>
+                <p class="text-xs text-gray-400 font-['Poppins'] mt-1">
+                  Check back soon!
+                </p>
+              </div>
+            </template>
+          </div>
         </div>
 
         <!-- ─────────────────────────────────────────────
@@ -424,6 +476,52 @@ const selectedDayLabel = computed(() => {
   if (!selectedDay.value) return ''
   return selectedDay.value.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 })
+
+const upcomingEvents = computed(() => {
+  const now = new Date()
+  // Set time to start of today so today's events are included
+  now.setHours(0, 0, 0, 0)
+
+  return events.value
+    .filter(event => {
+      const eventDate = new Date(event.date_start)
+      eventDate.setHours(0, 0, 0, 0)
+      return eventDate >= now
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.date_start)
+      const dateB = new Date(b.date_start)
+      return dateA.getTime() - dateB.getTime()
+    })
+    .slice(0, 3) // max 3 upcoming events
+})
+
+// Deterministic color for event card dot based on event ID
+const getEventDotColor = (eventId: string | undefined) => {
+  const colors = ['bg-[#FE601C]', 'bg-[#1A4189]', 'bg-red-500', 'bg-green-500', 'bg-purple-500', 'bg-blue-500']
+  if (!eventId) return colors[0]
+  const id = parseInt(eventId) || 0
+  return colors[id % colors.length]
+}
+
+const formatUpcomingEventDate = (event: Event) => {
+  const start = new Date(event.date_start)
+  const end = new Date(event.date_end)
+  
+  start.setHours(0, 0, 0, 0)
+  end.setHours(0, 0, 0, 0)
+  
+  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' }
+  
+  if (start.getTime() === end.getTime()) {
+    return start.toLocaleDateString('en-US', options)
+  }
+  
+  // Different months or years — show full date range
+  const startStr = start.toLocaleDateString('en-US', options)
+  const endStr = end.toLocaleDateString('en-US', options)
+  return `${startStr} – ${endStr}`
+}
 
 const formatMobileEventDateRange = (event: Event) => {
   const start = new Date(event.date_start)

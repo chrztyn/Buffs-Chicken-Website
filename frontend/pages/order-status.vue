@@ -218,15 +218,6 @@
                   </span>
                   <span class="summary-value">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
-                <div class="summary-item group">
-                  <span class="summary-label">
-                    <svg class="w-4 h-4 inline mr-2 text-[#1A4189]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
-                    </svg>
-                    Delivery Fee
-                  </span>
-                  <span class="summary-value">₱{{ deliveryFee.toFixed(2) }}</span>
-                </div>
                 <div class="summary-divider"></div>
                 <div class="summary-item-total">
                   <span class="summary-label-total">Total Amount</span>
@@ -419,7 +410,6 @@ const userEmail = ref('')
 const userAddress = ref('Loading address...')
 
 const subtotal = ref(0)
-const deliveryFee = ref(40)
 const itemsCount = ref(0)
 const orderItems = ref([])
 
@@ -447,7 +437,7 @@ const statusOrder = {
 // Thank you modal state
 const showThankYouModal = ref(false)
 
-const total = computed(() => subtotal.value + deliveryFee.value)
+const total = computed(() => subtotal.value)
 
 const getProgressPercentage = () => {
   const currentIndex = statusOrder[currentStatus.value]
@@ -560,7 +550,6 @@ const fetchOrderFromBackend = async (orderId) => {
       // Update other order details
       currentStatus.value = order.status || 'pending'
       subtotal.value = order.subtotal || 0
-      deliveryFee.value = order.deliveryFee || 40
     }
   } catch (error) {
     console.error('Error fetching order from backend:', error)
@@ -574,7 +563,6 @@ const loadOrder = async () => {
     orderId.value = order.orderId
     currentStatus.value = order.status || 'pending'
     subtotal.value = order.subtotal
-    deliveryFee.value = order.deliveryFee
     itemsCount.value = order.itemsCount
     userEmail.value = order.customerEmail || ''
     orderItems.value = order.items || []

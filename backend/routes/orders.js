@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const { userId, cartId, deliveryAddress, notes, subtotal, tax, deliveryFee } = req.body;
+    const { userId, cartId, deliveryAddress, notes, subtotal, tax } = req.body;
 
     const user = await User.findById(userId);
     if (!user || !user.isVerified) {
@@ -56,7 +56,7 @@ router.post('/', async (req, res) => {
       itemTotal: cartItem.itemTotal
     }));
 
-    const totalAmount = subtotal + tax + deliveryFee;
+    const totalAmount = subtotal + tax;
 
     // Create order
     const order = new Order({
@@ -64,7 +64,6 @@ router.post('/', async (req, res) => {
       items: orderItems,
       subtotal,
       tax,
-      deliveryFee,
       totalAmount,
       deliveryAddress: deliveryAddress || user.location,
       status: 'pending'
@@ -121,7 +120,6 @@ router.post('/', async (req, res) => {
       items: orderItems,
       subtotal: order.subtotal,
       tax: order.tax,
-      deliveryFee: order.deliveryFee,
       totalAmount: order.totalAmount,
       deliveryAddress: order.deliveryAddress,
       status: order.status,
@@ -302,7 +300,6 @@ router.post('/:orderId/reorder', async (req, res) => {
       items: previousOrder.items,
       subtotal: previousOrder.subtotal,
       tax: previousOrder.tax,
-      deliveryFee: previousOrder.deliveryFee,
       totalAmount: previousOrder.totalAmount,
       deliveryAddress: previousOrder.deliveryAddress,
       status: 'pending'
@@ -340,7 +337,6 @@ router.post('/submit', async (req, res) => {
       address, 
       cartItems, 
       subtotal, 
-      deliveryFee, 
       total,
       notes,
       paymentMethod,
@@ -369,7 +365,7 @@ router.post('/submit', async (req, res) => {
 
     // Calculate totals
     const tax = 0; // Can be calculated based on your tax rules
-    const totalAmount = subtotal + tax + deliveryFee;
+    const totalAmount = subtotal + tax;
 
     // Create order
     const order = new Order({
@@ -377,7 +373,6 @@ router.post('/submit', async (req, res) => {
       items: orderItems,
       subtotal,
       tax,
-      deliveryFee,
       totalAmount,
       deliveryAddress: address,
       status: 'pending',
@@ -535,7 +530,6 @@ router.post('/:orderId/receipt', upload.single('receipt'), async (req, res) => {
         items: order.items,
         subtotal: order.subtotal,
         tax: order.tax,
-        deliveryFee: order.deliveryFee,
         totalAmount: order.totalAmount,
         deliveryAddress: order.deliveryAddress,
         paymentMethod: order.paymentMethod,

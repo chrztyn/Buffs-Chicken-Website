@@ -56,10 +56,6 @@
                   <span class="summary-label">Subtotal:</span>
                   <span class="summary-value">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
-                <div class="summary-item">
-                  <span class="summary-label">Delivery Fee:</span>
-                  <span class="summary-value">₱{{ deliveryFee.toFixed(2) }}</span>
-                </div>
                 <div class="summary-divider"></div>
                 <span class="summary-label font-bold">Total Amount:</span>
                 <span class="summary-total-amount">₱{{ total.toFixed(2) }}</span>
@@ -452,10 +448,6 @@ const props = defineProps({
     type: Number,
     default: 0
   },
-  deliveryFee: {
-    type: Number,
-    default: 40
-  },
   total: {
     type: Number,
     default: 0
@@ -760,7 +752,6 @@ const createOrderForQR = async () => {
       address: formData.value.address,
       cartItems: transformedCartItems,
       subtotal: props.subtotal,
-      deliveryFee: props.deliveryFee,
       total: props.total,
       notes: '',
       paymentMethod: paymentMethod.value,
@@ -789,7 +780,6 @@ const createOrderForQR = async () => {
       userId: userId.value,
       items: props.cartItems,
       subtotal: props.subtotal,
-      deliveryFee: props.deliveryFee,
       total: props.total,
       itemsCount: props.cartItems.length,
       status: 'pending',
@@ -822,7 +812,6 @@ const proceedToCheckout = async () => {
         verificationStatus: 'verified',
         cartItems: props.cartItems,
         subtotal: props.subtotal,
-        deliveryFee: props.deliveryFee,
         total: props.total,
         isReturningCustomer: isReturningCustomer.value,
         paymentMethod: paymentMethod.value,
