@@ -16,6 +16,6 @@ jobs:
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            cd /var/www/buffs-website
-            git pull origin main
+            cd /home/ubuntu/Buffs-Chicken-Website
+            git pull origin docker
             docker compose up --build -d
