@@ -212,78 +212,7 @@ body,
 
   /* ============ FOOD CARDS ============ */
   .food-card {
-    width: 100%;
-    max-width: 320px;
-    overflow: hidden;
-    box-sizing: border-box;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
-    border: 2px solid transparent;
-    padding: 1.25rem;
-  }
-
-  /* Switch to 2 columns at 1249px to prevent card cropping */
-  @media (max-width: 1450px) {
-    .popular-picks-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
-    }
-
-    .food-card {
-      max-width: 360px;
-      padding: 1rem;
-    }
-  }
-
-  .food-card > div:first-of-type {
-    margin-bottom: 0.375rem;
-  }
-
-  .food-card img {
-    width: 100%;
-    object-fit: contain;
-    object-position: center;
-    transform-origin: center center;
-    --food-card-img-scale: 3.5;
-    height: 130px;
-    transform: scale(var(--food-card-img-scale));
-  }
-
-  .food-card:hover {
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(254, 185, 14, 0.5);
-    border-color: rgba(254, 185, 14, 0.4);
-    transform: translateY(-8px);
-  }
-
-  .food-card .food-card-footer {
-    min-width: 0;
-    gap: 0.5rem;
-    padding-left: 0.1rem;
-    padding-right: 0.1rem;
-    flex-wrap: nowrap;
-    padding-top: 6rem;
-  }
-
-  .food-card .food-card-footer span:first-child {
-    flex: 0 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .popular-picks-grid .food-card:nth-child(1),
-  .popular-picks-grid .food-card:nth-child(2),
-  .popular-picks-grid .food-card:nth-child(3),
-  .popular-picks-grid .food-card:nth-child(4) {
-    transform: translateY(10px);
-  }
-
-  .popular-picks-grid .food-card:nth-child(n):hover {
-    transform: translateY(calc(-8px - 6px));
-  }
-
-  .popular-picks-grid .food-card:nth-child(2):hover {
-    transform: translateY(-14px);
+    /* Component handles sizing with h-96 w-72 and Tailwind classes */
   }
 
   /* ============ BLOG SECTION ============ */
@@ -547,50 +476,7 @@ body,
 
   /* ============ FOOD CARDS ============ */
   .food-card {
-    width: 100%;
-    max-width: 360px;
-    overflow: hidden;
-    box-sizing: border-box;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
-    border: 2px solid transparent;
-    padding: 1rem;
-  }
-
-  .food-card > div:first-of-type {
-    margin-bottom: 0.375rem;
-  }
-
-  .food-card img {
-    width: 100%;
-    object-fit: contain;
-    object-position: center;
-    transform-origin: center center;
-    --food-card-img-scale: 3;
-    height: 110px;
-    transform: scale(var(--food-card-img-scale));
-  }
-
-  .food-card:hover {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(254, 185, 14, 0.5);
-    border-color: rgba(254, 185, 14, 0.4);
-    transform: translateY(-6px);
-  }
-
-  .food-card .food-card-footer {
-    min-width: 0;
-    gap: 0.5rem;
-    padding-left: 0.1rem;
-    padding-right: 0.1rem;
-    flex-wrap: nowrap;
-    padding-top: 5rem;
-  }
-
-  .food-card .food-card-footer span:first-child {
-    flex: 0 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* Component handles sizing with h-96 w-72 and Tailwind classes */
   }
 
   .popular-picks-grid .food-card:nth-child(1),
@@ -880,54 +766,7 @@ body,
 
   /* ============ FOOD CARDS ============ */
   .food-card {
-    width: 100%;
-    max-width: 390px;
-    overflow: hidden;
-    box-sizing: border-box;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
-    border: 2px solid transparent;
-    padding: 1rem;
-  }
-
-  .food-card > div:first-of-type {
-    margin-bottom: 0.25rem;
-  }
-
-  .food-card img {
-    width: 100%;
-    object-fit: contain;
-    object-position: center;
-    transform-origin: center center;
-    --food-card-img-scale: 2.5;
-    height: 100px;
-    transform: scale(var(--food-card-img-scale));
-  }
-
-  .food-card:active {
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(254, 185, 14, 0.5);
-    border-color: rgba(254, 185, 14, 0.4);
-    transform: translateY(-4px);
-  }
-
-  .food-card .food-card-footer {
-    min-width: 0;
-    gap: 0.5rem;
-    padding-left: 0.1rem;
-    padding-right: 0.1rem;
-    flex-wrap: nowrap;
-    padding-top: 4rem;
-  }
-
-  .food-card .food-card-footer span:first-child {
-    flex: 0 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .popular-picks-grid .food-card:nth-child(1) {
-    transform: translateY(0);
+    /* Component handles sizing with h-96 w-72 and Tailwind classes */
   }
 
   /* ============ BLOG SECTION ============ */
