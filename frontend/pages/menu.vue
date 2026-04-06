@@ -282,25 +282,26 @@ export default {
       try { const r = await getProducts(); return r?.data?.data || [] } catch { return [] }
     })
 
-    useHead({
-      script: [{ type: 'application/ld+json', innerHTML: computed(() => {
-        const products = menuSchemaData.value || []
-        if (!products.length) return ''
-        return JSON.stringify({ '@context': 'https://schema.org', '@type': 'FoodEstablishment', name: 'Buffs Chicken', url: 'https://www.buffschicken.com/menu', hasMenu: { '@type': 'Menu', name: 'Buffs Chicken Menu', url: 'https://www.buffschicken.com/menu', hasMenuSection: buildMenuSections(products) } })
-      }) }]
-    })
+useHead({
+  script: [{ type: 'application/ld+json', innerHTML: computed(() => {
+    const products = menuSchemaData.value || []
+    if (!products.length) return ''
+    return JSON.stringify({ '@context': 'https://schema.org', '@type': 'FoodEstablishment', name: 'Buffs Chicken', url: 'https://www.buffschicken.com/menu', hasMenu: { '@type': 'Menu', name: 'Buffs Chicken Menu', url: 'https://www.buffschicken.com/menu', hasMenuSection: buildMenuSections(products) } })
+  }) }]
+  })
   },
   head() {
-    return {
-      title: 'Menu - Buffs Chicken | Order Wings, Combos & Pastas Online',
-      meta: [
-        { name: 'description', content: 'Browse our full menu of crispy wings, loaded combos, and cheesy pastas. Order online from Buffs Chicken at The Hood, Angeles City.' },
-        { name: 'robots', content: 'index, follow' },
-        { property: 'og:title', content: 'Menu - Buffs Chicken' },
-        { property: 'og:type', content: 'website' },
-        { property: 'og:url', content: 'https://www.buffschicken.com/menu' }
-      ],
-      link: [{ rel: 'canonical', href: 'https://www.buffschicken.com/menu' }]
+  return {
+    title: 'Menu - Buffs Chicken | Online Orders & Deliveries',
+    meta: [
+      { name: 'description', content: 'Order the juiciest and most flavorful chicken online. Online Orders & Deliveries: https://buffschicken.com/menu' },
+      { name: 'robots', content: 'index, follow' },
+      { property: 'og:title', content: 'Menu - Buffs Chicken' },
+      { property: 'og:description', content: 'Order the juiciest and most flavorful chicken online. Online Orders & Deliveries: https://buffschicken.com/menu' },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://www.buffschicken.com/menu' }
+    ],
+    link: [{ rel: 'canonical', href: 'https://www.buffschicken.com/menu' }]
     }
   },
   components: { Navbar, Footer, MenuCard },
