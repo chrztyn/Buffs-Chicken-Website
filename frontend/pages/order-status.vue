@@ -344,7 +344,7 @@
                     </div>
                     <div>
                       <span class="info-label">Payment Method</span>
-                      <span class="info-value">Cash on Delivery</span>
+                      <span class="info-value">{{ formatPaymentMethod(paymentMethod) }}</span>
                     </div>
                   </div>
                 </div>
@@ -445,6 +445,7 @@ const statusOrder = {
   cancelled: -1
 }
 
+
 // Thank you modal state
 const showThankYouModal = ref(false)
 
@@ -457,7 +458,7 @@ const formatPaymentMethod = (method) => {
     'maribank': 'Maribank',
     'bpi': 'BPI'
   }
-  return methods[method] || 'Unknown'
+  return methods[method] || method
 }
 
 const getProgressPercentage = () => {
@@ -571,6 +572,10 @@ const fetchOrderFromBackend = async (orderId) => {
       // Update other order details
       currentStatus.value = order.status || 'pending'
       subtotal.value = order.subtotal || 0
+
+      if (order.paymentMethod) {
+        paymentMethod.value = order.paymentMethod
+      }
     }
   } catch (error) {
     console.error('Error fetching order from backend:', error)
