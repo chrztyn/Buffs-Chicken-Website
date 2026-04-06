@@ -41,6 +41,7 @@
                 <div class="w-10 h-1 bg-gray-300 rounded-full cursor-grab active:cursor-grabbing"></div>
               </div>
             </div>
+
             <!-- Close button -->
             <button
               @click="handleClose"
@@ -52,61 +53,62 @@
               </svg>
             </button>
 
-            <!-- Scrollable body — bottom pad ensures content is never hidden behind sticky footer -->
+            <!-- Scrollable body -->
             <div class="overflow-y-auto flex-1 pb-28 overscroll-contain">
               <MenuModalHeader :item="product" />
 
               <div class="space-y-0 pb-2">
-              <!-- ── New modifier-group system ─────────────────────────── -->
-              <template v-if="hasModifierGroups">
-                <MenuModalAddons
-                  v-for="group in modifierGroupsForDisplay"
-                  :key="group.groupName"
-                  :title="group.groupName"
-                  :addons="group.items"
-                  :addons-enabled="true"
-                  :selected-addons="selectedModifiers[group.groupName] || []"
-                  :min-selections="group.minSelections"
-                  :max-selections="group.maxSelections"
-                  @addon-change="handleModifierChange(group.groupName, $event)"
-                />
-              </template>
+                <!-- ── New modifier-group system ───────────────────────── -->
+                <template v-if="hasModifierGroups">
+                  <MenuModalAddons
+                    v-for="group in modifierGroupsForDisplay"
+                    :key="group.groupName"
+                    :title="group.groupName"
+                    :addons="group.items"
+                    :addons-enabled="true"
+                    :selected-addons="selectedModifiers[group.groupName] || []"
+                    :min-selections="group.minSelections"
+                    :max-selections="group.maxSelections"
+                    @addon-change="handleModifierChange(group.groupName, $event)"
+                  />
+                </template>
 
-              <!-- ── Legacy variants / sauces / addons system ───────────── -->
-              <template v-else>
-                <MenuModalVariants
-                  :variants="availableVariants"
-                  :variants-enabled="product.variantsEnabled !== false"
-                  :selected-variants="selectedVariants"
-                  :validation-error="variantValidationError"
-                  @variant-change="handleVariantChange"
-                />
+                <!-- ── Legacy variants / sauces / addons system ──────────── -->
+                <template v-else>
+                  <MenuModalVariants
+                    :variants="availableVariants"
+                    :variants-enabled="product.variantsEnabled !== false"
+                    :selected-variants="selectedVariants"
+                    :validation-error="variantValidationError"
+                    @variant-change="handleVariantChange"
+                  />
 
-                <MenuModalSauces
-                  :sauce-groups="availableSauceGroups"
-                  :sauces-enabled="product.saucesEnabled !== false"
-                  :selected-sauces="selectedSauces"
-                  :is-sauce-disabled="isSauceDisabled"
-                  @sauce-change="handleSauceChange"
-                />
+                  <MenuModalSauces
+                    :sauce-groups="availableSauceGroups"
+                    :sauces-enabled="product.saucesEnabled !== false"
+                    :selected-sauces="selectedSauces"
+                    :effective-sauce-maxes="effectiveSauceMaxes"
+                    :is-sauce-disabled="isSauceDisabled"
+                    @sauce-change="handleSauceChange"
+                  />
 
-                <MenuModalAddons
-                  :addons="availableAddons"
-                  :addons-enabled="product.addonsEnabled !== false"
-                  :selected-addons="selectedAddons"
-                  @addon-change="handleAddonChange"
-                />
-              </template>
+                  <MenuModalAddons
+                    :addons="availableAddons"
+                    :addons-enabled="product.addonsEnabled !== false"
+                    :selected-addons="selectedAddons"
+                    @addon-change="handleAddonChange"
+                  />
+                </template>
 
-              <!-- Notes always visible ──────────────────────────────────── -->
-              <MenuModalNotes
-                :notes="notes"
-                @update:notes="notes = $event"
-              />
+                <!-- Notes always visible ─────────────────────────────────── -->
+                <MenuModalNotes
+                  :notes="notes"
+                  @update:notes="notes = $event"
+                />
               </div>
             </div>
 
-            <!-- Sticky footer — quantity selector + Add to Cart -->
+            <!-- Sticky footer -->
             <MenuModalFooter
               :quantity="quantity"
               :total="totalPrice"
@@ -144,20 +146,30 @@ const emit = defineEmits<{
 
 const productRef = computed(() => props.product) as unknown as Ref<Product>
 
-// Cart-write + close handler passed into composable
+// ── Cart-write + close handler ────────────────────────────────────────────────
 function handleComposableEmit(event: string, ...args: unknown[]) {
   if (event === 'add-to-cart') {
     const newItem = args[0] as Record<string, unknown>
     const cart: Record<string, unknown>[] = JSON.parse(localStorage.getItem('buffs_cart') || '[]')
-    const key = `${newItem._id}:${JSON.stringify(newItem.selectedVariants)}`
-    const existing = cart.find(
-      (i) => `${i._id}:${JSON.stringify(i.selectedVariants)}` === key,
-    )
+
+    const makeKey = (item: Record<string, unknown>) =>
+      JSON.stringify({
+        _id: item._id,
+        selectedVariants: item.selectedVariants,
+        selectedSauces: item.selectedSauces,
+        selectedAddons: item.selectedAddons,
+        selectedModifiers: item.selectedModifiers,
+      })
+
+    const newKey = makeKey(newItem)
+    const existing = cart.find((i) => makeKey(i) === newKey)
+
     if (existing) {
       existing.quantity = (existing.quantity as number) + (newItem.quantity as number)
     } else {
       cart.push(newItem)
     }
+
     localStorage.setItem('buffs_cart', JSON.stringify(cart))
     if (process.client) window.dispatchEvent(new Event('cart-updated'))
     emit('added')
@@ -188,14 +200,18 @@ const {
   handleModifierChange,
   addToCart,
   resetModal,
+  effectiveSauceMaxes,
+  getEffectiveMaxForModifierGroup,  // ← used below for dynamic sauce limits
 } = useMenuModal(productRef, handleComposableEmit)
 
-// Map enabled modifier groups into the Addon shape for MenuModalAddons
+// ── Modifier groups for display ───────────────────────────────────────────────
+// maxSelections is dynamic: for non-variant groups it checks variantSauceLimits
+// on the product so the sauce cap updates whenever the customer picks a variant.
 const modifierGroupsForDisplay = computed(() =>
   enabledModifierGroups.value.map(mg => ({
     groupName: mg.group.name,
     minSelections: mg.group.minSelections ?? 0,
-    maxSelections: mg.group.maxSelections ?? 0,
+    maxSelections: getEffectiveMaxForModifierGroup(mg.group.name), // ← dynamic
     items: mg.group.items
       .filter(item => item.isAvailable !== false)
       .map(item => ({

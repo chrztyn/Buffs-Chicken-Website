@@ -22,7 +22,8 @@ const orderItemSchema = new mongoose.Schema({
       price: Number
     }
   ],
-  itemTotal: Number
+  itemTotal: Number,
+  notes: String,
 });
 
 const orderSchema = new mongoose.Schema(
@@ -65,8 +66,8 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['cash_on_delivery', 'gcash', 'maya', 'maribank', 'bpi'],
-      default: 'cash_on_delivery'
+      enum: ['gcash', 'maya', 'maribank', 'bpi'],
+      default: 'gcash'
     },
     gcashReference: {
       type: String,

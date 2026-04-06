@@ -81,9 +81,12 @@ router.get('/category/:categoryId', async (req, res) => {
 // Admin: Create product
 router.post('/admin/create', async (req, res) => {
   try {
-    const { name, description, price, category, image, isAvailable, isPopularPick, allowSpecialRequests, modifierGroups } = req.body;
+    const {
+      name, description, price, category, image,
+      isAvailable, isPopularPick, allowSpecialRequests,
+      modifierGroups, sauces, variantSauceLimits
+    } = req.body;
 
-    // Validation
     if (!name || !price || !category) {
       return res.status(400).json({ message: 'Name, price, and category are required' });
     }
@@ -97,7 +100,9 @@ router.post('/admin/create', async (req, res) => {
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       isPopularPick: isPopularPick || false,
       allowSpecialRequests: allowSpecialRequests || false,
-      modifierGroups: modifierGroups || []
+      modifierGroups: modifierGroups || [],
+      sauces: sauces || [],
+      variantSauceLimits: variantSauceLimits || []
     });
 
     const savedProduct = await product.save();
@@ -110,13 +115,25 @@ router.post('/admin/create', async (req, res) => {
 // Admin: Update product
 router.put('/admin/:id', async (req, res) => {
   try {
-    const { name, description, price, category, image, isAvailable, isPopularPick, allowSpecialRequests, modifierGroups } = req.body;
+    const {
+      name, description, price, category, image,
+      isAvailable, isPopularPick, allowSpecialRequests,
+      modifierGroups, sauces, variantSauceLimits
+    } = req.body;
 
-    const updates = { name, description, price, category, image,
+    const updates = {
+      name,
+      description,
+      price,
+      category,
+      image,
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       isPopularPick: isPopularPick !== undefined ? isPopularPick : false,
-      allowSpecialRequests: allowSpecialRequests !== undefined ? allowSpecialRequests : false
+      allowSpecialRequests: allowSpecialRequests !== undefined ? allowSpecialRequests : false,
+      sauces: sauces || [],
+      variantSauceLimits: variantSauceLimits || []
     };
+
     if (modifierGroups !== undefined) updates.modifierGroups = modifierGroups;
 
     const product = await Product.findByIdAndUpdate(
@@ -145,6 +162,37 @@ router.delete('/admin/:id', async (req, res) => {
     }
 
     res.json({ message: 'Product deleted successfully', product });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Admin: Update display order for multiple products (for menu sequencing)
+router.patch('/admin/reorder', async (req, res) => {
+  try {
+    const { updates } = req.body;
+
+    if (!Array.isArray(updates)) {
+      return res.status(400).json({ message: 'Updates must be an array' });
+    }
+
+    const results = [];
+    for (const { productId, displayOrder } of updates) {
+      const product = await Product.findByIdAndUpdate(
+        productId,
+        { displayOrder },
+        { new: true }
+      );
+      if (product) {
+        results.push(product);
+      }
+    }
+
+    res.json({
+      message: 'Products reordered successfully',
+      updated: results.length,
+      products: results
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

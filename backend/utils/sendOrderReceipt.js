@@ -21,7 +21,7 @@ function formatVariants(selectedVariants) {
 }
 
 /**
- * Generates the itemized rows HTML for all order items.
+ * Generates the itemized rows HTML for all order items with images.
  */
 function buildItemRows(items) {
   return items
@@ -29,22 +29,32 @@ function buildItemRows(items) {
       const variantsText = formatVariants(item.selectedVariants);
       const saucesText = (item.selectedSauces || []).map((s) => s.name).join(', ');
       const addonsText = (item.selectedAddons || []).map((a) => a.name).join(', ');
+      const notesText = item.notes || item.specialInstructions || '';
 
       const metaLines = [
         variantsText ? `<span style="color:#555;font-size:12px;">Variant: ${variantsText}</span>` : '',
         saucesText ? `<span style="color:#555;font-size:12px;">Sauces: ${saucesText}</span>` : '',
-        addonsText ? `<span style="color:#555;font-size:12px;">Add-ons: ${addonsText}</span>` : '',
+        addonsText ? `<span style="color:#555;font-size:12px;"> ${addonsText}</span>` : '',
+        notesText ? `<span style="color:#92400e;font-size:12px;font-style:italic;">Note: ${notesText}</span>` : '',
       ]
         .filter(Boolean)
         .join('<br>');
 
+      const imageHtml = item.productImage ? `
+        <img src="${item.productImage}" alt="${item.productName}" 
+          style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin-right:12px;vertical-align:middle;border:1px solid #e8dfc8;">
+      ` : '';
+
       return `
         <tr>
-          <td style="padding:10px 0;border-bottom:1px solid #e8dfc8;vertical-align:top;">
-            <strong style="font-family:Arial,sans-serif;font-size:14px;color:#1A4189;">
-              ${item.productName} &times; ${item.quantity}
-            </strong>
-            ${metaLines ? `<br>${metaLines}` : ''}
+          <td style="padding:10px 0;border-bottom:1px solid #e8dfc8;vertical-align:top;display:flex;align-items:flex-start;">
+            ${imageHtml}
+            <div>
+              <strong style="font-family:Arial,sans-serif;font-size:14px;color:#1A4189;display:block;margin-bottom:4px;">
+                ${item.productName} &times; ${item.quantity}
+              </strong>
+              ${metaLines ? `<div style="line-height:1.4;">${metaLines}</div>` : ''}
+            </div>
           </td>
           <td style="padding:10px 0;border-bottom:1px solid #e8dfc8;text-align:right;vertical-align:top;white-space:nowrap;">
             <strong style="font-family:Arial,sans-serif;font-size:14px;color:#1A4189;">
@@ -72,6 +82,15 @@ async function sendOrderReceipt(order, user) {
     const total = Number(order.totalAmount || 0).toFixed(2);
     const deliveryAddress = order.deliveryAddress || 'N/A';
     const trackingUrl = `https://buffschicken.com/order-status?order=${encodeURIComponent(orderNumber)}`;
+
+    // Format payment method for display
+    const paymentMethodMap = {
+      'gcash': 'GCash',
+      'maya': 'Maya',
+      'maribank': 'Maribank',
+      'bpi': 'BPI'
+    };
+    const paymentMethodDisplay = paymentMethodMap[order.paymentMethod] || order.paymentMethod || 'GCash';
 
     const itemRowsHtml = buildItemRows(order.items || []);
 
@@ -223,11 +242,24 @@ async function sendOrderReceipt(order, user) {
                 Payment Method
               </p>
               <p style="margin:0;font-size:14px;color:#333;">
-                Cash on Delivery
+                Paid via ${paymentMethodDisplay}
               </p>
             </td>
           </tr>
-
+          <!-- ─── SPECIAL INSTRUCTIONS ─────────────────────────────── -->
+          ${order.notes ? `
+          <tr>
+            <td style="padding:16px 32px 24px 32px;">
+              <p style="margin:0 0 6px 0;font-family:Arial,sans-serif;font-size:13px;
+                font-weight:700;color:#FE601C;text-transform:uppercase;letter-spacing:1px;">
+                Special Instructions
+              </p>
+              <p style="margin:0;font-size:14px;color:#333;line-height:1.6;
+                background:#fff8ee;padding:12px;border-radius:6px;border-left:3px solid #FE601C;">
+                ${order.notes}
+              </p>
+            </td>
+          </tr>` : ''}
           <!-- ─── CTA BUTTON ────────────────────────────────────────── -->
           <tr>
             <td style="padding:0 32px 32px 32px;text-align:center;">

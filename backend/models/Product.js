@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 require('./ModifierGroup'); // ensure ModifierGroup is registered for populate
 
 const variantSchema = new mongoose.Schema({
-  name: String, // e.g., "Pieces", "Size"
+  name: String,
   options: [
     {
-      name: String, // e.g., "6 Pieces", "Small"
+      name: String,
       priceModifier: { type: Number, default: 0 },
       isAvailable: { type: Boolean, default: true }
     }
@@ -13,19 +13,25 @@ const variantSchema = new mongoose.Schema({
 });
 
 const sauceSchema = new mongoose.Schema({
-  name: String, // e.g., "Sauce Type"
-  maxSelections: { type: Number, default: 1 }, // How many sauces user can pick
+  name: String,
+  maxSelections: { type: Number, default: 1 },
   options: [
     {
-      name: String, // e.g., "Spicy", "Mild"
-      price: { type: Number, default: 0 }, // Free sauces
+      name: String,
+      price: { type: Number, default: 0 },
       isAvailable: { type: Boolean, default: true }
+    }
+  ],
+  variantLimits: [
+    {
+      variantName: String,
+      maxSelections: { type: Number, default: 1 }
     }
   ]
 });
 
 const addonSchema = new mongoose.Schema({
-  name: String, // e.g., "Extra Cheese"
+  name: String,
   price: Number,
   isAvailable: { type: Boolean, default: true }
 });
@@ -41,12 +47,16 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
+    // CHANGED: no longer an enum — category is a slug string matching Category.slug
     category: {
       type: String,
-      enum: ['wings', 'sandwiches', 'combos', 'sides', 'meals', 'pasta'],
       required: true
     },
-    image: String, // URL to image
+    displayOrder: {
+      type: Number,
+      default: 0
+    },
+    image: String,
     variants: [variantSchema],
     sauces: [sauceSchema],
     addons: [addonSchema],
@@ -69,16 +79,20 @@ const productSchema = new mongoose.Schema(
       default: false
     },
     allowSpecialRequests: { type: Boolean, default: false },
-    // Group-level modifier toggles (legacy – kept for backward compat)
     variantsEnabled: { type: Boolean, default: true },
     saucesEnabled: { type: Boolean, default: true },
     addonsEnabled: { type: Boolean, default: true },
-    // Global modifier groups (new system)
     modifierGroups: [
       {
         group: { type: mongoose.Schema.Types.ObjectId, ref: 'ModifierGroup' },
         enabled: { type: Boolean, default: true },
         _id: false
+      }
+    ],
+    variantSauceLimits: [
+      {
+        variantName: { type: String, required: true },
+        maxSauces: { type: Number, required: true }
       }
     ]
   },

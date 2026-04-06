@@ -4,6 +4,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const User = require('../models/User');
+const Product = require('../models/Product');
 const Payment = require('../models/Payment');
 const Notification = require('../models/Notification');
 const StoreSettings = require('../models/StoreSettings');
@@ -17,6 +18,55 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB hard limit
 });
+
+/**
+ * Validate that sauce selections respect variant-specific limits.
+ * @param {Array} cartItems - Cart items with product populated
+ * @param {Object} productMap - Map of product proxies for quick lookup
+ * @throws {Error} if sauce limits are violated
+ */
+async function validateVariantSauceLimits(cartItems, productMap) {
+  for (const cartItem of cartItems) {
+    const product = cartItem.product || productMap[cartItem.productId];
+    if (!product || !product.sauces || product.sauces.length === 0) {
+      continue; // No sauces configured — skip
+    }
+
+    // Check each sauce group
+    for (const sauceGroup of product.sauces) {
+      const selectedCount = cartItem.selectedSauces?.filter(s => {
+        // Match sauces belonging to this group
+        const groupOption = sauceGroup.options?.find(opt => opt.name === s.name);
+        return groupOption !== undefined;
+      }).length || 0;
+
+      if (selectedCount === 0) continue; // No sauces selected for this group
+
+      // Find effective max for this sauce group based on selected variant
+      let effectiveMax = sauceGroup.maxSelections; // Default to global max
+
+      if (sauceGroup.variantLimits && sauceGroup.variantLimits.length > 0) {
+        // Check if selected variant has a specific limit
+        for (const variantName of Object.values(cartItem.selectedVariants || {})) {
+          const variantLimit = sauceGroup.variantLimits.find(vl => vl.variantName === variantName);
+          if (variantLimit) {
+            effectiveMax = variantLimit.maxSelections;
+            break;
+          }
+        }
+      }
+
+      // Validate
+      if (selectedCount > effectiveMax) {
+        throw new Error(
+          `Invalid sauce selection for "${product.name}": ` +
+          `Selected ${selectedCount} ${sauceGroup.name.toLowerCase()}, ` +
+          `but limit is ${effectiveMax} for this variant`
+        );
+      }
+    }
+  }
+}
 
 // Create order from cart
 router.post('/', async (req, res) => {
@@ -41,6 +91,17 @@ router.post('/', async (req, res) => {
     const cart = await Cart.findById(cartId).populate('items.product');
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: 'Cart is empty' });
+    }
+
+    // Validate variant-specific sauce limits
+    try {
+      await validateVariantSauceLimits(cart.items, {});
+    } catch (validationError) {
+      return res.status(400).json({
+        success: false,
+        message: validationError.message,
+        code: 'INVALID_SAUCE_SELECTION'
+      });
     }
 
     // Create order items from cart items
@@ -360,7 +421,8 @@ router.post('/submit', async (req, res) => {
       selectedVariants: item.selectedVariants || {},
       selectedSauces: item.selectedSauces || [],
       selectedAddons: item.selectedAddons || [],
-      itemTotal: (item.basePrice || item.price) * item.quantity + (item.addonsCost || 0)
+      itemTotal: (item.basePrice || item.price) * item.quantity + (item.addonsCost || 0),
+      notes: item.notes || '',
     }));
 
     // Calculate totals

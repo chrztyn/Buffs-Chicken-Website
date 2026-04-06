@@ -18,22 +18,22 @@
           </span>
         </div>
         <p
-          v-if="sauceGroup.maxSelections > 1"
+          v-if="effectiveMax(sauceGroup.name) > 1"
           class="text-xs text-gray-400 mt-0.5"
           style="font-family: 'Unbounded', sans-serif;"
         >
-          Pick up to {{ sauceGroup.maxSelections }}
+          Pick up to {{ effectiveMax(sauceGroup.name) }}
         </p>
         <transition name="slide-down">
           <p
             v-if="
-              (selectedSauces[sauceGroup.name] || []).length >= sauceGroup.maxSelections
-                && sauceGroup.maxSelections > 0
+              (selectedSauces[sauceGroup.name] || []).length >= effectiveMax(sauceGroup.name)
+                && effectiveMax(sauceGroup.name) > 0
             "
             class="text-xs text-[#FE601C] font-medium mt-0.5"
             style="font-family: 'Unbounded', sans-serif;"
           >
-            Maximum {{ sauceGroup.maxSelections }} {{ sauceGroup.name.toLowerCase() }} selected
+            Maximum {{ effectiveMax(sauceGroup.name) }} {{ sauceGroup.name.toLowerCase() }} selected
           </p>
         </transition>
       </div>
@@ -48,7 +48,7 @@
             (selectedSauces[sauceGroup.name] || []).includes(option.name)
               ? 'bg-orange-50 border-[#FE601C]'
               : 'bg-white border-gray-200 hover:border-gray-300',
-            isSauceDisabled(sauceGroup.name, option.name, sauceGroup.maxSelections)
+            isSauceDisabled(sauceGroup.name, option.name, effectiveMax(sauceGroup.name))
               ? 'opacity-40 cursor-not-allowed'
               : '',
           ]"
@@ -56,7 +56,7 @@
           <input
             type="checkbox"
             :checked="(selectedSauces[sauceGroup.name] || []).includes(option.name)"
-            :disabled="isSauceDisabled(sauceGroup.name, option.name, sauceGroup.maxSelections)"
+            :disabled="isSauceDisabled(sauceGroup.name, option.name, effectiveMax(sauceGroup.name))"
             @change="$emit('sauce-change', sauceGroup.name, option.name)"
             class="w-5 h-5 rounded flex-shrink-0"
             style="accent-color: #FE601C;"
@@ -96,13 +96,20 @@ defineProps<{
   sauceGroups: SauceGroup[]
   saucesEnabled: boolean
   selectedSauces: Record<string, string[]>
+  effectiveSauceMaxes: Record<string, number>
   isSauceDisabled: (groupName: string, optionName: string, maxSelections: number) => boolean
 }>()
 
 defineEmits<{
   'sauce-change': [groupName: string, optionName: string]
 }>()
+
+function effectiveMax(groupName: string): number {
+  // Use the computed effective max from parent, fallback to 1 if not available
+  return effectiveSauceMaxes[groupName] ?? 1
+}
 </script>
+
 
 <style scoped>
 .slide-down-enter-active,

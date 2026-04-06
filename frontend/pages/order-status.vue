@@ -223,6 +223,16 @@
                   <span class="summary-label-total">Total Amount</span>
                   <span class="summary-total-amount">₱{{ total.toFixed(2) }}</span>
                 </div>
+                <div v-if="paymentMethod" class="summary-divider"></div>
+                <div v-if="paymentMethod" class="summary-item group">
+                  <span class="summary-label">
+                    <svg class="w-4 h-4 inline mr-2 text-[#FE601C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    Payment Method
+                  </span>
+                  <span class="summary-value capitalize">{{ formatPaymentMethod(paymentMethod) }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -412,6 +422,7 @@ const userAddress = ref('Loading address...')
 const subtotal = ref(0)
 const itemsCount = ref(0)
 const orderItems = ref([])
+const paymentMethod = ref('')
 
 // Toast notification state
 const toastMessage = ref('')
@@ -438,6 +449,16 @@ const statusOrder = {
 const showThankYouModal = ref(false)
 
 const total = computed(() => subtotal.value)
+
+const formatPaymentMethod = (method) => {
+  const methods = {
+    'gcash': 'GCash',
+    'maya': 'Maya',
+    'maribank': 'Maribank',
+    'bpi': 'BPI'
+  }
+  return methods[method] || 'Unknown'
+}
 
 const getProgressPercentage = () => {
   const currentIndex = statusOrder[currentStatus.value]
@@ -566,6 +587,7 @@ const loadOrder = async () => {
     itemsCount.value = order.itemsCount
     userEmail.value = order.customerEmail || ''
     orderItems.value = order.items || []
+    paymentMethod.value = order.paymentMethod || ''
     hasOrder.value = true
     
     // Use the delivery address from the order if available
@@ -578,7 +600,8 @@ const loadOrder = async () => {
       status: currentStatus.value,
       type: typeof orderId.value,
       email: userEmail.value,
-      address: userAddress.value
+      address: userAddress.value,
+      paymentMethod: paymentMethod.value
     })
     
     // Always fetch latest status from backend (authoritative source).

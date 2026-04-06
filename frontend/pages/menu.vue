@@ -1,348 +1,252 @@
 <template>
-    <div class="menu-page min-h-screen bg-[#FBF4E5] overflow-x-hidden w-full">
-        <!-- Toast Notification -->
-        <transition name="toast-fade">
-            <div 
-                v-if="notification.show"
-                @click="$router.push('/cart'); notification.show = false"
-                class="fixed top-6 right-6 z-100 flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg shadow-lg px-6 py-4 max-w-sm cursor-pointer hover:shadow-xl transition-shadow"
-            >
-                <div class="flex-shrink-0">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <p class="font-semibold text-gray-800">{{ notification.title }}</p>
-                    <p class="text-sm text-gray-600">{{ notification.message }}</p>
-                    <p class="text-xs text-green-600 font-semibold mt-0.5">Tap to view cart →</p>
-                </div>
-                <button 
-                    @click.stop="notification.show = false"
-                    class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </transition>
-
-        <Navbar class="relative z-20" />
-
-        <!-- Store Status Banner -->
-        <div 
-            v-if="storeStatus"
-            :class="[
-                'store-status-banner py-4 px-6 shadow-md border-b-2',
-                storeStatus.isOpen 
-                    ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-400' 
-                    : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-400'
-            ]"
-        >
-            <div class="max-w-[1920px] mx-auto">
-                <div class="flex flex-col gap-3">
-                    <!-- Status Header -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div 
-                                :class="[
-                                    'w-3 h-3 rounded-full animate-pulse',
-                                    storeStatus.isOpen ? 'bg-green-500' : 'bg-red-500'
-                                ]"
-                            ></div>
-                            <h3 
-                                :class="[
-                                    'text-lg sm:text-xl font-bold font-[\'Unbounded\']',
-                                    storeStatus.isOpen ? 'text-green-800' : 'text-red-800'
-                                ]"
-                            >
-                                {{ storeStatus.isOpen ? 'We\'re Open!' : 'We\'re Closed' }}
-                            </h3>
-                        </div>
-                        <button 
-                            @click="showOperatingHours = !showOperatingHours"
-                            class="text-xs sm:text-sm font-semibold font-['Unbounded'] text-gray-600 hover:text-gray-800 flex items-center gap-1 transition-colors"
-                        >
-                            {{ showOperatingHours ? 'Hide' : 'View' }} Hours
-                            <svg 
-                                :class="['w-4 h-4 transition-transform duration-300', { 'rotate-180': showOperatingHours }]"
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                            >
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Custom Message (if exists) -->
-                    <p 
-                        v-if="storeStatus.message"
-                        :class="[
-                            'text-sm sm:text-base font-[\'Unbounded\']',
-                            storeStatus.isOpen ? 'text-green-700' : 'text-red-700'
-                        ]"
-                    >
-                        {{ storeStatus.message }}
-                    </p>
-
-                    <!-- Temporary Closure Countdown -->
-                    <div 
-                        v-if="storeStatus.activeClosure"
-                        class="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-red-100 border border-red-300 rounded-full"
-                    >
-                        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="text-xs font-semibold font-['Unbounded'] text-red-800">
-                            {{ getClosureCountdown(storeStatus.activeClosure) }}
-                        </span>
-                    </div>
-
-                    <!-- Operating Hours -->
-                    <transition
-                        enter-active-class="transition-all duration-300 ease-out"
-                        leave-active-class="transition-all duration-200 ease-in"
-                        enter-from-class="opacity-0 max-h-0"
-                        leave-to-class="opacity-0 max-h-0"
-                    >
-                        <div v-if="showOperatingHours" class="mt-2 pt-3 border-t border-gray-300">
-                            <h4 class="text-sm font-bold font-['Unbounded'] text-gray-800 mb-2">Operating Hours</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                <div 
-                                    v-for="(hours, day) in operatingHours" 
-                                    :key="day"
-                                    class="flex flex-col text-xs sm:text-sm font-['Unbounded'] bg-white px-3 py-2 rounded-lg"
-                                >
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-semibold text-gray-700 capitalize">{{ day }}:</span>
-                                        <span 
-                                            :class="[
-                                                'font-medium',
-                                                hours.isOpen ? 'text-gray-600' : 'text-red-600'
-                                            ]"
-                                        >
-                                            {{ hours.isOpen ? `${formatTime(hours.openTime)} - ${formatTime(hours.closeTime)}` : 'Closed' }}
-                                        </span>
-                                    </div>
-                                    <p 
-                                        v-if="hours.customMessage"
-                                        class="text-xs text-blue-600 font-medium mt-1 italic"
-                                    >
-                                        {{ hours.customMessage }}
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            <!-- Upcoming Closures Section -->
-                            <div v-if="upcomingClosures.length > 0" class="mt-4 pt-3 border-t border-gray-300">
-                                <h4 class="text-sm font-bold font-['Unbounded'] text-gray-800 mb-3 flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
-                                    Upcoming Closures
-                                </h4>
-                                <div class="space-y-2">
-                                    <div 
-                                        v-for="closure in upcomingClosures" 
-                                        :key="closure._id"
-                                        class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
-                                    >
-                                        <div class="flex items-start gap-2">
-                                            <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            <div class="flex-1">
-                                                <p class="text-xs font-semibold font-['Unbounded'] text-amber-800">
-                                                    {{ formatDate(closure.startDate) }} - {{ formatDate(closure.endDate) }}
-                                                </p>
-                                                <p v-if="closure.message" class="text-xs font-['Unbounded'] text-amber-700 mt-0.5">
-                                                    {{ closure.message }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </transition>
-                </div>
-            </div>
+  <div class="menu-page min-h-screen bg-[#FBF4E5] overflow-x-hidden w-full">
+    <!-- Toast Notification -->
+    <transition name="toast-fade">
+      <div
+        v-if="notification.show"
+        @click="$router.push('/cart'); notification.show = false"
+        class="fixed top-6 right-6 z-[100] flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg shadow-lg px-6 py-4 max-w-sm cursor-pointer hover:shadow-xl transition-shadow"
+      >
+        <div class="flex-shrink-0">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
         </div>
-
-        <!-- Menu Content Section -->
-        <div class="menu-content-container pt-8 sm:pt-12 md:pt-16 pb-16 sm:pb-20 md:pb-24 lg:pb-32 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 max-w-[1920px] mx-auto w-full">
-            <!-- Main Content: Left Sidebar and Right Grid -->
-            <div class="flex flex-col lg:flex-row gap-6 sm:gap-8 md:gap-10 lg:gap-12 xl:gap-16 items-start w-full">
-                <!-- Left Sidebar (Full width on mobile/tablet, 25% on desktop) -->
-                <div class="w-full lg:w-[25%] lg:flex-shrink-0">
-                    <!-- Title -->
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-['Unbounded'] text-[#1A4189] mb-6 sm:mb-8 lg:mb-10 leading-tight">Grab your favorites</h2>
-
-                    <!-- Search Bar and Cart -->
-                    <div class="flex flex-col gap-4 mb-8 sm:mb-10">
-                        <div class="flex gap-2 sm:gap-3 items-center w-full">
-                            <div class="relative flex-1 min-w-0">
-                                <input 
-                                    v-model="searchQuery"
-                                    type="text" 
-                                    placeholder="Search meals" 
-                                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-full border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/20 transition-all shadow-sm hover:shadow-md text-xs sm:text-sm"
-                                />
-                                <svg class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="relative flex-shrink-0">
-                                <button 
-                                    @click="goToCart"
-                                    class="w-11 h-11 sm:w-12 sm:h-12 bg-[#FEB90E] rounded-full text-[#1A4189] hover:bg-[#e5a70d] transition-all duration-200 hover:scale-105 flex items-center justify-center shadow-md hover:shadow-lg"
-                                    aria-label="View Cart"
-                                >
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
-                                </button>
-                                <!-- Cart Badge -->
-                                <transition name="badge-pop">
-                                    <div 
-                                        v-if="cartCount > 0"
-                                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-lg border-2 border-white"
-                                    >
-                                        {{ cartCount > 99 ? '99+' : cartCount }}
-                                    </div>
-                                </transition>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filter Options -->
-                    <div class="filter-options">
-                        <!-- Mobile Filter Dropdown Toggle -->
-                        <button
-                            @click="mobileFilterOpen = !mobileFilterOpen"
-                            class="lg:hidden w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-[#1A4189] hover:bg-gray-50 transition-all duration-200 mb-4"
-                        >
-                            <div class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-[#1A4189]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                                </svg>
-                                <span class="font-['Unbounded'] font-semibold text-gray-800">
-                                    Filters {{ selectedFilters.length > 0 ? `(${selectedFilters.length})` : '' }}
-                                </span>
-                            </div>
-                            <svg 
-                                :class="['w-5 h-5 text-[#1A4189] transition-transform duration-300', { 'rotate-180': mobileFilterOpen }]"
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                            >
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                            </svg>
-                        </button>
-
-                        <!-- Mobile Filter Dropdown Content -->
-                        <transition
-                            enter-active-class="transition-all duration-300 ease-out"
-                            leave-active-class="transition-all duration-300 ease-in"
-                            enter-from-class="opacity-0 max-h-0"
-                            leave-to-class="opacity-0 max-h-0"
-                        >
-                            <div 
-                                v-if="mobileFilterOpen"
-                                class="lg:hidden bg-white border-2 border-t-0 border-gray-200 rounded-b-lg overflow-hidden mb-4"
-                            >
-                                <div class="p-4 space-y-3">
-                                    <label 
-                                        v-for="category in filterCategories" 
-                                        :key="category.id"
-                                        class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors group"
-                                    >
-                                        <input 
-                                            type="checkbox" 
-                                            :value="category.id"
-                                            v-model="selectedFilters"
-                                            class="w-5 h-5 cursor-pointer text-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/30 rounded border-gray-300 transition-all flex-shrink-0"
-                                        />
-                                        <span class="text-sm font-['Unbounded'] text-gray-700 group-hover:text-[#1A4189] transition-colors">{{ category.name }}</span>
-                                    </label>
-                                    <button
-                                        @click="selectedFilters = []; mobileFilterOpen = false"
-                                        v-if="selectedFilters.length > 0"
-                                        class="w-full mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-['Unbounded'] font-semibold rounded-lg transition-colors text-sm"
-                                    >
-                                        Clear Filters
-                                    </button>
-                                </div>
-                            </div>
-                        </transition>
-
-                        <!-- Desktop Filter Options (hidden on mobile) -->
-                        <div class="hidden lg:block">
-                            <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 font-['Unbounded'] tracking-tight">Filter Options</h3>
-                            <div class="border-b border-gray-200 mb-4 sm:mb-6"></div>
-                            <div class="filter-checkbox flex flex-col gap-2 sm:gap-4">
-                                <label 
-                                    v-for="category in filterCategories" 
-                                    :key="category.id"
-                                    class="flex items-center gap-2 sm:gap-3 cursor-pointer group py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors"
-                                >
-                                    <input 
-                                        type="checkbox" 
-                                        :value="category.id"
-                                        v-model="selectedFilters"
-                                        class="w-4 sm:w-5 h-4 sm:h-5 cursor-pointer text-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/30 rounded border-gray-300 transition-all flex-shrink-0"
-                                    />
-                                    <span class="text-sm sm:text-base text-gray-700 font-normal font-['Unbounded'] group-hover:text-[#1A4189] transition-colors">{{ category.name }}</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Main Content (Full width on mobile/tablet, 75% on desktop) -->
-                <div class="flex-1 w-full lg:w-[75%] pb-8">
-                    <!-- Store Closed Message (shown when items are disabled) -->
-                    <div 
-                        v-if="storeStatus && !storeStatus.isOpen"
-                        class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg"
-                    >
-                        <p class="text-sm font-semibold font-['Unbounded'] text-red-800">
-                            Sorry, we're currently closed. You can browse our menu but ordering is disabled.
-                        </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-7 menu-grid">
-                        <ClientOnly>
-                            <MenuCard
-                                v-for="item in filteredMenuItems"
-                                :key="item.id"
-                                :product="item"
-                                :disabled="storeStatus && !storeStatus.isOpen"
-                                @added="handleAdded"
-                            />
-                        </ClientOnly>
-                    </div>
-
-                    <!-- Empty State -->
-                    <ClientOnly>
-                        <div v-if="filteredMenuItems.length === 0" class="text-center py-24">
-                            <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
-                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <p class="text-xl font-semibold font-['Unbounded'] text-gray-600 mb-2">No items found</p>
-                            <p class="text-gray-400">Try adjusting your search or filter options</p>
-                        </div>
-                    </ClientOnly>
-                </div>
-            </div>
+        <div class="flex-1">
+          <p class="font-semibold text-gray-800">{{ notification.title }}</p>
+          <p class="text-sm text-gray-600">{{ notification.message }}</p>
+          <p class="text-xs text-green-600 font-semibold mt-0.5">Tap to view cart →</p>
         </div>
+        <button @click.stop="notification.show = false" class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </transition>
 
-        <Footer />
+    <Navbar class="relative z-20"/>
+
+    <!-- Store Status Banner -->
+    <div
+      v-if="storeStatus"
+      :class="[
+        'py-4 px-6 shadow-md border-b-2',
+        storeStatus.isOpen
+          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-400'
+          : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-400'
+      ]"
+    >
+      <div class="max-w-[1920px] mx-auto">
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div :class="['w-3 h-3 rounded-full animate-pulse', storeStatus.isOpen ? 'bg-green-500' : 'bg-red-500']"></div>
+              <h3 :class="['text-lg sm:text-xl font-bold font-[\'Unbounded\']', storeStatus.isOpen ? 'text-green-800' : 'text-red-800']">
+                {{ storeStatus.isOpen ? "We're Open!" : "We're Closed" }}
+              </h3>
+            </div>
+            <button @click="showOperatingHours = !showOperatingHours" class="text-xs sm:text-sm font-semibold font-['Unbounded'] text-gray-600 hover:text-gray-800 flex items-center gap-1 transition-colors">
+              {{ showOperatingHours ? 'Hide' : 'View' }} Hours
+              <svg :class="['w-4 h-4 transition-transform duration-300', { 'rotate-180': showOperatingHours }]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+          </div>
+          <p v-if="storeStatus.message" :class="['text-sm sm:text-base font-[\'Unbounded\']', storeStatus.isOpen ? 'text-green-700' : 'text-red-700']">
+            {{ storeStatus.message }}
+          </p>
+          <transition enter-active-class="transition-all duration-300 ease-out" leave-active-class="transition-all duration-200 ease-in" enter-from-class="opacity-0 max-h-0" leave-to-class="opacity-0 max-h-0">
+            <div v-if="showOperatingHours" class="mt-2 pt-3 border-t border-gray-300">
+              <h4 class="text-sm font-bold font-['Unbounded'] text-gray-800 mb-2">Operating Hours</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                <div v-for="(hours, day) in operatingHours" :key="day" class="flex flex-col text-xs sm:text-sm font-['Unbounded'] bg-white px-3 py-2 rounded-lg">
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-gray-700 capitalize">{{ day }}:</span>
+                    <span :class="['font-medium', hours.isOpen ? 'text-gray-600' : 'text-red-600']">
+                      {{ hours.isOpen ? `${formatTime(hours.openTime)} - ${formatTime(hours.closeTime)}` : 'Closed' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </transition>
+        </div>
+      </div>
     </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         MOBILE + TABLET STICKY BAR (hidden on lg+)
+         search row + category pill tabs, always on top while scrolling
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="lg:hidden sticky top-0 z-30 bg-[#FBF4E5] border-b border-gray-200 shadow-sm">
+      <div class="flex items-center gap-3 px-4 pt-3 pb-2">
+        <div class="relative flex-1">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search meals"
+            class="w-full pl-4 pr-10 py-2 rounded-full border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#1A4189] transition-all text-sm shadow-sm"
+          />
+          <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <div class="relative flex-shrink-0">
+          <button @click="goToCart" class="w-10 h-10 bg-[#FEB90E] rounded-full text-[#1A4189] hover:bg-[#e5a70d] transition-all flex items-center justify-center shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </button>
+          <transition name="badge-pop">
+            <div v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg border-2 border-white">
+              {{ cartCount > 99 ? '99+' : cartCount }}
+            </div>
+          </transition>
+        </div>
+      </div>
+      <div v-if="categorizedMenu.length > 0" class="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide">
+        <button
+          v-for="cat in categorizedMenu"
+          :key="cat.slug"
+          @click="scrollToSection(cat.slug)"
+          :class="[
+            'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold font-[\'Unbounded\'] transition-all duration-200',
+            activeSection === cat.slug
+              ? 'bg-[#1A4189] text-white shadow-md'
+              : 'bg-white text-gray-600 border border-gray-200 hover:border-[#1A4189] hover:text-[#1A4189]'
+          ]"
+        >
+          {{ cat.name }}
+        </button>
+      </div>
+    </div>
+
+    <div class="px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24 max-w-[1920px] mx-auto w-full">
+      <div class="flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 items-start">
+
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:block w-[240px] xl:w-[260px] flex-shrink-0 sticky top-0 self-start pt-8 pb-8 max-h-screen overflow-y-auto scrollbar-hide">
+          <h2 class="text-3xl xl:text-4xl font-['Unbounded'] text-[#1A4189] mb-6 leading-tight">Grab your favorites</h2>
+
+          <!-- Search + Cart -->
+          <div class="flex gap-3 items-center mb-8">
+            <div class="relative flex-1">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search meals"
+                class="w-full pl-4 pr-10 py-2.5 rounded-full border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#1A4189] focus:ring-2 focus:ring-[#1A4189]/20 transition-all shadow-sm text-sm"
+              />
+              <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <div class="relative flex-shrink-0">
+              <button @click="goToCart" class="w-11 h-11 bg-[#FEB90E] rounded-full text-[#1A4189] hover:bg-[#e5a70d] transition-all hover:scale-105 flex items-center justify-center shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </button>
+              <transition name="badge-pop">
+                <div v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg border-2 border-white">
+                  {{ cartCount > 99 ? '99+' : cartCount }}
+                </div>
+              </transition>
+            </div>
+          </div>
+
+          <!-- Category Nav -->
+          <div>
+            <h3 class="text-sm font-bold text-gray-800 mb-3 font-['Unbounded']">Categories</h3>
+            <div class="border-b border-gray-200 mb-3"></div>
+            <nav class="flex flex-col gap-1">
+              <button
+                v-for="cat in categorizedMenu"
+                :key="cat.slug"
+                @click="scrollToSection(cat.slug)"
+                :class="[
+                  'flex items-center justify-between w-full text-left px-3 py-2.5 rounded-xl transition-all duration-200 font-[\'Unbounded\'] text-sm',
+                  activeSection === cat.slug
+                    ? 'bg-[#1A4189] text-white font-bold shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-[#1A4189]'
+                ]"
+              >
+                <span>{{ cat.name }}</span>
+                <span :class="['text-xs rounded-full px-2 py-0.5', activeSection === cat.slug ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500']">
+                  {{ cat.items.length }}
+                </span>
+              </button>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- Right Content -->
+        <div class="flex-1 w-full min-w-0 pt-8 pb-16 sm:pb-24">
+
+          <!-- Store Closed Alert -->
+          <div v-if="storeStatus && !storeStatus.isOpen" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+            <p class="text-sm font-semibold font-['Unbounded'] text-red-800">Sorry, we're currently closed. You can browse but ordering is disabled.</p>
+          </div>
+
+          <!-- Loading skeleton -->
+          <div v-if="loading" class="space-y-10">
+            <div v-for="s in 3" :key="s">
+              <div class="h-7 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div v-for="n in 3" :key="n" class="h-[220px] bg-white rounded-xl animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Sections -->
+          <template v-else>
+            <div v-if="categorizedMenu.length === 0" class="text-center py-24">
+              <div class="inline-block p-4 bg-gray-100 rounded-full mb-4">
+                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <p class="text-xl font-semibold font-['Unbounded'] text-gray-600 mb-2">No items found</p>
+              <p class="text-gray-400">Try adjusting your search</p>
+            </div>
+
+            <div
+              v-for="cat in categorizedMenu"
+              :key="cat.slug"
+              :id="`section-${cat.slug}`"
+              :data-category-slug="cat.slug"
+              class="category-section mb-12 sm:mb-16 menu-scroll-target"
+            >
+              <div class="flex items-center gap-4 mb-5">
+                <h2 class="text-xl sm:text-2xl font-bold font-['Unbounded'] text-[#1A4189] capitalize whitespace-nowrap">
+                  {{ cat.name }}
+                </h2>
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-xs text-gray-400 font-['Unbounded'] whitespace-nowrap">
+                  {{ cat.items.length }} item{{ cat.items.length !== 1 ? 's' : '' }}
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+                <ClientOnly>
+                  <MenuCard
+                    v-for="item in cat.items"
+                    :key="item.id"
+                    :product="item"
+                    :disabled="storeStatus && !storeStatus.isOpen"
+                    @added="handleAdded"
+                  />
+                </ClientOnly>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <Footer/>
+  </div>
 </template>
 
 <script>
@@ -359,662 +263,237 @@ export default {
     const config = useRuntimeConfig()
 
     function buildMenuSections(products) {
-      if (!products || !products.length) return []
+      if (!products?.length) return []
       const categoryMap = {}
       for (const p of products) {
         if (!p.isAvailable) continue
         const cat = p.category || 'Other'
         if (!categoryMap[cat]) categoryMap[cat] = []
         const rawImage = p.image
-        const imageUrl = rawImage
-          ? rawImage.startsWith('http') ? rawImage : `${config.public.socketUrl}${rawImage}`
-          : null
-        const item = {
-          '@type': 'MenuItem',
-          'name': p.name,
-          'description': p.description || '',
-          'offers': {
-            '@type': 'Offer',
-            'price': String(p.price),
-            'priceCurrency': 'PHP',
-            'availability': 'https://schema.org/InStock'
-          }
-        }
+        const imageUrl = rawImage ? (rawImage.startsWith('http') ? rawImage : `${config.public.socketUrl}${rawImage}`) : null
+        const item = { '@type': 'MenuItem', name: p.name, description: p.description || '', offers: { '@type': 'Offer', price: String(p.price), priceCurrency: 'PHP', availability: 'https://schema.org/InStock' } }
         if (imageUrl) item.image = imageUrl
         categoryMap[cat].push(item)
       }
-      return Object.entries(categoryMap).map(([cat, items]) => ({
-        '@type': 'MenuSection',
-        'name': cat.charAt(0).toUpperCase() + cat.slice(1),
-        'hasMenuItem': items
-      }))
+      return Object.entries(categoryMap).map(([cat, items]) => ({ '@type': 'MenuSection', name: cat.charAt(0).toUpperCase() + cat.slice(1), hasMenuItem: items }))
     }
 
     const { data: menuSchemaData } = useAsyncData('menu-schema-products', async () => {
-      try {
-        const r = await getProducts()
-        return r?.data?.data || []
-      } catch {
-        return []
-      }
+      try { const r = await getProducts(); return r?.data?.data || [] } catch { return [] }
     })
 
     useHead({
-      script: [{
-        type: 'application/ld+json',
-        innerHTML: computed(() => {
-          const products = menuSchemaData.value || []
-          if (!products.length) return ''
-          return JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FoodEstablishment',
-            'name': 'Buffs Chicken',
-            'url': 'https://www.buffschicken.com/menu',
-            'hasMenu': {
-              '@type': 'Menu',
-              'name': 'Buffs Chicken Menu',
-              'url': 'https://www.buffschicken.com/menu',
-              'hasMenuSection': buildMenuSections(products)
-            }
-          })
-        })
-      }]
+      script: [{ type: 'application/ld+json', innerHTML: computed(() => {
+        const products = menuSchemaData.value || []
+        if (!products.length) return ''
+        return JSON.stringify({ '@context': 'https://schema.org', '@type': 'FoodEstablishment', name: 'Buffs Chicken', url: 'https://www.buffschicken.com/menu', hasMenu: { '@type': 'Menu', name: 'Buffs Chicken Menu', url: 'https://www.buffschicken.com/menu', hasMenuSection: buildMenuSections(products) } })
+      }) }]
     })
   },
   head() {
     return {
       title: 'Menu - Buffs Chicken | Order Wings, Combos & Pastas Online',
       meta: [
-        {
-          name: 'description',
-          content: 'Browse our full menu of crispy wings, loaded combos, and cheesy pastas. Order online from Buffs Chicken at The Hood, Angeles City for fresh, flavorful comfort food.'
-        },
-        { name: 'keywords', content: 'menu, chicken wings, combos, pasta, food menu, order online, Angeles City' },
+        { name: 'description', content: 'Browse our full menu of crispy wings, loaded combos, and cheesy pastas. Order online from Buffs Chicken at The Hood, Angeles City.' },
         { name: 'robots', content: 'index, follow' },
         { property: 'og:title', content: 'Menu - Buffs Chicken' },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://www.buffschicken.com/menu' }
       ],
-      link: [
-        { rel: 'canonical', href: 'https://www.buffschicken.com/menu' }
-      ],
-      script: [
-        {
-          type: 'application/ld+json',
-          innerHTML: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            'itemListElement': [
-              {
-                '@type': 'ListItem',
-                'position': 1,
-                'name': 'Home',
-                'item': 'https://www.buffschicken.com'
-              },
-              {
-                '@type': 'ListItem',
-                'position': 2,
-                'name': 'Menu',
-                'item': 'https://www.buffschicken.com/menu'
-              }
-            ]
-          }, null, 2)
-        }
-      ]
+      link: [{ rel: 'canonical', href: 'https://www.buffschicken.com/menu' }]
     }
   },
-  components: {
-    Navbar,
-    Footer,
-    MenuCard
-  },
+  components: { Navbar, Footer, MenuCard },
   data() {
     return {
       searchQuery: '',
-      selectedFilters: [],
       cartCount: 0,
       menuItems: [],
-      filterCategories: [],
+      categories: [],
       loading: true,
-      error: null,
-      notification: {
-        show: false,
-        title: '',
-        message: ''
-      },
-      mobileFilterOpen: false,
-      // Pagination properties
-      currentPage: 1,
-      pageSize: 12,
-      totalProducts: 0,
-      hasMore: true,
-      isLoadingMore: false,
-      // Store status properties
+      notification: { show: false, title: '', message: '' },
+      activeSection: '',
       storeStatus: null,
       showOperatingHours: false,
       operatingHours: {},
-      upcomingClosures: [],
-      // Scroll optimization
-      scrollTicking: false
+      _observer: null
+    }
+  },
+  computed: {
+    categorizedMenu() {
+      const catMeta = {}
+      this.categories.forEach((cat, idx) => {
+        catMeta[cat.slug] = { name: cat.name, order: cat.displayOrder ?? idx }
+      })
+      const query = this.searchQuery.toLowerCase().trim()
+      const groups = {}
+      for (const item of this.menuItems) {
+        const slug = item.category || 'other'
+        if (!groups[slug]) groups[slug] = []
+        const matches = !query || item.name.toLowerCase().includes(query) || (item.description || '').toLowerCase().includes(query)
+        if (matches) groups[slug].push(item)
+      }
+      return Object.entries(groups)
+        .filter(([, items]) => items.length > 0)
+        .map(([slug, items]) => ({
+          slug,
+          name: catMeta[slug]?.name || (slug.charAt(0).toUpperCase() + slug.slice(1)),
+          order: catMeta[slug]?.order ?? 999,
+          items
+        }))
+        .sort((a, b) => a.order - b.order)
     }
   },
   async mounted() {
-    console.log('[Menu] mounted')
     try {
-      await this.loadProducts(1)
-      console.log('[Menu] after loadProducts, items =', this.menuItems.length)
+      await Promise.all([this.loadCategories(), this.loadProducts()])
     } catch (e) {
-      console.error('[Menu] mounted -> loadProducts threw', e)
+      console.error('[Menu] mount error', e)
     }
-
-    // Track menu page view
-    const { trackMenuViewed } = useTracking()
-    trackMenuViewed()
-
-    // Load store status
-    try {
-      await this.loadStoreStatus()
-    } catch (e) {
-      console.error('[Menu] Failed to load store status:', e)
-    }
-
-    // Load cart count on page load
-    const savedCart = localStorage.getItem('buffs_cart');
+    try { const { trackMenuViewed } = useTracking(); trackMenuViewed() } catch (_) {}
+    try { await this.loadStoreStatus() } catch (_) {}
+    const savedCart = localStorage.getItem('buffs_cart')
     if (savedCart) {
-      const cartItems = JSON.parse(savedCart);
-      this.cartCount = cartItems.length;
+      const cartItems = JSON.parse(savedCart)
+      this.cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
     }
-
-    // Add infinite scroll listener
-    window.addEventListener('scroll', this.handleScroll)
+    this.$nextTick(() => this.setupObserver())
   },
-
-  unmounted() {
-    // Clean up scroll listener
-    window.removeEventListener('scroll', this.handleScroll)
-  },
-  computed: {
-    filteredMenuItems() {
-      let items = this.menuItems
-
-      // Filter by selected categories
-      if (this.selectedFilters.length > 0) {
-        items = items.filter(item => this.selectedFilters.includes(item.category))
-      }
-
-      // Filter by search query
-      if (this.searchQuery.trim()) {
-        const query = this.searchQuery.toLowerCase()
-        items = items.filter(item => 
-          item.name.toLowerCase().includes(query) ||
-          item.description.toLowerCase().includes(query)
-        )
-      }
-
-      return items
-    }
+  beforeUnmount() {
+    if (this._observer) this._observer.disconnect()
   },
   methods: {
-    async loadProducts(page = 1) {
-      console.log('[Menu] loadProducts start, page =', page)
-      try {
-        const isInitialLoad = page === 1
-        if (isInitialLoad) {
-          this.loading = true
-        } else {
-          this.isLoadingMore = true
-        }
-
-        const { getProducts } = useApi()
-        console.log('[Menu] calling getProducts')
-
-        const response = await getProducts({
-          page,
-          limit: this.pageSize
-        })
-
-        console.log('[Menu] getProducts response:', response.data)
-
-        const newProducts = response.data.data.map(product => ({
-          ...product,
-          id: product._id,
-        }))
-
-        // Append new products (infinite scroll) or replace (initial load)
-        if (page === 1) {
-          this.menuItems = newProducts
-        } else {
-          this.menuItems.push(...newProducts)
-        }
-
-        // Update pagination state
-        this.totalProducts = response.data.total || 0
-        this.hasMore = this.menuItems.length < this.totalProducts
-        this.currentPage = page
-        
-        // Extract unique categories from products on initial load
-        if (isInitialLoad) {
-          this.loadCategoriesFromProducts()
-        }
-
-        this.loading = false
-        this.isLoadingMore = false
-      } catch (error) {
-        console.error('Error loading products:', error)
-        this.error = 'Failed to load menu items'
-        this.loading = false
-        this.isLoadingMore = false
-      }
-    },
-    loadCategoriesFromProducts() {
-      const uniqueCategories = new Set()
-      this.menuItems.forEach(item => {
-        if (item.category) {
-          uniqueCategories.add(item.category)
-        }
-      })
-      
-      // Map categories to filter format (capitalize first letter)
-      this.filterCategories = Array.from(uniqueCategories).map(cat => ({
-        id: cat,
-        name: cat.charAt(0).toUpperCase() + cat.slice(1)
-      }))
-    },
     async loadCategories() {
       try {
         const { getCategories } = useApi()
         const response = await getCategories()
-        this.filterCategories = response.data.map(cat => ({
-          id: cat._id,
-          name: cat.name
-        }))
-      } catch (error) {
-        console.error('Error loading categories:', error)
+        this.categories = response?.data?.data || response?.data || []
+      } catch (e) {
+        console.error('[Menu] loadCategories error', e)
+      }
+    },
+    async loadProducts() {
+      this.loading = true
+      try {
+        const { getProducts } = useApi()
+        const response = await getProducts({ page: 1, limit: 200 })
+        const raw = response.data.data || []
+        this.menuItems = raw
+          .map(p => ({ ...p, id: p._id }))
+          .sort((a, b) => {
+            const diff = (a.displayOrder || 0) - (b.displayOrder || 0)
+            return diff !== 0 ? diff : new Date(a.createdAt) - new Date(b.createdAt)
+          })
+      } catch (e) {
+        console.error('[Menu] loadProducts error', e)
+      } finally {
+        this.loading = false
+        this.$nextTick(() => this.setupObserver())
+      }
+    },
+    setupObserver() {
+      if (this._observer) this._observer.disconnect()
+      const sections = document.querySelectorAll('.category-section')
+      if (!sections.length) return
+      this._observer = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) this.activeSection = entry.target.dataset.categorySlug
+          })
+        },
+        { rootMargin: '-10% 0px -75% 0px', threshold: 0 }
+      )
+      sections.forEach(el => this._observer.observe(el))
+      if (!this.activeSection && sections.length) this.activeSection = sections[0].dataset.categorySlug
+    },
+    scrollToSection(slug) {
+      const el = document.getElementById(`section-${slug}`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        this.activeSection = slug
       }
     },
     handleAdded() {
-      const saved = localStorage.getItem('buffs_cart');
-      const cartItems = saved ? JSON.parse(saved) : [];
-      this.cartCount = cartItems.length;
-      const last = cartItems[cartItems.length - 1];
-      if (last) {
-        this.showNotification(last.name, `Added ${last.quantity} item${last.quantity > 1 ? 's' : ''} to cart`);
-      }
-    },
-    handleAddToCart(item) {
-      // Load existing cart
-      const savedCart = localStorage.getItem('buffs_cart');
-      let cartItems = savedCart ? JSON.parse(savedCart) : [];
-
-      // Create a unique key based on product and customizations (including sauces)
-      const customizationKey = JSON.stringify({
-        selectedVariants: item.selectedVariants || {},
-        selectedAddons: item.selectedAddons || [],
-        selectedSauces: item.selectedSauces || {}
-      });
-
-      // Check if item with same customizations already exists
-      const existingItemIndex = cartItems.findIndex(
-        cartItem => 
-          cartItem.id === item.id && 
-          cartItem.customizationKey === customizationKey &&
-          cartItem.notes === (item.notes || '')
-      );
-
-      if (existingItemIndex > -1) {
-        // If item exists with same customizations, increase quantity
-        cartItems[existingItemIndex].quantity += item.quantity;
-      } else {
-        // Add new item with all customization details (including sauces)
-        cartItems.push({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          quantity: item.quantity,
-          notes: item.notes || '',
-          selectedVariants: item.selectedVariants || {},
-          selectedAddons: item.selectedAddons || [],
-          selectedSauces: item.selectedSauces || {},
-          basePrice: item.basePrice,
-          addonsCost: item.addonsCost,
-          totalPrice: item.totalPrice,
-          customizationKey: customizationKey
-        });
-      }
-
-      // Save updated cart to localStorage
-      localStorage.setItem('buffs_cart', JSON.stringify(cartItems));
-      window.dispatchEvent(new Event('cart-updated'));
-      
-      this.cartCount = cartItems.length;
-      console.log('Added to cart:', item);
-      
-      // Show professional notification
-      this.showNotification(`${item.name}`, `Added ${item.quantity} item${item.quantity > 1 ? 's' : ''} to cart`);
+      const saved = localStorage.getItem('buffs_cart')
+      const cartItems = saved ? JSON.parse(saved) : []
+      this.cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
+      const last = cartItems[cartItems.length - 1]
+      if (last) this.showNotification(last.name, `Added ${last.quantity} item${last.quantity > 1 ? 's' : ''} to cart`)
     },
     showNotification(title, message) {
-      this.notification = {
-        show: true,
-        title: title,
-        message: message
-      };
-      
-      // Auto-hide after 4 seconds
-      setTimeout(() => {
-        this.notification.show = false;
-      }, 4000);
+      this.notification = { show: true, title, message }
+      setTimeout(() => { this.notification.show = false }, 4000)
     },
-    handleSearch() {
-      // Search is handled by computed property
-    },
-    goToCart() {
-      this.$router.push('/cart')
-    },
-    handleScroll() {
-      // Throttle scroll events using requestAnimationFrame to prevent forced reflows
-      if (!this.scrollTicking) {
-        this.scrollTicking = true
-        requestAnimationFrame(() => {
-          // Check if user scrolled near bottom of page (500px from bottom)
-          // Use documentElement instead of body to avoid forced reflow
-          const scrollTop = window.scrollY
-          const windowHeight = window.innerHeight
-          const docHeight = document.documentElement.scrollHeight
-          
-          if (scrollTop + windowHeight >= docHeight - 500) {
-            // Load more products if available and not already loading
-            if (this.hasMore && !this.isLoadingMore && !this.loading) {
-              this.loadProducts(this.currentPage + 1)
-            }
-          }
-          this.scrollTicking = false
-        })
-      }
-    },
+    goToCart() { this.$router.push('/cart') },
     async loadStoreStatus() {
       try {
         const { getStoreStatus } = useApi()
-        
-        // Fetch current store status (open/closed) and operating hours
         const statusResponse = await getStoreStatus()
-        
-        // Extract data from backend response
-        if (statusResponse.data && statusResponse.data.data) {
-          const { isOpen, manualOverride, operatingHours, activeClosure, temporaryClosures } = statusResponse.data.data
-          
-          // Priority: 1. Active temporary closure, 2. Manual override, 3. Day's custom message
+        if (statusResponse.data?.data) {
+          const { isOpen, manualOverride, operatingHours, activeClosure } = statusResponse.data.data
           let displayMessage = ''
-          
-          if (activeClosure) {
-            // Temporary closure is active
-            displayMessage = activeClosure.message || 'Temporarily closed'
-          } else if (manualOverride.isActive) {
-            // Manual override is active
-            displayMessage = manualOverride.message
-          } else {
-            // Use day's custom message
+          if (activeClosure) displayMessage = activeClosure.message || 'Temporarily closed'
+          else if (manualOverride?.isActive) displayMessage = manualOverride.message
+          else {
             const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-            const today = new Date().getDay()
-            const currentDay = dayNames[today]
-            const todaySchedule = operatingHours[currentDay]
-            displayMessage = todaySchedule?.customMessage || ''
+            displayMessage = operatingHours?.[dayNames[new Date().getDay()]]?.customMessage || ''
           }
-          
-          // Set store status
-          this.storeStatus = {
-            isOpen,
-            message: displayMessage,
-            activeClosure: activeClosure || null
-          }
-          
-          // Set operating hours
+          this.storeStatus = { isOpen, message: displayMessage, activeClosure: activeClosure || null }
           this.operatingHours = operatingHours || {}
-          
-          // Filter for upcoming closures only (not active, not past)
-          const now = new Date()
-          this.upcomingClosures = (temporaryClosures || []).filter(closure => {
-            const start = new Date(closure.startDate)
-            start.setHours(0, 0, 0, 0)
-            return start > now
-          }).sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
         }
-      } catch (error) {
-        console.error('Error loading store status:', error)
-      }
+      } catch (e) { console.error('[Menu] loadStoreStatus', e) }
     },
     formatTime(time) {
-      // Convert 24-hour time to 12-hour format with AM/PM
       if (!time) return ''
-      const [hours, minutes] = time.split(':')
-      const hour = parseInt(hours, 10)
-      const ampm = hour >= 12 ? 'PM' : 'AM'
-      const displayHour = hour % 12 || 12
-      return `${displayHour}:${minutes} ${ampm}`
-    },
-    getClosureCountdown(closure) {
-      if (!closure) return ''
-      
-      const now = new Date()
-      const end = new Date(closure.endDate)
-      end.setHours(23, 59, 59, 999)
-      
-      const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-      
-      if (daysLeft === 0) return 'Reopening today'
-      if (daysLeft === 1) return 'Reopening tomorrow'
-      return `Reopening in ${daysLeft} days`
-    },
-    formatDate(dateString) {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      const [h, m] = time.split(':')
+      const hour = parseInt(h, 10)
+      return `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`
     }
   }
 }
 </script>
 
 <style scoped>
-/* Toast Notification Animations */
-.toast-fade-enter-active,
-.toast-fade-leave-active {
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Scrollbar hide */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/*
+  scroll-margin-top: push section headers below the sticky bar when jumping.
+  Mobile/tablet sticky bar is ~110px tall (search ~52px + tabs ~44px + padding).
+  Desktop has no sticky bar so just a small offset.
+*/
+.menu-scroll-target { scroll-margin-top: 120px; }
+@media (min-width: 1024px) {
+  .menu-scroll-target { scroll-margin-top: 32px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .toast-fade-enter-active,
-    .toast-fade-leave-active {
-        transition: none;
-    }
-}
+/* Toast */
+.toast-fade-enter-active, .toast-fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+.toast-fade-enter-from, .toast-fade-leave-to { opacity: 0; transform: translateX(100%); }
 
-.toast-fade-enter-from {
-    opacity: 0;
-    transform: translateX(100%);
-}
+/* Badge */
+.badge-pop-enter-active, .badge-pop-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+.badge-pop-enter-from, .badge-pop-leave-to { opacity: 0; transform: scale(0); }
 
-.toast-fade-leave-to {
-    opacity: 0;
-    transform: translateX(100%);
-}
-
-/* Cart Badge Animations */
-.badge-pop-enter-active,
-.badge-pop-leave-active {
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .badge-pop-enter-active,
-    .badge-pop-leave-active {
-        transition: none;
-    }
-}
-
-.badge-pop-enter-from {
-    opacity: 0;
-    transform: scale(0);
-}
-
-.badge-pop-leave-to {
-    opacity: 0;
-    transform: scale(0);
-}
-
-/* Mobile Filter Dropdown Animation */
-.transition-all {
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.duration-300 {
-    transition-duration: 300ms;
-}
-
-.ease-out {
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.ease-in {
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.opacity-0 {
-    opacity: 0;
-}
-
-.max-h-0 {
-    max-height: 0;
-}
-
-/* ============ TABLET (md breakpoint - 768px) - 2 COLUMNS ============ */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .menu-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1.5rem;
-    }
-}
-
-/* ============ LARGE DESKTOP (lg breakpoint - 1024px) - 3 COLUMNS ============ */
-@media (min-width: 1024px) and (max-width: 1369px) {
-    .menu-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1.5rem;
-    }
-}
-
-/* ============ MENU CARD STYLES - SHORTENED ============ */
+/* Menu card */
 :deep(.menu-card) {
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 0.875rem;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  max-width: 280px;
-  margin: 0 auto;
-  height: 220px;
+  display: flex; flex-direction: column; background: #ffffff; border-radius: 12px;
+  padding: 0.875rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);
+  position: relative; overflow: hidden; max-width: 280px; margin: 0 auto; height: 220px;
 }
-
-:deep(.menu-card:hover) {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border-color: #d1d5db;
-}
-
+:deep(.menu-card:hover) { transform: translateY(-6px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 :deep(.menu-card .image-container) {
-  background: linear-gradient(135deg, #fafbfc 0%, #f3f4f6 100%);
-  border-radius: 10px;
-  padding: 0.5rem;
-  margin-bottom: 0.625rem;
-  height: 145px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition: background 0.3s ease;
+  background: linear-gradient(135deg,#fafbfc 0%,#f3f4f6 100%); border-radius: 10px;
+  padding: 0.5rem; margin-bottom: 0.625rem; height: 145px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
+:deep(.menu-card .image-container img) { width: 100%; height: 100%; object-fit: cover; transform: scale(1.06); transition: transform 0.3s ease; }
+:deep(.menu-card:hover .image-container img) { transform: scale(1.1); }
+:deep(.menu-card .text-section) { flex: 1; display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 0.625rem; }
+:deep(.menu-card .product-name) { font-size: 0.8rem; font-weight: 700; color: #1a4189; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+:deep(.menu-card .product-price) { font-size: 0.95rem; font-weight: 700; color: #1a4189; white-space: nowrap; flex-shrink: 0; }
 
-:deep(.menu-card:hover .image-container) {
-  background: linear-gradient(135deg, #f0f1f3 0%, #e8eaed 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    :deep(.menu-card) {
-        transition: none;
-    }
-    :deep(.menu-card .image-container) {
-        transition: none;
-    }
-}
-
-:deep(.menu-card .image-container img) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-  max-width: 100%;
-  max-height: 100%;
-  transform: scale(1.06);
-}
-
-:deep(.menu-card:hover .image-container img) {
-  transform: scale(1.1);
-}
-
-:deep(.menu-card .text-section) {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.1rem 0;
-}
-
-:deep(.menu-card .product-name) {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #1a4189;
-  letter-spacing: 0.3px;
-  text-transform: capitalize;
-  word-break: break-word;
-  line-height: 1.3;
-  flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-:deep(.menu-card .product-price) {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1a4189;
-  white-space: nowrap;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.grid > * {
-    animation: fadeInUp 0.5s ease-out;
-}
+@media (prefers-reduced-motion: reduce) { :deep(.menu-card) { transition: none; } }
 </style>

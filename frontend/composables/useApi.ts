@@ -78,10 +78,13 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
   // Category endpoints
   const getCategories = wrap(() => api.get('/categories'), [])
   const getCategory = wrap((id: string) => api.get(`/categories/${id}`), null)
-  const createCategory = (data: any) => api.post('/admin/categories', data)
+  const getAllCategoriesAdmin = wrap(() => api.get('/categories/admin/all'), [])
+  const createCategory = (data: any) => api.post('/categories/admin/create', data)
   const updateCategory = (id: string, data: any) =>
-    api.put(`/admin/categories/${id}`, data)
-  const deleteCategory = (id: string) => api.delete(`/admin/categories/${id}`)
+    api.put(`/categories/admin/${id}`, data)
+  const deleteCategory = (id: string) => api.delete(`/categories/admin/${id}`)
+  const reorderCategories = (updates: { categoryId: string; displayOrder: number }[]) =>
+  api.patch('/categories/admin/reorder', { updates })
 
   // Order endpoints
   const getAllOrders = wrap(() => api.get('/admin/orders'), [])
@@ -174,9 +177,11 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     getAllProductsAdmin,
     getCategories,
     getCategory,
+    getAllCategoriesAdmin,
     createCategory,
     updateCategory,
     deleteCategory,
+    reorderCategories,
     getAllOrders,
     getUserOrders,
     getOrder,

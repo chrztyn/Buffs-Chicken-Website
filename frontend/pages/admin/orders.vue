@@ -71,27 +71,20 @@
         <!-- Order Header -->
         <div class="p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-[#1A4189]/5 to-[#2356b4]/5">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- Order Number -->
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Order #</p>
               <p class="font-['Poppins'] font-bold text-2xl text-[#1A4189]">#{{ order.orderNumber }}</p>
             </div>
-
-            <!-- Customer Info -->
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Customer</p>
               <p class="font-['Poppins'] font-bold text-[#1A4189] text-sm">{{ order.user?.name || 'Guest' }}</p>
               <p class="text-xs text-gray-600">{{ order.user?.phone }}</p>
               <p class="text-xs text-gray-600">{{ order.deliveryAddress }}</p>
             </div>
-
-            <!-- Amount -->
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Amount</p>
               <p class="font-['Poppins'] font-bold text-2xl text-[#FE601C]">₱{{ order.totalAmount }}</p>
             </div>
-
-            <!-- Status Badge -->
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Status</p>
               <span
@@ -101,8 +94,6 @@
                 {{ order.status }}
               </span>
             </div>
-
-            <!-- Time Waiting -->
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Waiting</p>
               <p class="font-['Poppins'] font-bold text-lg text-gray-800">{{ getTimeWaiting(order.createdAt) }}</p>
@@ -110,34 +101,51 @@
           </div>
         </div>
 
-        <!-- Order Items Summary -->
+        <!-- Order Items Summary (Card View) -->
         <div class="p-4 lg:p-6 border-b border-gray-200 bg-white">
           <h3 class="font-['Poppins'] font-bold text-[#1A4189] mb-3 text-sm">Items Ordered</h3>
-          <div class="space-y-2">
+          <div class="space-y-3">
             <div v-for="(item, idx) in order.items.slice(0, 2)" :key="idx" class="flex justify-between items-start text-sm font-['Poppins']">
               <div class="flex-1">
                 <p class="font-bold text-gray-800">{{ item.productName }} × {{ item.quantity }}</p>
+
                 <div v-if="item.selectedVariants && Object.keys(item.selectedVariants).length > 0" class="text-xs text-gray-600 mt-1">
                   <span class="inline-block bg-blue-50 text-blue-700 px-2 py-0.5 rounded mr-2 mb-1">
                     Variant: {{ Object.values(item.selectedVariants).join(', ') }}
                   </span>
                 </div>
+
                 <div v-if="item.selectedSauces && item.selectedSauces.length > 0" class="text-xs text-gray-600 mt-1">
                   <span class="inline-block bg-orange-50 text-orange-700 px-2 py-0.5 rounded mr-2 mb-1">
                     Sauces: {{ item.selectedSauces.map((s: any) => s.name || s).filter(Boolean).join(', ') }}
                   </span>
                 </div>
+
                 <div v-if="item.selectedAddons && item.selectedAddons.length > 0" class="text-xs text-gray-600 mt-1">
                   <span class="inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded mr-2 mb-1">
                     Add-ons: {{ item.selectedAddons.map((a: any) => a.name).join(', ') }}
                   </span>
                 </div>
+
+                <!-- Per-item notes in card view -->
+                <div v-if="item.notes && item.notes.trim()" class="mt-1">
+                  <span class="inline-block bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-xs font-['Poppins'] font-semibold italic">
+                    "{{ item.notes }}"
+                  </span>
+                </div>
               </div>
               <p class="font-bold text-[#FE601C] ml-2 whitespace-nowrap">₱{{ item.itemTotal }}</p>
             </div>
+
             <div v-if="order.items.length > 2" class="text-xs text-gray-600 font-semibold mt-2 pt-2 border-t border-gray-200">
               +{{ order.items.length - 2 }} more item{{ order.items.length - 2 > 1 ? 's' : '' }} (view details)
             </div>
+          </div>
+
+          <!-- Order-level Special Instructions in Card -->
+          <div v-if="order.notes && order.notes.trim()" class="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            <p class="text-xs font-['Poppins'] font-semibold text-purple-900 mb-1">Special Instructions:</p>
+            <p class="text-xs text-purple-800 line-clamp-2">{{ order.notes }}</p>
           </div>
         </div>
 
@@ -243,31 +251,51 @@
           </h3>
           <div class="space-y-4">
             <div v-for="(item, idx) in selectedOrder.items" :key="idx" class="border rounded-lg p-4 bg-white hover:shadow-md transition-all">
-              <div class="flex justify-between items-start mb-3">
-                <div>
-                  <p class="font-['Poppins'] font-bold text-gray-800">{{ item.productName }}</p>
-                  <p class="text-sm text-gray-600 font-['Poppins']">Quantity: <span class="font-bold">{{ item.quantity }}</span></p>
-                </div>
-                <p class="font-['Poppins'] font-bold text-[#FE601C] text-lg">₱{{ item.itemTotal }}</p>
-              </div>
-              
-              <div class="space-y-2">
-                <div v-if="item.selectedVariants && Object.keys(item.selectedVariants).length > 0" class="flex flex-wrap gap-2">
-                  <span v-for="(variant, key) in item.selectedVariants" :key="key" class="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-['Poppins'] font-semibold">
-                    {{ variant }}
-                  </span>
+              <div class="flex gap-4 mb-3">
+                <!-- Product Image -->
+                <div v-if="item.productImage" class="flex-shrink-0">
+                  <img :src="item.productImage" :alt="item.productName" class="w-20 h-20 object-cover rounded-lg border border-gray-200" />
                 </div>
                 
-                <div v-if="item.selectedSauces && item.selectedSauces.length > 0" class="flex flex-wrap gap-2">
-                  <span v-for="sauce in item.selectedSauces" :key="sauce._id || sauce.name" class="inline-block bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-xs font-['Poppins'] font-semibold">
-                    {{ sauce.name || sauce }} +₱{{ typeof sauce === 'object' ? sauce.price : 0 }}
-                  </span>
-                </div>
-                
-                <div v-if="item.selectedAddons && item.selectedAddons.length > 0" class="flex flex-wrap gap-2">
-                  <span v-for="addon in item.selectedAddons" :key="addon._id" class="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-['Poppins'] font-semibold">
-                    {{ addon.name }} +₱{{ addon.price }}
-                  </span>
+                <!-- Product Details -->
+                <div class="flex-1">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <p class="font-['Poppins'] font-bold text-gray-800">{{ item.productName }}</p>
+                      <p class="text-sm text-gray-600 font-['Poppins']">Quantity: <span class="font-bold">{{ item.quantity }}</span></p>
+                    </div>
+                    <p class="font-['Poppins'] font-bold text-[#FE601C] text-lg">₱{{ item.itemTotal }}</p>
+                  </div>
+                  
+                  <div class="space-y-2">
+                    <div v-if="item.selectedVariants && Object.keys(item.selectedVariants).length > 0" class="flex flex-wrap gap-2">
+                      <span v-for="(variant, key) in item.selectedVariants" :key="key" class="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-['Poppins'] font-semibold">
+                        {{ variant }}
+                      </span>
+                    </div>
+                    
+                    <div v-if="item.selectedSauces && item.selectedSauces.length > 0" class="flex flex-wrap gap-2">
+                      <span v-for="sauce in item.selectedSauces" :key="sauce._id || sauce.name" class="inline-block bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-xs font-['Poppins'] font-semibold">
+                        {{ sauce.name || sauce }} +₱{{ typeof sauce === 'object' ? sauce.price : 0 }}
+                      </span>
+                    </div>
+                    
+                    <div v-if="item.selectedAddons && item.selectedAddons.length > 0" class="flex flex-wrap gap-2">
+                      <span v-for="addon in item.selectedAddons" :key="addon._id" class="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-['Poppins'] font-semibold">
+                        {{ addon.name }} +₱{{ addon.price }}
+                      </span>
+                    </div>
+
+                    <!-- Per-item notes in modal -->
+                    <div v-if="item.notes && item.notes.trim()" class="mt-1">
+                      <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full text-xs font-['Poppins'] font-semibold italic">
+                        <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        "{{ item.notes }}"
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -290,6 +318,17 @@
               <span>₱{{ selectedOrder.totalAmount }}</span>
             </div>
           </div>
+        </div>
+
+        <!-- Order-level Special Instructions in Modal -->
+        <div v-if="selectedOrder.notes && selectedOrder.notes.trim()" class="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 p-6 rounded-xl">
+          <h3 class="font-['Poppins'] font-bold text-[#1A4189] mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+            </svg>
+            Special Instructions
+          </h3>
+          <p class="text-gray-800 font-['Poppins'] text-sm leading-relaxed whitespace-pre-wrap">{{ selectedOrder.notes }}</p>
         </div>
 
         <!-- Payment -->
@@ -321,17 +360,15 @@
             </span>
           </div>
 
-          <!-- Receipt section (QR orders only) -->
+          <!-- Receipt section -->
           <div
             v-if="['gcash', 'maya', 'maribank', 'bpi'].includes(selectedOrder.paymentMethod)"
             class="mt-3 pt-3 border-t border-gray-100"
           >
-            <!-- State 1: No receipt yet -->
             <div v-if="!selectedOrder.receiptImage?.filename" class="flex items-center gap-2 text-gray-500 text-sm font-['Poppins']">
               <span>Awaiting receipt upload</span>
             </div>
 
-            <!-- State 2: Receipt uploaded, not yet verified -->
             <template v-else-if="!selectedOrder.receiptVerified">
               <div class="space-y-2">
                 <img
@@ -348,7 +385,6 @@
                   Uploaded {{ formatTime(selectedOrder.receiptImage.uploadedAt) }}
                 </p>
 
-                <!-- Action buttons -->
                 <div v-if="verifyConfirmOrderId !== selectedOrder._id" class="flex gap-2">
                   <button
                     type="button"
@@ -366,7 +402,6 @@
                   </button>
                 </div>
 
-                <!-- Inline confirmation -->
                 <div v-else class="flex items-center gap-2 p-2 bg-yellow-50 border border-yellow-300 rounded-lg">
                   <p class="text-xs font-['Poppins'] text-yellow-800 flex-1">Confirm verify and permanently delete this receipt?</p>
                   <button
@@ -389,7 +424,6 @@
               </div>
             </template>
 
-            <!-- State 3: Receipt verified -->
             <div v-else class="flex items-center gap-2 text-green-700 text-sm font-['Poppins']">
               <span>Receipt verified on {{ formatDateTime(selectedOrder.receiptVerifiedAt) }}</span>
             </div>
@@ -412,9 +446,7 @@
         </p>
 
         <div>
-          <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-3">
-            New Status
-          </label>
+          <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-3">New Status</label>
           <div class="space-y-2">
             <button
               v-for="status in ['pending', 'preparing', 'out for delivery', 'delivered', 'cancelled']"
@@ -432,7 +464,6 @@
           </div>
         </div>
 
-        <!-- Loading Overlay -->
         <div v-if="isUpdating" class="absolute inset-0 bg-white/50 rounded-lg flex items-center justify-center">
           <div class="flex flex-col items-center gap-3">
             <div class="w-8 h-8 border-4 border-[#FE601C] border-t-transparent rounded-full animate-spin"></div>
@@ -445,7 +476,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useApi } from '~/composables/useApi'
 import { useSocket } from '~/composables/useSocket'
 import Modal from '~/components/admin/Modal.vue'
@@ -477,7 +508,6 @@ const filteredOrders = computed(() => {
   let result = [...orders.value].sort((a, b) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
-
   if (!filterStatus.value) return result
   return result.filter((order) => order.status === filterStatus.value)
 })
@@ -515,38 +545,22 @@ const getTimeWaiting = (createdAt: string | Date) => {
   const created = new Date(createdAt)
   const diffMs = now.getTime() - created.getTime()
   const diffMins = Math.floor(diffMs / 60000)
-  
   if (diffMins < 1) return 'Just now'
   if (diffMins < 60) return `${diffMins}m`
-  
   const diffHours = Math.floor(diffMins / 60)
   if (diffHours < 24) return `${diffHours}h ${diffMins % 60}m`
-  
   const diffDays = Math.floor(diffHours / 24)
   return `${diffDays}d ${diffHours % 24}h`
 }
 
 const formatTime = (time: string | Date) => {
   if (!time) return 'N/A'
-  const date = new Date(time)
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  return new Date(time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 const formatDateTime = (time: string | Date) => {
   if (!time) return 'N/A'
-  const date = new Date(time)
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  return new Date(time).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 const playNotificationSound = () => {
@@ -554,31 +568,22 @@ const playNotificationSound = () => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
-    
     oscillator.connect(gainNode)
     gainNode.connect(audioContext.destination)
-    
     oscillator.frequency.value = 800
     oscillator.type = 'sine'
-    
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
-    
     oscillator.start(audioContext.currentTime)
     oscillator.stop(audioContext.currentTime + 0.5)
-  } catch (error) {
-    console.log('Sound notification not available')
-  }
+  } catch { /* silent */ }
 }
 
 const showNotification = (title: string, message: string) => {
   toastMessage.value = { title, message }
   showToast.value = true
   playNotificationSound()
-  
-  setTimeout(() => {
-    showToast.value = false
-  }, 5000)
+  setTimeout(() => { showToast.value = false }, 5000)
 }
 
 const openOrderDetails = (order: any) => {
@@ -587,10 +592,6 @@ const openOrderDetails = (order: any) => {
   if (order.receiptImage?.filename) {
     fetchReceiptImage(order.receiptImage.filename)
   }
-}
-
-const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).catch(() => {})
 }
 
 const fetchReceiptImage = async (filename: string) => {
@@ -645,28 +646,19 @@ const toggleOrderInProgress = (order: any) => {
 
 const submitStatusUpdate = async () => {
   if (!selectedOrder.value || !newStatus.value) return
-
   try {
     isUpdating.value = true
     const response = await updateOrderStatus(selectedOrder.value._id, newStatus.value)
-    
-    // Update from the response to ensure consistency with backend
     const updatedOrder = response.data.order
-    
-    // Update the order in the list
     const index = orders.value.findIndex(o => o._id === selectedOrder.value._id)
     if (index !== -1) {
       orders.value[index].status = updatedOrder.status
       orders.value[index].inProgress = false
-      
-      // Verify the update was successful
       if (updatedOrder.status !== newStatus.value) {
-        console.warn(`Status mismatch: Expected ${newStatus.value}, got ${updatedOrder.status}`)
         showNotification('Warning', 'Status update may not have been saved correctly')
         return
       }
     }
-    
     showStatusModal.value = false
     showNotification('Success', `Order #${selectedOrder.value.orderNumber} status updated to ${newStatus.value}`)
   } catch (error: any) {
@@ -681,10 +673,8 @@ onMounted(async () => {
   await loadOrders()
   connect()
 
-  // Listen for new orders via socket
   if (socket.value) {
     socket.value.on('new-order', (data) => {
-      // Add new order to the top of the list with complete details
       const newOrder = {
         _id: data.orderId,
         orderNumber: data.orderNumber,
@@ -700,12 +690,12 @@ onMounted(async () => {
         totalAmount: data.totalAmount,
         status: data.status || 'pending',
         deliveryAddress: data.deliveryAddress,
+        notes: data.notes || '',
         paymentMethod: data.paymentMethod,
         receiptImage: data.receiptImage || null,
         createdAt: data.timestamp,
         inProgress: false
       }
-      
       orders.value.unshift(newOrder)
     })
 
@@ -731,45 +721,26 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Toast Animations */
 .toast-fade-enter-active,
 .toast-fade-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .toast-fade-enter-from {
   opacity: 0;
   transform: translateX(100%);
 }
-
 .toast-fade-leave-to {
   opacity: 0;
   transform: translateX(100%);
 }
-
 @keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
-
 @keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.95;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
 }
-
-.animate-bounce-slow {
-  animation: bounce-slow 2s infinite;
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s infinite;
-}
+.animate-bounce-slow { animation: bounce-slow 2s infinite; }
+.animate-pulse-subtle { animation: pulse-subtle 2s infinite; }
 </style>

@@ -139,7 +139,10 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
 
         if (selectedAddons && selectedAddons.length > 0) {
           const addons = selectedAddons.map(a => a.name).join(', ');
-          itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• Add-ons: ${addons}</span>`;
+          itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• ${addons}</span>`;
+        }
+        if (item.notes && item.notes.trim()) {
+          itemHTML += `<br><span style="color: #92400e; font-size: 13px; margin-left: 20px; font-style: italic;">• Note: "${item.notes}"</span>`;
         }
 
         itemHTML += '</li>';
@@ -202,6 +205,12 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
               <h3 style="margin-top: 0; color: #1A4189;">Delivery Address</h3>
               <p style="margin: 0; line-height: 1.6;">${order.deliveryAddress}</p>
             </div>
+            ${order.notes ? `
+            <!-- Special Instructions -->
+            <div style="background-color: #fff8ee; padding: 20px; border-radius: 8px; border-left: 4px solid #FE601C; margin-top: 20px;">
+              <h3 style="margin-top: 0; color: #FE601C;">Special Instructions</h3>
+              <p style="margin: 0; line-height: 1.6;">${order.notes}</p>
+            </div>` : ''}
 
             <!-- Action Button -->
             <div style="text-align: center; margin-top: 30px;">

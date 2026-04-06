@@ -145,13 +145,13 @@
                                         </div>
 
                                         <!-- Order Customization Details -->
-                                        <div v-if="getOrderDescription(item).length > 0" class="text-sm text-gray-700 space-y-2 bg-gradient-to-br from-[#FBF4E5] to-[#FFF8E7] rounded-lg p-3 border border-[#FEB90E]/20">
-                                            <div v-for="(description, idx) in getOrderDescription(item)" :key="idx" class="flex items-start gap-2">
-                                                <svg class="w-4 h-4 text-[#FE601C] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                                </svg>
-                                                <span class="text-gray-700 leading-relaxed">{{ description }}</span>
+                                        <div v-if="getOrderDescription(item).length > 0" class="text-sm text-gray-700 space-y-1 bg-gradient-to-br from-[#FBF4E5] to-[#FFF8E7] rounded-lg p-3 border border-[#FEB90E]/20">
+                                            <div v-for="(desc, idx) in getOrderDescription(item)" :key="idx" class="text-gray-700 leading-relaxed">
+                                                {{ desc.text }}
                                             </div>
+                                            <NuxtLink :to="`/menu`" class="text-[#FE601C] font-semibold text-sm hover:underline inline-block mt-2">
+                                                Edit
+                                            </NuxtLink>
                                         </div>
                                     </div>
 
@@ -355,50 +355,86 @@ export default {
         getOrderDescription(item) {
             const descriptions = [];
             
+            // Add variant options (sizes, pieces, etc.)
             if (item.selectedVariants && Object.keys(item.selectedVariants).length > 0) {
                 Object.values(item.selectedVariants).forEach(variantOption => {
                     if (variantOption) {
-                        descriptions.push(variantOption);
+                        descriptions.push({
+                            text: variantOption,
+                            type: 'variant'
+                        });
                     }
                 });
             }
             
+            // Add modifier group options (system addons like chicken types)
+            if (item.selectedModifiers && Object.keys(item.selectedModifiers).length > 0) {
+                Object.entries(item.selectedModifiers).forEach(([groupName, selectedOptions]) => {
+                    if (Array.isArray(selectedOptions) && selectedOptions.length > 0) {
+                        selectedOptions.forEach(option => {
+                            descriptions.push({
+                                text: option,
+                                type: 'variant'
+                            });
+                        });
+                    } else if (typeof selectedOptions === 'string' && selectedOptions) {
+                        descriptions.push({
+                            text: selectedOptions,
+                            type: 'variant'
+                        });
+                    }
+                });
+            }
+            
+            // Add sauces without label - just list them
             if (item.selectedSauces) {
-                let sauceNames = [];
-                
                 if (Array.isArray(item.selectedSauces)) {
-                    sauceNames = item.selectedSauces
+                    item.selectedSauces
                         .map(sauce => typeof sauce === 'string' ? sauce : sauce.name)
-                        .filter(Boolean);
+                        .filter(Boolean)
+                        .forEach(sauceName => {
+                            descriptions.push({
+                                text: sauceName,
+                                type: 'sauce'
+                            });
+                        });
                 } else if (typeof item.selectedSauces === 'object' && Object.keys(item.selectedSauces).length > 0) {
                     Object.entries(item.selectedSauces).forEach(([sauceName, selectedOptions]) => {
                         if (Array.isArray(selectedOptions) && selectedOptions.length > 0) {
                             selectedOptions.forEach(option => {
                                 const optionName = typeof option === 'string' ? option : option.name;
                                 if (optionName) {
-                                    sauceNames.push(optionName);
+                                    descriptions.push({
+                                        text: optionName,
+                                        type: 'sauce'
+                                    });
                                 }
                             });
                         }
                     });
                 }
-                
-                if (sauceNames.length > 0) {
-                    descriptions.push(`Sauces: ${sauceNames.join(', ')}`);
-                }
             }
             
-            if (item.selectedAddons && item.selectedAddons.length > 0) {
-                const addonNames = item.selectedAddons.map(addon => 
-                    typeof addon === 'string' ? addon : addon.name
-                ).join(', ');
-                if (addonNames) {
-                    descriptions.push(`Add-ons: ${addonNames}`);
-                }
+            // Add addons without label - just list them
+            const usesModifierGroups = item.selectedModifiers && Object.keys(item.selectedModifiers).length > 0
+            if (!usesModifierGroups && item.selectedAddons && item.selectedAddons.length > 0) {
+                item.selectedAddons.forEach(addon => {
+                    const addonName = typeof addon === 'string' ? addon : addon.name;
+                    if (addonName) {
+                        descriptions.push({
+                            text: addonName,
+                            type: 'addon'
+                        });
+                    }
+                });
             }
             
+            // Add notes
             if (item.notes && item.notes.trim()) {
-                descriptions.push(`Notes: ${item.notes}`);
+                descriptions.push({
+                    text: `Notes: ${item.notes}`,
+                    type: 'notes'
+                });
             }
             
             return descriptions;
@@ -566,6 +602,18 @@ export default {
             const saved = localStorage.getItem('buffs_cart');
             if (saved) {
                 this.cartItems = JSON.parse(saved);
+                // Ensure each item has a customizationKey for proper comparison
+                this.cartItems = this.cartItems.map((item, index) => {
+                    if (!item.customizationKey) {
+                        item.customizationKey = JSON.stringify({
+                            selectedVariants: item.selectedVariants || {},
+                            selectedAddons: item.selectedAddons || [],
+                            selectedSauces: item.selectedSauces || {},
+                            selectedModifiers: item.selectedModifiers || {}
+                        });
+                    }
+                    return item;
+                });
             }
         },
         checkForActiveOrder() {
@@ -594,6 +642,18 @@ export default {
         // Track cart view
         const { trackCartViewed } = useTracking()
         trackCartViewed(this.cartItems.length, this.subtotal)
+        
+        // Listen for cart updates from menu page
+        if (process.client) {
+            window.addEventListener('cart-updated', () => {
+                this.loadCart()
+            })
+        }
+    },
+    beforeUnmount() {
+        if (process.client) {
+            window.removeEventListener('cart-updated', this.loadCart)
+        }
     }
 };
 </script>

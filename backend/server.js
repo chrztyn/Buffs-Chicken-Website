@@ -26,6 +26,7 @@ const storeSettingsRoutes = require('./routes/storeSettings');
 const modifierGroupRoutes = require('./routes/modifierGroups');
 const authenticateAdmin = require('./middleware/authenticateAdmin');
 const { startReceiptCleanupJob } = require('./utils/receiptStorage');
+const categoriesRouter = require('./routes/categories');
 
 // Initialize Express app
 const app = express();
@@ -123,6 +124,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/store-settings', storeSettingsRoutes);
 app.use('/api/modifier-groups', modifierGroupRoutes);
+app.use('/api/categories', categoriesRouter);
 
 // Health check
 app.get('/health', (req, res) => {
