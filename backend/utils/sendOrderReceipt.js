@@ -45,7 +45,7 @@ function buildItemRows(items) {
         .join('<br>');
 
       const imageHtml = item.productImage
-        ? `<img src="${item.productImage}" alt="${item.productName}"
+        ? `<img src="https://buffschicken.com${item.productImage}" alt="${item.productName}"
             style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin-right:12px;vertical-align:middle;border:1px solid #e8dfc8;">`
         : '';
 
