@@ -2,6 +2,8 @@ services:
   backend:
     build: ./backend
     restart: always
+    volumes:
+      - backend_images:/app/backend-images
     expose:
       - '5001'
     env_file:

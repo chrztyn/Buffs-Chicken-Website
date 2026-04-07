@@ -1,14 +1,19 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
-/**
- * Formats a Mongoose Map or plain object of variants into readable text.
- * e.g. { Size: "Large", Spice: "Hot" } → "Size: Large, Spice: Hot"
- */
+const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@buffschicken.com';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function formatVariants(selectedVariants) {
   if (!selectedVariants) return '';
-  // Mongoose Map → plain object
   const obj =
     selectedVariants instanceof Map
       ? Object.fromEntries(selectedVariants)
@@ -20,9 +25,6 @@ function formatVariants(selectedVariants) {
   return entries.map(([k, v]) => `${k}: ${v}`).join(', ');
 }
 
-/**
- * Generates the itemized rows HTML for all order items with images.
- */
 function buildItemRows(items) {
   return items
     .map((item) => {
@@ -35,15 +37,17 @@ function buildItemRows(items) {
         variantsText ? `<span style="color:#555;font-size:12px;">Variant: ${variantsText}</span>` : '',
         saucesText ? `<span style="color:#555;font-size:12px;">Sauces: ${saucesText}</span>` : '',
         addonsText ? `<span style="color:#555;font-size:12px;"> ${addonsText}</span>` : '',
-        notesText ? `<span style="color:#92400e;font-size:12px;font-style:italic;">Note: ${notesText}</span>` : '',
+        notesText
+          ? `<span style="color:#92400e;font-size:12px;font-style:italic;">Note: ${notesText}</span>`
+          : '',
       ]
         .filter(Boolean)
         .join('<br>');
 
-      const imageHtml = item.productImage ? `
-        <img src="${item.productImage}" alt="${item.productName}" 
-          style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin-right:12px;vertical-align:middle;border:1px solid #e8dfc8;">
-      ` : '';
+      const imageHtml = item.productImage
+        ? `<img src="${item.productImage}" alt="${item.productName}"
+            style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin-right:12px;vertical-align:middle;border:1px solid #e8dfc8;">`
+        : '';
 
       return `
         <tr>
@@ -66,6 +70,8 @@ function buildItemRows(items) {
     .join('');
 }
 
+// ─── sendOrderReceipt ─────────────────────────────────────────────────────────
+
 /**
  * Sends a branded HTML receipt email to the customer.
  * Never throws — logs errors silently so the order flow is never affected.
@@ -75,22 +81,20 @@ function buildItemRows(items) {
  */
 async function sendOrderReceipt(order, user) {
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
     const orderNumber = order.orderNumber || String(order._id);
     const subtotal = Number(order.subtotal || 0).toFixed(2);
     const total = Number(order.totalAmount || 0).toFixed(2);
     const deliveryAddress = order.deliveryAddress || 'N/A';
     const trackingUrl = `https://buffschicken.com/order-status?order=${encodeURIComponent(orderNumber)}`;
 
-    // Format payment method for display
     const paymentMethodMap = {
-      'gcash': 'GCash',
-      'maya': 'Maya',
-      'maribank': 'Maribank',
-      'bpi': 'BPI'
+      gcash: 'GCash',
+      maya: 'Maya',
+      maribank: 'Maribank',
+      bpi: 'BPI',
     };
-    const paymentMethodDisplay = paymentMethodMap[order.paymentMethod] || order.paymentMethod || 'GCash';
+    const paymentMethodDisplay =
+      paymentMethodMap[order.paymentMethod] || order.paymentMethod || 'GCash';
 
     const itemRowsHtml = buildItemRows(order.items || []);
 
@@ -128,8 +132,7 @@ async function sendOrderReceipt(order, user) {
 
           <!-- ─── CONFIRMATION MESSAGE ──────────────────────────────── -->
           <tr>
-            <td style="padding:28px 32px 8px 32px;text-align:center;
-              background-color:#FBF4E5;">
+            <td style="padding:28px 32px 8px 32px;text-align:center;background-color:#FBF4E5;">
               <h2 style="margin:0 0 8px 0;font-family:Arial,sans-serif;font-size:22px;
                 font-weight:800;color:#1A4189;">
                 Your order has been confirmed!
@@ -246,6 +249,7 @@ async function sendOrderReceipt(order, user) {
               </p>
             </td>
           </tr>
+
           <!-- ─── SPECIAL INSTRUCTIONS ─────────────────────────────── -->
           ${order.notes ? `
           <tr>
@@ -260,6 +264,7 @@ async function sendOrderReceipt(order, user) {
               </p>
             </td>
           </tr>` : ''}
+
           <!-- ─── CTA BUTTON ────────────────────────────────────────── -->
           <tr>
             <td style="padding:0 32px 32px 32px;text-align:center;">
@@ -296,17 +301,12 @@ async function sendOrderReceipt(order, user) {
 </body>
 </html>`;
 
-    const { error } = await resend.emails.send({
+    await transporter.sendMail({
       from: FROM_EMAIL,
-      to: [user.email],
+      to: user.email,
       subject: `Your Buffs Chicken Order ${orderNumber} is confirmed!`,
       html,
     });
-
-    if (error) {
-      console.error('[sendOrderReceipt] Resend API error:', error);
-      return;
-    }
 
     console.log(`[sendOrderReceipt] Receipt sent to ${user.email} for order ${orderNumber}`);
   } catch (err) {

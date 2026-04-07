@@ -1,14 +1,29 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
-// Default sender email (must be verified domain in Resend)
-const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@buffschicken.com';
+
+const sendMail = ({ from, to, replyTo, subject, html }) =>
+  transporter.sendMail({
+    from,
+    to: Array.isArray(to) ? to.join(', ') : to,
+    ...(replyTo ? { replyTo: Array.isArray(replyTo) ? replyTo.join(', ') : replyTo } : {}),
+    subject,
+    html,
+  });
+
+// ─── sendOTP ─────────────────────────────────────────────────────────────────
 
 const sendOTP = async (email, otp) => {
   try {
-    const { data, error } = await resend.emails.send({
+    await sendMail({
       from: FROM_EMAIL,
       to: [email],
       subject: 'Your Order Verification OTP - Buffs Restaurant',
@@ -25,21 +40,18 @@ const sendOTP = async (email, otp) => {
           <br>
           <p>Best regards,<br><strong>Buffs Restaurant Team</strong></p>
         </div>
-      `
+      `,
     });
 
-    if (error) {
-      console.error('Resend API error:', error);
-      throw new Error('Failed to send OTP');
-    }
-
-    console.log('OTP email sent successfully:', data);
+    console.log('OTP email sent successfully to:', email);
     return true;
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('Email sending error (sendOTP):', error);
     throw new Error('Failed to send OTP');
   }
 };
+
+// ─── sendOrderNotification ───────────────────────────────────────────────────
 
 const sendOrderNotification = async (email, orderNumber, status) => {
   try {
@@ -48,10 +60,10 @@ const sendOrderNotification = async (email, orderNumber, status) => {
       preparing: 'Your order is being prepared.',
       'out for delivery': 'Your order is out for delivery.',
       delivered: 'Your order has been delivered.',
-      cancelled: 'Your order has been cancelled.'
+      cancelled: 'Your order has been cancelled.',
     };
 
-    const { data, error } = await resend.emails.send({
+    await sendMail({
       from: FROM_EMAIL,
       to: [email],
       subject: `Order Update - ${orderNumber} - Buffs Restaurant`,
@@ -65,25 +77,22 @@ const sendOrderNotification = async (email, orderNumber, status) => {
           <br>
           <p>Thank you for your order!<br><strong>Buffs Restaurant Team</strong></p>
         </div>
-      `
+      `,
     });
 
-    if (error) {
-      console.error('Resend API error:', error);
-      throw new Error('Failed to send notification');
-    }
-
-    console.log('Order notification sent successfully:', data);
+    console.log('Order notification sent successfully to:', email);
     return true;
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('Email sending error (sendOrderNotification):', error);
     throw new Error('Failed to send notification');
   }
 };
 
+// ─── sendContactFormEmail ────────────────────────────────────────────────────
+
 const sendContactFormEmail = async (name, email, message) => {
   try {
-    const { data, error } = await resend.emails.send({
+    await sendMail({
       from: FROM_EMAIL,
       to: [process.env.EMAIL_USER || 'admin@buffschicken.com'],
       replyTo: [email],
@@ -100,47 +109,42 @@ const sendContactFormEmail = async (name, email, message) => {
           <br>
           <p style="color: #666; font-size: 12px;">This is an automated message from your Buffs Restaurant website.</p>
         </div>
-      `
+      `,
     });
 
-    if (error) {
-      console.error('Resend API error:', error);
-      throw new Error('Failed to send contact form email');
-    }
-
-    console.log('Contact form email sent successfully:', data);
+    console.log('Contact form email sent successfully');
     return true;
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('Email sending error (sendContactFormEmail):', error);
     throw new Error('Failed to send contact form email');
   }
 };
 
+// ─── sendAdminOrderNotification ──────────────────────────────────────────────
+
 const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
   try {
-    // Format order items for email - as clean bulleted list
     const itemsList = order.items
-      .map(item => {
-        // Extract only the fields we need
+      .map((item) => {
         const productName = item.productName || 'Unknown Product';
         const quantity = item.quantity || 1;
         const itemTotal = item.itemTotal || 0;
-        const selectedVariants = item.selectedVariants || {};
         const selectedSauces = item.selectedSauces || [];
         const selectedAddons = item.selectedAddons || [];
 
         let itemHTML = `<li style="margin-bottom: 15px; line-height: 1.6;">
           <strong>${productName}</strong> x${quantity} - <strong style="color: #FE601C;">₱${parseFloat(itemTotal).toFixed(2)}</strong>`;
 
-        if (selectedSauces && selectedSauces.length > 0) {
-          const sauces = selectedSauces.map(s => s.name || s).join(', ');
+        if (selectedSauces.length > 0) {
+          const sauces = selectedSauces.map((s) => s.name || s).join(', ');
           itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• Sauces: ${sauces}</span>`;
         }
 
-        if (selectedAddons && selectedAddons.length > 0) {
-          const addons = selectedAddons.map(a => a.name).join(', ');
+        if (selectedAddons.length > 0) {
+          const addons = selectedAddons.map((a) => a.name).join(', ');
           itemHTML += `<br><span style="color: #666; font-size: 13px; margin-left: 20px;">• ${addons}</span>`;
         }
+
         if (item.notes && item.notes.trim()) {
           itemHTML += `<br><span style="color: #92400e; font-size: 13px; margin-left: 20px; font-style: italic;">• Note: "${item.notes}"</span>`;
         }
@@ -150,7 +154,7 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
       })
       .join('');
 
-    const { data, error } = await resend.emails.send({
+    await sendMail({
       from: FROM_EMAIL,
       to: [adminEmail],
       subject: `New Order #${order.orderNumber} - Buffs Restaurant`,
@@ -162,7 +166,6 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
           </div>
 
           <div style="background-color: #f9f5ed; padding: 30px; border-radius: 0 0 12px 12px;">
-            <!-- Customer Information -->
             <div style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1A4189;">
               <h2 style="margin-top: 0; color: #1A4189;">Customer Information</h2>
               <p style="margin: 8px 0;"><strong>Name:</strong> ${customerInfo.name}</p>
@@ -171,7 +174,6 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
               <p style="margin: 8px 0;"><strong>Address:</strong> ${customerInfo.address}</p>
             </div>
 
-            <!-- Order Items -->
             <div style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h2 style="margin-top: 0; color: #1A4189;">Order Items</h2>
               <ul style="list-style: disc; padding-left: 20px; margin: 0;">
@@ -179,7 +181,6 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
               </ul>
             </div>
 
-            <!-- Order Summary -->
             <div style="background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h2 style="margin-top: 0; color: #1A4189;">Order Summary</h2>
               <table style="width: 100%; border-collapse: collapse;">
@@ -191,8 +192,7 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
                 <tr>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Tax:</strong></td>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">₱${order.tax.toFixed(2)}</td>
-                </tr>
-                ` : ''}
+                </tr>` : ''}
                 <tr>
                   <td style="padding: 12px 0; font-size: 16px;"><strong>Total:</strong></td>
                   <td style="padding: 12px 0; text-align: right; font-size: 16px; color: #FE601C;"><strong>₱${order.totalAmount.toFixed(2)}</strong></td>
@@ -200,21 +200,20 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
               </table>
             </div>
 
-            <!-- Delivery Address -->
             <div style="background-color: #ebeff7; padding: 20px; border-radius: 8px; border-left: 4px solid #1A4189;">
               <h3 style="margin-top: 0; color: #1A4189;">Delivery Address</h3>
               <p style="margin: 0; line-height: 1.6;">${order.deliveryAddress}</p>
             </div>
+
             ${order.notes ? `
-            <!-- Special Instructions -->
             <div style="background-color: #fff8ee; padding: 20px; border-radius: 8px; border-left: 4px solid #FE601C; margin-top: 20px;">
               <h3 style="margin-top: 0; color: #FE601C;">Special Instructions</h3>
               <p style="margin: 0; line-height: 1.6;">${order.notes}</p>
             </div>` : ''}
 
-            <!-- Action Button -->
             <div style="text-align: center; margin-top: 30px;">
-              <a href="${process.env.ADMIN_DASHBOARD_URL || 'https://buffschicken.com/admin/orders'}" style="display: inline-block; background: linear-gradient(to right, #1A4189, #2356b4); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              <a href="${process.env.ADMIN_DASHBOARD_URL || 'https://buffschicken.com/admin/orders'}"
+                style="display: inline-block; background: linear-gradient(to right, #1A4189, #2356b4); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
                 View Order in Dashboard
               </a>
             </div>
@@ -225,15 +224,10 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
             </div>
           </div>
         </div>
-      `
+      `,
     });
 
-    if (error) {
-      console.error('Resend API error:', error);
-      throw new Error('Failed to send admin notification');
-    }
-
-    console.log('Admin order notification sent successfully:', data);
+    console.log('Admin order notification sent successfully to:', adminEmail);
     return true;
   } catch (error) {
     console.error('Admin email notification error:', error);
@@ -241,4 +235,10 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
   }
 };
 
-module.exports = { sendOTP, sendOrderNotification, sendContactFormEmail, sendAdminOrderNotification, resend };
+module.exports = {
+  sendOTP,
+  sendOrderNotification,
+  sendContactFormEmail,
+  sendAdminOrderNotification,
+  transporter, 
+};
