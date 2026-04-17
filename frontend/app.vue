@@ -82,10 +82,16 @@ if (process.client) {
   }, {
     trigger: 'onNuxtReady', // Load after Nuxt is ready, not blocking initial render
     use() {
-      window.dataLayer = window.dataLayer || [];
+      window.dataLayer = window.dataLayer || []
       window.gtag = function() { window.dataLayer.push(arguments) }
-      gtag('js', new Date());
-      gtag('config', 'G-P48SW3GZ05');
+      gtag('js', new Date())
+
+      const params = new URLSearchParams(window.location.search)
+      gtag('config', 'G-P48SW3GZ05', {
+        campaign_source: params.get('utm_source') || undefined,
+        campaign_medium: params.get('utm_medium') || undefined,
+        campaign_name: params.get('utm_campaign') || undefined,
+      })
     }
   })
 }

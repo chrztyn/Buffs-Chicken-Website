@@ -71,9 +71,9 @@ export const useTracking = () => {
           transaction_id: orderNumber,
           value: total,
           currency: 'PHP',
-          campaign: utm.campaign,   // creator name
-          source: utm.source,       // tiktok, instagram, etc.
-          medium: utm.medium,
+          campaign_source: utm.source,  
+          campaign_medium: utm.medium,    
+          campaign_name: utm.campaign,
           items: cartItems.map(item => ({
             item_id: item._id || item.id,
             item_name: item.name,
