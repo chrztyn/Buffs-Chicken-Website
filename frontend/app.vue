@@ -80,18 +80,11 @@ if (process.client) {
     key: 'google-analytics',
     src: 'https://www.googletagmanager.com/gtag/js?id=G-P48SW3GZ05',
   }, {
-    trigger: 'onNuxtReady', // Load after Nuxt is ready, not blocking initial render
     use() {
       window.dataLayer = window.dataLayer || []
       window.gtag = function() { window.dataLayer.push(arguments) }
       gtag('js', new Date())
-
-      const params = new URLSearchParams(window.location.search)
-      gtag('config', 'G-P48SW3GZ05', {
-        campaign_source: params.get('utm_source') || undefined,
-        campaign_medium: params.get('utm_medium') || undefined,
-        campaign_name: params.get('utm_campaign') || undefined,
-      })
+      gtag('config', 'G-P48SW3GZ05') 
     }
   })
 }
