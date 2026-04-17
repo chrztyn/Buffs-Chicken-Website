@@ -83,7 +83,7 @@ if (process.client) {
     trigger: 'onNuxtReady', // Load after Nuxt is ready, not blocking initial render
     use() {
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      window.gtag = function() { window.dataLayer.push(arguments) }
       gtag('js', new Date());
       gtag('config', 'G-P48SW3GZ05');
     }
