@@ -9,6 +9,16 @@ interface TrackingParams {
   [key: string]: string | number | undefined
 }
 
+interface CartItem {
+  _id?: string
+  id?: string
+  name: string
+  price: number
+  basePrice?: number
+  addonsCost?: number
+  quantity: number
+}
+
 export const useTracking = () => {
   /**
    * Core internal helper — every public function routes through here.
@@ -51,8 +61,28 @@ export const useTracking = () => {
   }
 
   /** Fire after the backend confirms the order and returns an order number */
-  const trackOrderConfirmed = (orderNumber: string, total: number): void => {
-    track('order_confirmed', { order_number: orderNumber, total })
+  const trackOrderConfirmed = (orderNumber: string, total: number, cartItems: CartItem[] = []): void => {
+    // Fire standard GA4 purchase event for revenue tracking
+    if (!import.meta.client) return
+    try {
+      const utm = JSON.parse(localStorage.getItem('utm_data') || '{}')
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'purchase', {
+          transaction_id: orderNumber,
+          value: total,
+          currency: 'PHP',
+          campaign: utm.campaign,   // creator name
+          source: utm.source,       // tiktok, instagram, etc.
+          medium: utm.medium,
+          items: cartItems.map(item => ({
+            item_id: item._id || item.id,
+            item_name: item.name,
+            price: (item.basePrice || item.price) + (item.addonsCost || 0),
+            quantity: item.quantity
+          }))
+        })
+      }
+    } catch { /* never break the UI */ }
   }
 
   return {

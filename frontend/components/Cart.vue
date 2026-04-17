@@ -557,7 +557,8 @@ export default {
 
                 // Track successful order confirmation
                 const { trackOrderConfirmed } = useTracking()
-                trackOrderConfirmed(data.orderNumber, this.total)
+                // Pass cartItems as 3rd argument
+                trackOrderConfirmed(data.orderNumber, this.total, this.cartItems)
 
                 const orderData = {
                     orderId: data.order._id,
