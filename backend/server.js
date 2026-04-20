@@ -46,7 +46,8 @@ const corsOptions = {
   origin: function(origin, callback) {
     const allowed = [
       'https://buffschicken.com',
-      'https://www.buffschicken.com'
+      'https://www.buffschicken.com',
+      'http://localhost:3000'
     ];
     if (!origin || allowed.includes(origin)) {
       callback(null, true);

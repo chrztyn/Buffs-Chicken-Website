@@ -94,7 +94,7 @@ const sendContactFormEmail = async (name, email, message) => {
   try {
     await sendMail({
       from: FROM_EMAIL,
-      to: [process.env.EMAIL_USER || 'admin@buffschicken.com'],
+      to: [process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@buffschicken.com'],
       replyTo: [email],
       subject: `New Contact Form Submission from ${name} - Buffs Restaurant`,
       html: `
