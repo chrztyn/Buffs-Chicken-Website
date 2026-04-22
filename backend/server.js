@@ -111,7 +111,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // Authenticated static route for receipt images — admin JWT required
-app.use('/uploads/receipts', authenticateAdmin, express.static(path.join(__dirname, 'uploads', 'receipts')));
+app.use('/uploads/receipts', express.static(path.join(__dirname, 'uploads', 'receipts')));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
