@@ -4,6 +4,7 @@ services:
     restart: always
     volumes:
       - /home/ubuntu/Buffs-Chicken-Website/backend/public/backend-images:/app/public/backend-images
+      - /home/ubuntu/Buffs-Chicken-Website/backend/uploads/receipts:/app/uploads/receipts
     expose:
       - '5001'
     env_file:
