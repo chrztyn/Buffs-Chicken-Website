@@ -473,6 +473,57 @@ router.get('/orders/:id/verify', authenticateAdmin, async (req, res) => {
 
 // ========== ANALYTICS ==========
 
+// Get monthly analytics
+router.get('/analytics/monthly/:year/:month', authenticateAdmin, async (req, res) => {
+  try {
+    const year = parseInt(req.params.year);
+    const month = parseInt(req.params.month); // 1-based
+
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 1);
+
+    const orders = await Order.find({
+      createdAt: { $gte: start, $lt: end }
+    })
+      .populate('user', 'name email phone')
+      .sort({ createdAt: -1 });
+
+    const delivered = orders.filter(o =>
+      ['delivered', 'out for delivery', 'preparing'].includes(o.status)
+    );
+
+    const totalRevenue = delivered.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+    // Payment breakdown
+    const paymentBreakdown = {};
+    delivered.forEach(o => {
+      const method = o.paymentMethod || 'unknown';
+      if (!paymentBreakdown[method]) paymentBreakdown[method] = { count: 0, total: 0 };
+      paymentBreakdown[method].count++;
+      paymentBreakdown[method].total += o.totalAmount || 0;
+    });
+
+    res.json({
+      year,
+      month,
+      totalOrders: orders.length,
+      totalRevenue,
+      royaltyFee: totalRevenue * 0.03,
+      paymentBreakdown,
+      orders: orders.map(o => ({
+        orderNumber: o.orderNumber,
+        customerName: o.user?.name || 'Guest',
+        paymentMethod: o.paymentMethod,
+        totalAmount: o.totalAmount,
+        status: o.status,
+        createdAt: o.createdAt
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get dashboard analytics
 router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
   try {
@@ -494,6 +545,16 @@ router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
       status: { $in: ['pending', 'preparing', 'out for delivery'] }
     });
 
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const monthlyOrders = await Order.countDocuments({ createdAt: { $gte: startOfMonth } });
+    const monthlyRevenueAgg = await Order.aggregate([
+      { $match: { status: { $in: ['delivered', 'out for delivery', 'preparing'] }, createdAt: { $gte: startOfMonth } } },
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    ]);
+
     const recentOrders = await Order.find()
       .populate('user', 'name email phone')
       .sort({ createdAt: -1 })
@@ -507,6 +568,8 @@ router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
       totalRevenue: totalRevenue[0]?.total || 0,
       todayOrders,
       activeOrders,
+      monthlyOrders,
+      monthlyRevenue: monthlyRevenueAgg[0]?.total || 0,
       ordersByStatus,
       recentOrders,
       totalProducts,

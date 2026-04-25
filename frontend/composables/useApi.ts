@@ -109,6 +109,8 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
   // Analytics endpoints
   const getAnalytics = wrap(() => api.get('/admin/analytics/dashboard'), {})
   const getSummaryToday = () => api.get('/orders/summary/today')
+  const getMonthlyAnalytics = (year: number, month: number) =>
+    api.get(`/admin/analytics/monthly/${year}/${month}`)
 
   // Notification endpoints
   const getAdminNotifications = wrap(() => api.get('/notifications/admin'), [])
@@ -196,6 +198,7 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     deleteBlog,
     getAnalytics,
     getSummaryToday,
+    getMonthlyAnalytics,
     getAdminNotifications,
     markNotificationRead,
     deleteNotification,
