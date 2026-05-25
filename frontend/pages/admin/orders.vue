@@ -84,6 +84,11 @@
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Amount</p>
               <p class="font-['Poppins'] font-bold text-2xl text-[#FE601C]">₱{{ order.totalAmount }}</p>
+              <div v-if="order.voucher && order.voucher.code" class="mt-1">
+                <span class="inline-block bg-teal-50 text-teal-700 px-2 py-0.5 rounded text-xs font-semibold">
+                  {{ order.voucher.code }} · -₱{{ order.voucher.discountAmount.toFixed(2) }}
+                </span>
+              </div>
             </div>
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Status</p>
@@ -307,15 +312,19 @@
           <div class="space-y-3 text-white font-['Poppins']">
             <div class="flex justify-between text-sm">
               <span>Subtotal:</span>
-              <span class="font-bold">₱{{ selectedOrder.subtotal }}</span>
+              <span class="font-bold">₱{{ selectedOrder.subtotal.toFixed(2) }}</span>
+            </div>
+            <div v-if="selectedOrder.voucher?.code" class="flex justify-between text-sm">
+              <span>Voucher ({{ selectedOrder.voucher.code }}):</span>
+              <span class="font-bold">−₱{{ selectedOrder.voucher.discountAmount.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between text-sm">
               <span>Tax:</span>
-              <span class="font-bold">₱{{ selectedOrder.tax }}</span>
+              <span class="font-bold">₱{{ selectedOrder.tax.toFixed(2) }}</span>
             </div>
             <div class="border-t border-white/30 pt-3 flex justify-between font-bold text-lg">
               <span>Total:</span>
-              <span>₱{{ selectedOrder.totalAmount }}</span>
+              <span>₱{{ selectedOrder.totalAmount.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -693,6 +702,7 @@ onMounted(async () => {
         notes: data.notes || '',
         paymentMethod: data.paymentMethod,
         receiptImage: data.receiptImage || null,
+        voucher: data.voucher || null,
         createdAt: data.timestamp,
         inProgress: false
       }

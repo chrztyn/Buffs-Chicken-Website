@@ -195,6 +195,15 @@ async function sendOrderReceipt(order, user) {
                     &#8369;${subtotal}
                   </td>
                 </tr>
+                ${order.voucher?.code ? `
+                <tr>
+                  <td style="padding:4px 0;font-size:13px;color:#16a34a;">
+                    Voucher (${order.voucher.code})
+                  </td>
+                  <td style="padding:4px 0;font-size:13px;color:#16a34a;text-align:right;">
+                    &minus;&#8369;${Number(order.voucher.discountAmount || 0).toFixed(2)}
+                  </td>
+                </tr>` : ''}
                 <tr>
                   <td style="padding:10px 0 4px 0;border-top:2px solid #e8dfc8;">
                     <strong style="font-family:Arial,sans-serif;font-size:16px;color:#1A4189;">

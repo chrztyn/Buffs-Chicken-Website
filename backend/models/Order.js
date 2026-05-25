@@ -24,6 +24,10 @@ const orderItemSchema = new mongoose.Schema({
   ],
   itemTotal: Number,
   notes: String,
+  voucher_free_item: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const orderSchema = new mongoose.Schema(
@@ -82,6 +86,17 @@ const orderSchema = new mongoose.Schema(
     },
     receiptVerified: { type: Boolean, default: false },
     receiptVerifiedAt: { type: Date, default: null },
+    voucher: {
+      code: { type: String, default: null },
+      benefitType: { type: String, default: null },
+      discountAmount: { type: Number, default: 0 },
+      freeItemSnapshot: {
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+        name: { type: String, default: null },
+        variantLabel: { type: String, default: null },
+        originalPrice: { type: Number, default: 0 }
+      }
+    }
   },
   { timestamps: true }
 );

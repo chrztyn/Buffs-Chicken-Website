@@ -7,6 +7,8 @@
             :total="total"
             :itemsCount="cartItems.length"
             :cartItems="cartItems"
+            :voucher-code="appliedVoucher?.code || ''"
+            :voucher-discount="appliedVoucher?.discountAmount || 0"
             @close="handleModalClose"
             @confirm="handleConfirmOrder"
         />
@@ -136,6 +138,7 @@
                                         <div>
                                             <h3 class="text-lg sm:text-xl font-['Unbounded'] font-bold text-[#1A4189] mb-2 line-clamp-2 group-hover:text-[#2557b8] transition-colors">
                                                 {{ item.name }}
+                                                <span v-if="item.voucher_free_item" class="ml-2 px-2 py-1 bg-[#FEB90E] text-[#1A4189] text-xs font-bold rounded">FREE</span>
                                             </h3>
 
                                             <div class="flex items-baseline gap-2 mb-3">
@@ -149,9 +152,12 @@
                                             <div v-for="(desc, idx) in getOrderDescription(item)" :key="idx" class="text-gray-700 leading-relaxed">
                                                 {{ desc.text }}
                                             </div>
-                                            <NuxtLink :to="`/menu`" class="text-[#FE601C] font-semibold text-sm hover:underline inline-block mt-2">
+                                            <button
+                                                @click="openEditModal(item, index)"
+                                                class="text-[#FE601C] font-semibold text-sm hover:underline inline-block mt-2 hover:text-[#e5540a] transition-colors"
+                                            >
                                                 Edit
-                                            </NuxtLink>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -161,7 +167,11 @@
                                         <div class="flex items-center gap-3 bg-gray-100 rounded-xl p-1">
                                             <button
                                                 @click="decreaseQuantity(index)"
-                                                class="w-9 h-9 rounded-lg bg-white hover:bg-[#FE601C] hover:text-white text-gray-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
+                                                :disabled="item.voucher_free_item"
+                                                :class="item.voucher_free_item
+                                                    ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                                                    : 'bg-white hover:bg-[#FE601C] hover:text-white text-gray-700 shadow-sm hover:shadow-md active:scale-95'"
+                                                class="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
                                                 aria-label="Decrease quantity"
                                             >
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,9 +179,13 @@
                                                 </svg>
                                             </button>
                                             <span class="w-10 text-center font-bold text-[#1A4189] text-lg">{{ item.quantity }}</span>
-                                            <button
+                                           <button
                                                 @click="increaseQuantity(index)"
-                                                class="w-9 h-9 rounded-lg bg-white hover:bg-[#FE601C] hover:text-white text-gray-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
+                                                :disabled="item.voucher_free_item"
+                                                :class="item.voucher_free_item
+                                                    ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                                                    : 'bg-white hover:bg-[#FE601C] hover:text-white text-gray-700 shadow-sm hover:shadow-md active:scale-95'"
+                                                class="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
                                                 aria-label="Increase quantity"
                                             >
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,6 +245,10 @@
                                 <span>Subtotal</span>
                                 <span class="font-semibold">₱{{ subtotal.toFixed(2) }}</span>
                             </div>
+                            <div v-if="appliedVoucher" class="flex justify-between text-xs sm:text-sm text-[#FEB90E]">
+                                <span>Voucher ({{ appliedVoucher.code }})</span>
+                                <span class="font-semibold">−₱{{ voucherDiscount.toFixed(2) }}</span>
+                            </div>
                         </div>
 
                         <!-- Total -->
@@ -242,6 +260,25 @@
                                 <span class="font-['Unbounded'] font-bold text-xl sm:text-2xl md:text-3xl text-[#FEB90E]">
                                     ₱{{ total.toFixed(2) }}
                                 </span>
+                            </div>
+                        </div>
+
+                        <!-- Voucher Section -->
+                        <div class="mb-5">
+                            <button
+                                v-if="!appliedVoucher"
+                                @click="showVoucherModal = true"
+                                class="w-full px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg font-['Unbounded'] text-sm transition flex items-center justify-center gap-2"
+                            >
+                                <span>Add Voucher</span>
+                            </button>
+                            <div v-else class="flex items-center justify-between px-4 py-2.5 bg-[#FEB90E]/20 rounded-lg">
+                                <span class="font-['Unbounded'] text-sm text-[#FEB90E] font-bold">{{ appliedVoucher.code }}</span>
+                                <button @click="removeVoucher" class="text-white/70 hover:text-white">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
@@ -297,16 +334,68 @@
                 </div>
             </div>
         </div>
+
+        <!-- Product Edit Modal -->
+        <MenuModal
+            v-if="editingItem"
+            :product="editingItem._productSnapshot"
+            :is-open="true"
+            :is-edit-mode="true"
+            :initial-selections="{
+                selectedVariants: editingItem.selectedVariants || {},
+                selectedModifiers: editingItem.selectedModifiers || {},
+                selectedSauces: editingItem.selectedSauces || [],
+                selectedAddons: editingItem.selectedAddons || [],
+                quantity: editingItem.quantity,
+                notes: editingItem.notes || ''
+            }"
+            @close="editingItem = null; editingItemIndex = -1"
+            @add-to-cart="handleEditSave"
+        />
+
+        <!-- Voucher Modal -->
+        <div v-if="showVoucherModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showVoucherModal = false">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-['Unbounded'] font-bold text-xl text-[#1A4189]">Enter Voucher Code</h3>
+                    <button @click="showVoucherModal = false" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <input
+                        v-model="voucherCode"
+                        type="text"
+                        @input="voucherCode = voucherCode.toUpperCase(); voucherError = ''"
+                        placeholder="Enter code"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#FE601C] font-['Unbounded'] uppercase"
+                    />
+                    <p v-if="voucherError" class="text-red-600 text-sm font-['Poppins']">{{ voucherError }}</p>
+                    <button
+                        @click="applyVoucher"
+                        :disabled="voucherLoading || !voucherCode"
+                        :class="voucherLoading || !voucherCode ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#FE601C] hover:bg-[#e5540a]'"
+                        class="w-full px-6 py-3 text-white font-['Unbounded'] font-bold rounded-lg transition"
+                    >
+                        {{ voucherLoading ? 'Validating...' : 'Apply' }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
 import OrderConfirmModal from './OrderConfirmModal.vue';
+import MenuModal from './MenuModal.vue';
 
 export default {
     name: 'Cart',
     components: {
-        OrderConfirmModal
+        OrderConfirmModal,
+        MenuModal
     },
     data() {
         return {
@@ -315,7 +404,14 @@ export default {
             showOrderConfirmModal: false,
             orderStatus: '',
             storeOpen: true,
-            storeStatus: null
+            storeStatus: null,
+            editingItem: null,
+            editingItemIndex: -1,
+            appliedVoucher: null,
+            showVoucherModal: false,
+            voucherCode: '',
+            voucherLoading: false,
+            voucherError: ''
         };
     },
     computed: {
@@ -333,14 +429,19 @@ export default {
         },
         subtotal() {
             return this.cartItems.reduce((sum, item) => {
+                if (item.voucher_free_item) return sum;
                 const itemPrice = item.basePrice || item.price;
                 const addonsTotal = item.addonsCost || 0;
                 const itemTotalPrice = (itemPrice + addonsTotal) * item.quantity;
                 return sum + itemTotalPrice;
             }, 0);
         },
+        voucherDiscount() {
+            if (!this.appliedVoucher) return 0;
+            return this.appliedVoucher.discountAmount || 0;
+        },
         total() {
-            return this.subtotal;
+            return Math.max(0, this.subtotal - this.voucherDiscount);
         }
     },
     methods: {
@@ -440,6 +541,7 @@ export default {
             return descriptions;
         },
         increaseQuantity(index) {
+            if (this.cartItems[index]?.voucher_free_item) return;
             if (this.cartItems[index]) {
                 this.cartItems[index].quantity++;
                 this.saveCart();
@@ -454,6 +556,11 @@ export default {
             }
         },
         removeItem(index) {
+            // Don't allow removing free items directly
+            if (this.cartItems[index].voucher_free_item) {
+                alert('This is a free item from your voucher. Remove the voucher to remove this item.');
+                return;
+            }
             this.cartItems.splice(index, 1);
             this.saveCart();
         },
@@ -528,7 +635,9 @@ export default {
                     notes: customerData.notes || '',
                     paymentMethod: customerData.paymentMethod || 'cash_on_delivery',
                     paymentReference: customerData.paymentReference || null,
-                    gcashReference: customerData.gcashReference || null
+                    gcashReference: customerData.gcashReference || null,
+                    voucherCode: this.appliedVoucher ? this.appliedVoucher.code : null,
+                    voucherDiscount: this.appliedVoucher ? this.voucherDiscount : 0
                 };
 
                 const response = await fetch(`${API_BASE_URL}/orders/submit`, {
@@ -577,6 +686,8 @@ export default {
                 localStorage.setItem('buffs_order', JSON.stringify(orderData));
                 
                 this.cartItems = [];
+                this.appliedVoucher = null;
+                localStorage.removeItem('buffs_voucher');
                 this.saveCart();
                 
                 this.hasActiveOrder = true;
@@ -593,29 +704,114 @@ export default {
                 this.$router.push('/order-status');
             }
         },
+        async applyVoucher() {
+            if (!this.voucherCode.trim()) return;
+            
+            this.voucherLoading = true;
+            this.voucherError = '';
+            
+            try {
+                const config = useRuntimeConfig();
+                const API_BASE_URL = config.public.apiBase;
+                
+                const response = await fetch(`${API_BASE_URL}/vouchers/validate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: this.voucherCode,
+                        orderTotal: this.subtotal,
+                        cartItems: this.cartItems
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok || !data.valid) {
+                    this.voucherError = data.message || 'Invalid voucher code';
+                    return;
+                }
+                
+                // Handle free item voucher
+                if (data.benefitType === 'free_item' && data.freeItem) {
+                    const freeItem = {
+                        id: data.freeItem.productId,
+                        _id: data.freeItem.productId,
+                        name: data.freeItem.name,
+                        image: data.freeItem.image,
+                        price: 0,
+                        basePrice: 0,
+                        quantity: 1,
+                        selectedVariants: { variant: data.freeItem.variantLabel },
+                        selectedSauces: [],
+                        selectedAddons: [],
+                        addonsCost: 0,
+                        voucher_free_item: true,
+                        customizationKey: JSON.stringify({ voucher_free_item: true })
+                    };
+                    this.cartItems.push(freeItem);
+                }
+                
+                this.appliedVoucher = {
+                    code: this.voucherCode,
+                    benefitType: data.benefitType,
+                    discountAmount: data.discountAmount,
+                    message: data.message
+                };
+                
+                this.saveCart();
+                this.showVoucherModal = false;
+                this.voucherCode = '';
+            } catch (error) {
+                console.error('Voucher validation error:', error);
+                this.voucherError = 'Failed to validate voucher. Please try again.';
+            } finally {
+                this.voucherLoading = false;
+            }
+        },
+        removeVoucher() {
+            // Remove free item if it exists
+            this.cartItems = this.cartItems.filter(item => !item.voucher_free_item);
+            this.appliedVoucher = null;
+            this.saveCart();
+        },
         saveCart() {
             localStorage.setItem('buffs_cart', JSON.stringify(this.cartItems));
+            // Persist voucher state so it survives loadCart() calls
+            localStorage.setItem('buffs_voucher', this.appliedVoucher
+                ? JSON.stringify(this.appliedVoucher)
+                : 'null'
+            );
             if (process.client) {
                 window.dispatchEvent(new Event('cart-updated'));
             }
-        },
+            },
         loadCart() {
-            const saved = localStorage.getItem('buffs_cart');
-            if (saved) {
-                this.cartItems = JSON.parse(saved);
-                // Ensure each item has a customizationKey for proper comparison
-                this.cartItems = this.cartItems.map((item, index) => {
-                    if (!item.customizationKey) {
-                        item.customizationKey = JSON.stringify({
-                            selectedVariants: item.selectedVariants || {},
-                            selectedAddons: item.selectedAddons || [],
-                            selectedSauces: item.selectedSauces || {},
-                            selectedModifiers: item.selectedModifiers || {}
-                        });
-                    }
-                    return item;
+            const savedCart = localStorage.getItem('buffs_cart');
+            if (savedCart) {
+                this.cartItems = JSON.parse(savedCart).map(item => {
+                if (!item.customizationKey) {
+                    item.customizationKey = JSON.stringify({
+                    selectedVariants: item.selectedVariants || {},
+                    selectedAddons: item.selectedAddons || [],
+                    selectedSauces: item.selectedSauces || {},
+                    selectedModifiers: item.selectedModifiers || {}
+                    });
+                }
+                return item;
                 });
             }
+
+            // Restore voucher from localStorage
+            const savedVoucher = localStorage.getItem('buffs_voucher');
+            if (savedVoucher && savedVoucher !== 'null') {
+                this.appliedVoucher = JSON.parse(savedVoucher);
+            }
+        },
+        removeVoucher() {
+            this.cartItems = this.cartItems.filter(item => !item.voucher_free_item);
+            this.appliedVoucher = null;
+            localStorage.removeItem('buffs_voucher');  // Clean up explicitly
+            this.saveCart();
         },
         checkForActiveOrder() {
             const order = localStorage.getItem('buffs_order');
@@ -634,6 +830,65 @@ export default {
                 // Assume open if we can't check
                 this.storeOpen = true;
             }
+        },
+        openEditModal(item, index) {
+            if (item.voucher_free_item) {
+                alert('Free voucher items cannot be edited.');
+                return;
+            }
+            if (item._productSnapshot) {
+                this.editingItem = item;
+                this.editingItemIndex = index;
+            } else {
+                this.fetchProductForEdit(item, index);
+            }
+        },
+        async fetchProductForEdit(item, index) {
+            try {
+                const config = useRuntimeConfig();
+                const API_BASE_URL = config.public.apiBase;
+                const productId = item._id || item.id;
+                const res = await fetch(`${API_BASE_URL}/products/${productId}`);
+                if (!res.ok) throw new Error('Product not found');
+                const data = await res.json();
+
+                // Cache snapshot so future edits skip the fetch
+                this.cartItems[index]._productSnapshot = data;
+                this.editingItem = this.cartItems[index];
+                this.editingItemIndex = index;
+            } catch (err) {
+                console.error('Failed to load product for editing:', err);
+                alert('Could not load product details. Please try again.');
+            }
+        },
+        handleEditSave(updatedPayload) {
+            if (this.editingItemIndex === -1) return;
+
+            const original = this.cartItems[this.editingItemIndex];
+
+            this.cartItems[this.editingItemIndex] = {
+                ...original,                                                    // preserve _productSnapshot, voucher flags, etc.
+                quantity:          updatedPayload.quantity          ?? original.quantity,
+                selectedVariants:  updatedPayload.selectedVariants  ?? original.selectedVariants,
+                selectedModifiers: updatedPayload.selectedModifiers ?? original.selectedModifiers,
+                selectedSauces:    updatedPayload.selectedSauces    ?? original.selectedSauces,
+                selectedAddons:    updatedPayload.selectedAddons    ?? original.selectedAddons,
+                addonsCost:        updatedPayload.addonsCost        ?? original.addonsCost,
+                basePrice:         updatedPayload.basePrice         ?? original.basePrice,
+                price:             updatedPayload.price             ?? original.price,
+                notes:             updatedPayload.notes             ?? original.notes,
+                // Regenerate key so cart deduplication stays consistent
+                customizationKey: JSON.stringify({
+                    selectedVariants:  updatedPayload.selectedVariants  || {},
+                    selectedAddons:    updatedPayload.selectedAddons    || [],
+                    selectedSauces:    updatedPayload.selectedSauces    || [],
+                    selectedModifiers: updatedPayload.selectedModifiers || {}
+                })
+            };
+
+            this.saveCart();
+            this.editingItem = null;
+            this.editingItemIndex = -1;
         }
     },
     mounted() {

@@ -24,6 +24,7 @@ const paymentRoutes = require('./routes/payments');
 const contactRoutes = require('./routes/contact');
 const storeSettingsRoutes = require('./routes/storeSettings');
 const modifierGroupRoutes = require('./routes/modifierGroups');
+const voucherRoutes = require('./routes/vouchers');
 const authenticateAdmin = require('./middleware/authenticateAdmin');
 const { startReceiptCleanupJob } = require('./utils/receiptStorage');
 const categoriesRouter = require('./routes/categories');
@@ -135,6 +136,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/store-settings', storeSettingsRoutes);
 app.use('/api/modifier-groups', modifierGroupRoutes);
+app.use('/api', voucherRoutes);
 app.use('/api/categories', categoriesRouter);
 
 // Health check

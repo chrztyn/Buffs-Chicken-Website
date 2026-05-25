@@ -133,6 +133,15 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     })
   }
 
+  // Voucher endpoints
+  const getVouchers = () => api.get('/admin/vouchers')
+  const createVoucher = (data: any) => api.post('/admin/vouchers', data)
+  const updateVoucher = (id: string, data: any) => api.put(`/admin/vouchers/${id}`, data)
+  const deleteVoucher = (id: string) => api.delete(`/admin/vouchers/${id}`)
+  const toggleVoucher = (id: string) => api.patch(`/admin/vouchers/${id}/toggle`)
+  const validateVoucher = (data: { code: string; orderTotal: number; cartItems?: any[] }) =>
+  api.post('/vouchers/validate', data)
+
   // Modifier Group endpoints
   const getModifierGroups = wrap(() => api.get('/modifier-groups', { params: { _t: Date.now() } }), [])
   const createModifierGroup = (data: any) => api.post('/modifier-groups', data)
@@ -220,6 +229,12 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     getModifierGroups,
     createModifierGroup,
     updateModifierGroup,
-    deleteModifierGroup
+    deleteModifierGroup,
+    getVouchers,
+    createVoucher,
+    updateVoucher,
+    deleteVoucher,
+    toggleVoucher,
+    validateVoucher
   }
 }

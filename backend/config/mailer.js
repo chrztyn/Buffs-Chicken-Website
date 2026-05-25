@@ -193,6 +193,15 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Tax:</strong></td>
                   <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">₱${order.tax.toFixed(2)}</td>
                 </tr>` : ''}
+                ${order.voucher?.code ? `
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; color: #16a34a;">
+                    <strong>Voucher (${order.voucher.code}):</strong>
+                  </td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right; color: #16a34a;">
+                    <strong>−₱${Number(order.voucher.discountAmount || 0).toFixed(2)}</strong>
+                  </td>
+                </tr>` : ''}
                 <tr>
                   <td style="padding: 12px 0; font-size: 16px;"><strong>Total:</strong></td>
                   <td style="padding: 12px 0; text-align: right; font-size: 16px; color: #FE601C;"><strong>₱${order.totalAmount.toFixed(2)}</strong></td>

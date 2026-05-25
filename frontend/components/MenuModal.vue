@@ -113,6 +113,7 @@
               :quantity="quantity"
               :total="totalPrice"
               :is-disabled="isVariantRequired || isModifierGroupRequired"
+              :action-label="isEditMode ? 'Save Changes' : 'Add to Cart'"
               @update:quantity="quantity = $event"
               @add-to-cart="handleAddToCartClick"
             />
@@ -124,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, type Ref } from 'vue'
+import { computed, ref, onMounted, nextTick, type Ref } from 'vue'
 import MenuModalHeader from '~/components/menu/MenuModalHeader.vue'
 import MenuModalVariants from '~/components/menu/MenuModalVariants.vue'
 import MenuModalSauces from '~/components/menu/MenuModalSauces.vue'
@@ -137,11 +138,22 @@ import type { Product } from '~/composables/useMenuModal'
 const props = defineProps<{
   product: Product | null
   isOpen: boolean
+  // ── Edit-mode additions ──────────────────────────
+  isEditMode?: boolean
+  initialSelections?: {
+    selectedVariants?: Record<string, string>
+    selectedModifiers?: Record<string, string[]>
+    selectedSauces?: unknown[]
+    selectedAddons?: string[]
+    quantity?: number
+    notes?: string
+  }
 }>()
 
 const emit = defineEmits<{
   close: []
   added: []
+  'add-to-cart': [item: Record<string, unknown>]  // ← new: cart.vue catches this in edit mode
 }>()
 
 const productRef = computed(() => props.product) as unknown as Ref<Product>
@@ -149,6 +161,14 @@ const productRef = computed(() => props.product) as unknown as Ref<Product>
 // ── Cart-write + close handler ────────────────────────────────────────────────
 function handleComposableEmit(event: string, ...args: unknown[]) {
   if (event === 'add-to-cart') {
+    // ── Edit mode: hand the payload back to Cart.vue; don't touch localStorage ──
+    if (props.isEditMode) {
+      emit('add-to-cart', args[0] as Record<string, unknown>)
+      handleClose()   // resets modal state + emits 'close'
+      return
+    }
+
+    // ── Normal mode: existing localStorage logic unchanged ────────────────────
     const newItem = args[0] as Record<string, unknown>
     const cart: Record<string, unknown>[] = JSON.parse(localStorage.getItem('buffs_cart') || '[]')
 
@@ -236,6 +256,37 @@ function handleClose() {
   resetModal()
   emit('close')
 }
+
+// ── Seed selections when opened in edit mode ──────────────────────────────────
+onMounted(async () => {
+  if (!props.isEditMode || !props.initialSelections) return
+
+  // Wait one tick so useMenuModal's own product-watch runs first and resets state
+  await nextTick()
+
+  const sel = props.initialSelections
+
+  if (sel.selectedVariants && Object.keys(sel.selectedVariants).length) {
+    Object.assign(selectedVariants.value, sel.selectedVariants)
+  }
+  if (sel.selectedModifiers && Object.keys(sel.selectedModifiers).length) {
+    Object.keys(sel.selectedModifiers).forEach(k => {
+      selectedModifiers.value[k] = [...(sel.selectedModifiers![k] ?? [])]
+    })
+  }
+  if (sel.selectedSauces?.length) {
+    selectedSauces.value = [...sel.selectedSauces] as typeof selectedSauces.value
+  }
+  if (sel.selectedAddons?.length) {
+    selectedAddons.value = [...sel.selectedAddons]
+  }
+  if (sel.quantity && sel.quantity > 0) {
+    quantity.value = sel.quantity
+  }
+  if (sel.notes !== undefined) {
+    notes.value = sel.notes
+  }
+})
 
 // ── Swipe-to-dismiss (mobile only) ───────────────────────────────────────────
 const dragY = ref(0)

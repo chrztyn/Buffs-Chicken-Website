@@ -218,6 +218,15 @@
                   </span>
                   <span class="summary-value">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
+                <div v-if="voucherCode" class="summary-item group">
+                  <span class="summary-label" style="color: #16a34a;">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    Voucher ({{ voucherCode }})
+                  </span>
+                  <span class="summary-value" style="color: #16a34a;">−₱{{ voucherDiscount.toFixed(2) }}</span>
+                </div>
                 <div class="summary-divider"></div>
                 <div class="summary-item-total">
                   <span class="summary-label-total">Total Amount</span>
@@ -309,6 +318,89 @@
                 <h4 class="status-alert-title">Order Cancelled</h4>
                 <p class="status-alert-description">Your order has been cancelled. You can place a new order anytime.</p>
               </div>
+            </div>
+          </div>
+
+          <!-- Receipt Upload Prompt — shown when order exists but no receipt was uploaded -->
+          <div v-if="showReceiptUpload && !receiptUploaded" class="mb-10 pb-8 border-b border-gray-200/50">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="w-1 h-8 bg-gradient-to-b from-[#1A4189] to-[#2356b4] rounded-full"></div>
+              <h3 class="section-title">Complete Payment</h3>
+            </div>
+            <div class="p-5 bg-orange-50 border border-orange-200 rounded-2xl">
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-5 h-5 text-[#FE601C] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-sm font-bold text-[#FE601C]">Receipt not yet uploaded</p>
+              </div>
+              <p class="text-xs text-gray-600 mb-4">
+                Your order was placed but we haven't received your payment receipt yet.
+                Please upload your screenshot to confirm your payment.
+              </p>
+
+              <!-- Upload zone -->
+              <div
+                v-if="!receiptFile"
+                @click="receiptInputRef?.click()"
+                class="flex flex-col items-center justify-center border-2 border-dashed border-[#FE601C] rounded-xl p-5 cursor-pointer hover:bg-orange-100 transition-colors duration-200"
+              >
+                <svg class="w-8 h-8 text-[#FE601C] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <p class="text-sm font-bold text-gray-700">Upload Payment Receipt</p>
+                <p class="text-xs text-gray-400 mt-1">Tap to select your screenshot</p>
+              </div>
+
+              <input
+                ref="receiptInputRef"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="hidden"
+                @change="handleFileSelect"
+              />
+
+              <!-- Preview -->
+              <div v-if="receiptFile && receiptPreviewUrl" class="mt-3">
+                <img :src="receiptPreviewUrl" class="max-h-40 w-full object-contain rounded-xl border border-gray-200" alt="Receipt preview" />
+                <div class="flex items-center justify-between mt-2 px-1">
+                  <span class="text-xs text-green-600 font-semibold flex items-center gap-1">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Receipt ready
+                  </span>
+                  <button
+                    type="button"
+                    @click="removeReceipt"
+                    class="text-xs text-red-500 hover:text-red-700 underline transition-colors duration-200"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <button
+                  @click="uploadReceipt"
+                  :disabled="receiptUploading"
+                  class="mt-3 w-full py-3 rounded-xl bg-[#FE601C] text-white font-bold text-sm hover:bg-[#e25519] disabled:bg-gray-300 disabled:text-gray-500 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <svg v-if="receiptUploading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                  {{ receiptUploading ? 'Uploading...' : 'Submit Receipt' }}
+                </button>
+              </div>
+
+              <p v-if="receiptError" class="mt-2 text-xs text-red-600">{{ receiptError }}</p>
+            </div>
+          </div>
+
+          <!-- Success state -->
+          <div v-if="receiptUploaded" class="mb-10 pb-8 border-b border-gray-200/50">
+            <div class="p-4 bg-green-50 border border-green-200 rounded-2xl flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <p class="text-sm font-semibold text-green-700">Receipt uploaded! We'll verify your payment shortly.</p>
             </div>
           </div>
 
@@ -418,11 +510,13 @@ const currentStatus = ref('pending')
 const hasOrder = ref(false)
 const userEmail = ref('')
 const userAddress = ref('Loading address...')
-
+const totalAmount = ref(0)
 const subtotal = ref(0)
 const itemsCount = ref(0)
 const orderItems = ref([])
 const paymentMethod = ref('')
+const voucherCode = ref('')
+const voucherDiscount = ref(0)
 
 // Toast notification state
 const toastMessage = ref('')
@@ -449,12 +543,15 @@ const statusOrder = {
 // Thank you modal state
 const showThankYouModal = ref(false)
 
-const total = computed(() => subtotal.value)
+const total = computed(() => {
+  if (totalAmount.value > 0) return totalAmount.value
+  return Math.max(0, subtotal.value - voucherDiscount.value)
+})
 
 const formatPaymentMethod = (method) => {
   const methods = {
     'gcash': 'GCash',
-    'maya': 'Maya',
+    'maya': 'Maya', 
     'maribank': 'Maribank',
     'bpi': 'BPI'
   }
@@ -561,20 +658,17 @@ const fetchOrderFromBackend = async (orderId) => {
     const response = await fetch(`${useRuntimeConfig().public.apiBase}/orders/${orderId}`)
     if (response.ok) {
       const order = await response.json()
-      console.log('Order fetched from backend:', order)
-      
-      // Update address from database
-      if (order.deliveryAddress) {
-        userAddress.value = order.deliveryAddress
-        console.log('Updated address from database:', userAddress.value)
-      }
-      
-      // Update other order details
+
+      if (order.deliveryAddress) userAddress.value = order.deliveryAddress
       currentStatus.value = order.status || 'pending'
       subtotal.value = order.subtotal || 0
+      totalAmount.value = order.totalAmount || 0 
 
-      if (order.paymentMethod) {
-        paymentMethod.value = order.paymentMethod
+      if (order.paymentMethod) paymentMethod.value = order.paymentMethod
+
+      if (order.voucher?.code) {
+        voucherCode.value = order.voucher.code
+        voucherDiscount.value = order.voucher.discountAmount || 0
       }
     }
   } catch (error) {
@@ -587,12 +681,21 @@ const loadOrder = async () => {
   if (saved) {
     const order = JSON.parse(saved)
     orderId.value = order.orderId
+    
+    // Show receipt upload prompt if: QR payment AND no receipt yet uploaded
+    const needsReceipt =
+      QR_METHODS.includes(order?.paymentMethod) &&
+      !order?.receiptUploaded
+    showReceiptUpload.value = needsReceipt
+    receiptUploaded.value = order?.receiptUploaded || false
     currentStatus.value = order.status || 'pending'
     subtotal.value = order.subtotal
     itemsCount.value = order.itemsCount
     userEmail.value = order.customerEmail || ''
     orderItems.value = order.items || []
     paymentMethod.value = order.paymentMethod || ''
+    voucherCode.value = order.voucher?.code || ''
+    voucherDiscount.value = order.voucher?.discountAmount || 0
     hasOrder.value = true
     
     // Use the delivery address from the order if available
@@ -659,6 +762,74 @@ const handleOrderStatusUpdate = (data) => {
       }, 1000)
     }
   }
+}
+
+// ─── Receipt upload state (Step 3 fallback) ──────────────────────────────────
+const showReceiptUpload = ref(false)
+const receiptFile = ref(null)
+const receiptPreviewUrl = ref(null)
+const receiptUploading = ref(false)
+const receiptError = ref(null)
+const receiptUploaded = ref(false)
+const receiptInputRef = ref(null)
+
+const QR_METHODS = ['gcash', 'maya', 'maribank', 'bpi']
+
+const handleFileSelect = (e) => {
+  const file = e.target?.files?.[0]
+  receiptError.value = null
+  if (!file) return
+  
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+  if (!validTypes.includes(file.type) && !file.type.startsWith('image/')) {
+    receiptError.value = 'Please upload an image file'
+    if (e.target) e.target.value = ''
+    return
+  }
+  
+  if (file.size > 5 * 1024 * 1024) {
+    receiptError.value = 'Image too large. Please upload under 5MB.'
+    if (e.target) e.target.value = ''
+    return
+  }
+  
+  receiptFile.value = file
+  if (receiptPreviewUrl.value) URL.revokeObjectURL(receiptPreviewUrl.value)
+  receiptPreviewUrl.value = URL.createObjectURL(file)
+}
+
+const uploadReceipt = async () => {
+  if (!receiptFile.value || !orderId.value) return
+  receiptUploading.value = true
+  receiptError.value = null
+  try {
+    const fd = new FormData()
+    fd.append('receipt', receiptFile.value)
+    const res = await fetch(`${useRuntimeConfig().public.apiBase}/orders/${orderId.value}/receipt`, {
+      method: 'POST',
+      body: fd
+    })
+    if (!res.ok) throw new Error('Upload failed')
+
+    // Mark receipt as uploaded in localStorage so widget disappears on refresh
+    const updated = { ...JSON.parse(localStorage.getItem('buffs_order') || '{}'), receiptUploaded: true }
+    localStorage.setItem('buffs_order', JSON.stringify(updated))
+    receiptUploaded.value = true
+    showReceiptUpload.value = false
+    showNotification('Success', 'Receipt uploaded! We\'ll verify your payment shortly.', 'success')
+  } catch {
+    receiptError.value = 'Upload failed. Please message us on Facebook to confirm your payment.'
+  } finally {
+    receiptUploading.value = false
+  }
+}
+
+const removeReceipt = () => {
+  if (receiptPreviewUrl.value) URL.revokeObjectURL(receiptPreviewUrl.value)
+  receiptFile.value = null
+  receiptPreviewUrl.value = null
+  receiptError.value = null
+  if (receiptInputRef.value) receiptInputRef.value.value = ''
 }
 
 const cancelOrder = async () => {

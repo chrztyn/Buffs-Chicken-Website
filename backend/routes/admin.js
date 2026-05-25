@@ -7,6 +7,7 @@ const Category = require('../models/Category');
 const Order = require('../models/Order');
 const Blog = require('../models/Blog');
 const Notification = require('../models/Notification');
+const Voucher = require('../models/Voucher');
 const authenticateAdmin = require('../middleware/authenticateAdmin');
 const multer = require('multer');
 const fs = require('fs');
@@ -361,7 +362,8 @@ router.get('/orders', authenticateAdmin, async (req, res) => {
     const orders = await Order.find()
       .populate('user', 'name email phone')
       .populate('items.product')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
     res.json(orders);
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -388,6 +390,19 @@ router.put('/orders/:id/status', authenticateAdmin, async (req, res) => {
     ).populate('user');
 
     console.log(`[ORDER UPDATE] Order updated successfully. New status: ${order.status}`);
+
+    // Release voucher if order is being cancelled
+    if (status === 'cancelled' && order.voucher && order.voucher.code) {
+      const voucher = await Voucher.findOne({ code: order.voucher.code });
+      if (voucher) {
+        const emailIndex = voucher.usedByEmails.indexOf(order.user.email.toLowerCase());
+        if (emailIndex > -1) {
+          voucher.usedByEmails.splice(emailIndex, 1);
+        }
+        voucher.usageCount = Math.max(0, voucher.usageCount - 1);
+        await voucher.save();
+      }
+    }
 
     // Send notification email
     const statusMessages = {

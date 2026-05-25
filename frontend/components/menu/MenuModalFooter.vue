@@ -38,7 +38,7 @@
       ]"
       style="font-family: 'Unbounded', sans-serif;"
     >
-      <span>{{ storeClosed ? 'Store Closed' : 'Add to Cart' }}</span>
+      <span>{{ storeClosed ? 'Store Closed' : (actionLabel || 'Add to Cart') }}</span>
       <span class="font-bold">&#x20B1;{{ Number(total).toFixed(2) }}</span>
     </button>
   </div>
@@ -50,6 +50,7 @@ defineProps<{
   total: number
   isDisabled: boolean
   storeClosed?: boolean
+  actionLabel?: string
 }>()
 
 defineEmits<{

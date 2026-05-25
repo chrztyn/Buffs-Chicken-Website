@@ -8,6 +8,7 @@ const Product = require('../models/Product');
 const Payment = require('../models/Payment');
 const Notification = require('../models/Notification');
 const StoreSettings = require('../models/StoreSettings');
+const Voucher = require('../models/Voucher');
 const { sendOrderNotification, sendAdminOrderNotification } = require('../config/mailer');
 const { sendOrderReceipt } = require('../utils/sendOrderReceipt');
 const { saveReceipt, deleteReceipt } = require('../utils/receiptStorage');
@@ -209,7 +210,8 @@ router.get('/user/:userId', async (req, res) => {
   try {
     const orders = await Order.find({ user: req.params.userId })
       .populate('items.product')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -287,7 +289,8 @@ router.get('/:orderId', async (req, res) => {
   try {
     const order = await Order.findById(req.params.orderId)
       .populate('items.product')
-      .populate('user');
+      .populate('user')
+      .lean();
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -402,7 +405,9 @@ router.post('/submit', async (req, res) => {
       notes,
       paymentMethod,
       paymentReference,
-      gcashReference
+      gcashReference,
+      voucherCode,
+      voucherDiscount
     } = req.body;
 
     // Verify user
@@ -423,11 +428,12 @@ router.post('/submit', async (req, res) => {
       selectedAddons: item.selectedAddons || [],
       itemTotal: (item.basePrice || item.price) * item.quantity + (item.addonsCost || 0),
       notes: item.notes || '',
+      voucher_free_item: item.voucher_free_item || false
     }));
 
     // Calculate totals
-    const tax = 0; // Can be calculated based on your tax rules
-    const totalAmount = subtotal + tax;
+    const tax = 0;
+    const totalAmount = total; // Use the discounted total from frontend
 
     // Create order
     const order = new Order({
@@ -445,6 +451,76 @@ router.post('/submit', async (req, res) => {
       gcashReference: paymentMethod === 'gcash' ? (gcashReference || paymentReference) : null
     });
 
+    // Handle voucher if provided
+    if (voucherCode) {
+      console.log('[Voucher] voucherCode received:', voucherCode)
+      console.log('[Voucher] email received:', email)
+      console.log('[Voucher] subtotal received:', subtotal)
+
+      const voucher = await Voucher.findOne({ code: voucherCode.toUpperCase() })
+        .populate('freeItem.productId');
+
+      console.log('[Voucher] found:', voucher ? voucher.code : 'NOT FOUND')
+
+      if (voucher && voucher.isActive) {
+        const now = new Date();
+
+        // Log each condition separately
+        const c1 = now >= new Date(voucher.startDate)
+        const c2 = now <= new Date(voucher.endDate)
+        const c3 = voucher.usageCap === null || voucher.usageCount < voucher.usageCap
+        const c4 = Array.isArray(voucher.usedByEmails)
+          ? !voucher.usedByEmails.includes(email?.toLowerCase())
+          : true
+        const c5 = subtotal >= voucher.minimumOrderAmount
+
+        console.log('[Voucher] isActive:', voucher.isActive)
+        console.log('[Voucher] c1 - not before startDate:', c1, '| startDate:', voucher.startDate, '| now:', now)
+        console.log('[Voucher] c2 - not after endDate:', c2, '| endDate:', voucher.endDate)
+        console.log('[Voucher] c3 - usageCap OK:', c3, '| cap:', voucher.usageCap, '| count:', voucher.usageCount)
+        console.log('[Voucher] c4 - email not used:', c4, '| usedByEmails:', voucher.usedByEmails)
+        console.log('[Voucher] c5 - meets minimum:', c5, '| min:', voucher.minimumOrderAmount, '| subtotal:', subtotal)
+
+        const isValid = now >= new Date(voucher.startDate) &&
+               now <= new Date(voucher.endDate) &&
+               (voucher.usageCap === null || voucher.usageCount < voucher.usageCap) &&
+               (Array.isArray(voucher.usedByEmails)
+                 ? !voucher.usedByEmails.includes(email?.toLowerCase())
+                 : true) &&
+               subtotal >= voucher.minimumOrderAmount;
+        console.log('[Voucher] isValid:', isValid)
+
+        if (isValid) {
+          order.voucher = {
+            code: voucher.code,
+            benefitType: voucher.benefitType,
+            discountAmount: voucherDiscount || 0
+          };
+
+          if (voucher.benefitType === 'free_item' && voucher.freeItem) {
+            order.voucher.freeItemSnapshot = {
+              productId: voucher.freeItem.productId._id,
+              name: voucher.freeItem.productId.name,
+              variantLabel: voucher.freeItem.variantLabel,
+              originalPrice: voucher.freeItem.variantPrice
+            };
+          }
+
+          if (!Array.isArray(voucher.usedByEmails)) voucher.usedByEmails = [];
+          voucher.usedByEmails.push(email?.toLowerCase());
+          voucher.usageCount += 1;
+          await voucher.save();
+          console.log('[Voucher] Successfully attached to order')
+        } else {
+          console.warn('[Voucher] FAILED isValid — check conditions above')
+          // Recompute total WITHOUT discount since voucher is invalid
+          order.totalAmount = subtotal + tax
+        }
+      } else {
+        console.warn('[Voucher] not found or inactive:', { found: !!voucher, isActive: voucher?.isActive })
+      }
+    }
+
     await order.save();
 
     // Re-fetch user to ensure latest data is available
@@ -458,10 +534,6 @@ router.post('/submit', async (req, res) => {
       title: 'Order Confirmed',
       message: `Your order ${order.orderNumber} has been received.`
     });
-
-    // NOTE: Admin notifications and customer receipt email are deferred.
-    // They fire from POST /:orderId/receipt once the user uploads their receipt
-    // and completes the full checkout flow (lands on order-status page).
 
     res.status(201).json({
       message: 'Order submitted successfully',
@@ -489,6 +561,19 @@ router.put('/:id/cancel', async (req, res) => {
 
     order.status = 'cancelled';
     await order.save();
+
+    // Release voucher if used
+    if (order.voucher && order.voucher.code) {
+      const voucher = await Voucher.findOne({ code: order.voucher.code });
+      if (voucher) {
+        const emailIndex = voucher.usedByEmails.indexOf(order.user.email.toLowerCase());
+        if (emailIndex > -1) {
+          voucher.usedByEmails.splice(emailIndex, 1);
+        }
+        voucher.usageCount = Math.max(0, voucher.usageCount - 1);
+        await voucher.save();
+      }
+    }
 
     // Create notification for user
     await Notification.create({
@@ -596,6 +681,7 @@ router.post('/:orderId/receipt', upload.single('receipt'), async (req, res) => {
         deliveryAddress: order.deliveryAddress,
         paymentMethod: order.paymentMethod,
         receiptImage: order.receiptImage,
+        voucher: order.voucher?.code ? order.voucher : null, 
         status: 'pending',
         timestamp: new Date()
       });

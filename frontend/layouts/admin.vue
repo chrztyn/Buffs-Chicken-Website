@@ -79,6 +79,13 @@
           Orders
         </NuxtLink>
         <NuxtLink
+          to="/admin/vouchers"
+          class="block px-4 py-2 rounded-lg font-['Poppins'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
+          @click="menuOpen = false"
+        >
+          Vouchers
+        </NuxtLink>
+        <NuxtLink
           to="/admin/blogs"
           class="block px-4 py-2 rounded-lg font-['Poppins'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
           @click="menuOpen = false"
@@ -138,6 +145,12 @@
               class="block px-4 py-3 rounded-lg font-['Poppins'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
             >
               Orders
+            </NuxtLink>
+            <NuxtLink
+              to="/admin/vouchers"
+              class="block px-4 py-3 rounded-lg font-['Poppins'] font-semibold text-[#1A4189] hover:bg-[#FBF4E5] transition"
+            >
+              Vouchers
             </NuxtLink>
             <NuxtLink
               to="/admin/blogs"

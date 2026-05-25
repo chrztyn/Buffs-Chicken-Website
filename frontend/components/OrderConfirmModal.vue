@@ -20,13 +20,28 @@
           class="bg-white rounded-2xl shadow-xl max-w-2xl w-full pointer-events-auto overflow-y-auto max-h-[85vh] relative"
         >
           <!-- Close Button -->
+          <!-- Step 1 & 2: normal X close -->
           <button
+            v-if="currentStep !== 3"
             @click="handleCloseBtn"
             class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
+          </button>
+
+          <!-- Step 3: redirect to order status instead of closing -->
+          <button
+            v-else
+            @click="handleCloseBtn"
+            title="Go to Order Status"
+            class="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs font-medium transition-all duration-200"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+            Order Status
           </button>
 
           <!-- Step Indicator -->
@@ -49,12 +64,17 @@
               <h2 class="section-title">Confirm Order</h2>
               <div class="summary-items">
                 <div class="summary-item">
-                  <span class="summary-label">Items:</span>
-                  <span class="summary-value">{{ itemsCount }} {{ itemsCount === 1 ? 'Item' : 'Items' }}</span>
-                </div>
-                <div class="summary-item">
                   <span class="summary-label">Subtotal:</span>
                   <span class="summary-value">₱{{ subtotal.toFixed(2) }}</span>
+                </div>
+                <div v-if="voucherCode" class="summary-item">
+                  <span class="summary-label" style="color: #16a34a;">
+                    <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    Voucher ({{ voucherCode }})
+                  </span>
+                  <span class="summary-value" style="color: #16a34a;">−₱{{ voucherDiscount.toFixed(2) }}</span>
                 </div>
                 <div class="summary-divider"></div>
                 <span class="summary-label font-bold">Total Amount:</span>
@@ -459,6 +479,14 @@ const props = defineProps({
   cartItems: {
     type: Array,
     default: () => []
+  },
+  voucherCode: { 
+    type: String, 
+    default: '' 
+  },
+  voucherDiscount: { 
+    type: Number, 
+    default: 0 
   }
 })
 
@@ -558,10 +586,15 @@ const selectPayment = (method) => {
 const handleBackdropClick = () => {
   if (currentStep.value === 1) closeModal()
   else if (currentStep.value === 2) goBackToDelivery()
-  // Step 3: order already placed — do nothing on backdrop click
 }
 
 const handleCloseBtn = () => {
+  if (currentStep.value === 3) {
+    router.push('/order-status')
+    resetModal()
+    emit('close')
+    return
+  }
   if (currentStep.value === 2) goBackToDelivery()
   else closeModal()
 }
@@ -655,7 +688,7 @@ const sendOTPForNewUser = async () => {
     const data = await response.json()
     console.log('OTP sent successfully:', data)
     userId.value = data.userId
-    currentStep.value = 2 // advance to OTP step
+    currentStep.value = 2 
     startOTPTimer()
   } catch (error) {
     console.error('Error sending OTP:', error)
@@ -741,23 +774,35 @@ const transformCartItems = () => {
 const createOrderForQR = async () => {
   const transformedCartItems = transformCartItems()
 
+  console.log('[createOrderForQR] voucherCode prop:', props.voucherCode)
+  console.log('[createOrderForQR] voucherDiscount prop:', props.voucherDiscount)
+
+  const payload = {
+    userId: userId.value,
+    name: formData.value.name,
+    email: formData.value.email,
+    phone: formData.value.phone,
+    address: formData.value.address,
+    cartItems: transformedCartItems,
+    subtotal: props.subtotal,
+    total: props.total,
+    notes: '',
+    paymentMethod: paymentMethod.value,
+    paymentReference: null,
+    gcashReference: null,
+    // Use explicit string check — not || null which swallows empty strings
+    voucherCode: (typeof props.voucherCode === 'string' && props.voucherCode.trim())
+      ? props.voucherCode.trim()
+      : null,
+    voucherDiscount: props.voucherDiscount || 0
+  }
+  
+  console.log('[createOrderForQR] payload.voucherCode:', payload.voucherCode)
+
   const response = await fetch(`${API_BASE_URL}/orders/submit`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: userId.value,
-      name: formData.value.name,
-      email: formData.value.email,
-      phone: formData.value.phone,
-      address: formData.value.address,
-      cartItems: transformedCartItems,
-      subtotal: props.subtotal,
-      total: props.total,
-      notes: '',
-      paymentMethod: paymentMethod.value,
-      paymentReference: null,
-      gcashReference: null
-    })
+    body: JSON.stringify(payload)
   })
 
   if (!response.ok) {
@@ -785,10 +830,17 @@ const createOrderForQR = async () => {
       status: 'pending',
       timestamp: new Date().toISOString(),
       customer: { ...formData.value, userId: userId.value },
-      verificationStatus: 'verified'
+      verificationStatus: 'verified',
+      paymentMethod: paymentMethod.value,
+      deliveryAddress: formData.value.address,
+      customerEmail: formData.value.email,
+      voucher: props.voucherCode
+        ? { code: props.voucherCode, discountAmount: props.voucherDiscount }
+        : null
     }
     localStorage.setItem('buffs_order', JSON.stringify(orderData))
     localStorage.setItem('buffs_cart', JSON.stringify([]))
+    localStorage.removeItem('buffs_voucher')
     window.dispatchEvent(new Event('cart-updated'))
   }
 
