@@ -146,30 +146,25 @@ app.get('/health', (req, res) => {
 
 // Socket.io Connection
 io.on('connection', (socket) => {
-  console.log('New user connected:', socket.id);
 
   // Join user room for personal notifications
   socket.on('join-user', (userId) => {
     socket.join(`user-${userId}`);
-    console.log(`User ${userId} joined their notification room`);
   });
 
   // Join order room for order status updates
   socket.on('join-order', (orderId) => {
     socket.join(`order-${orderId}`);
-    console.log(`Socket joined order room: order-${orderId}`);
   });
 
   // Join admin room for notifications
   socket.on('join-admin', (adminId) => {
     socket.join(`admin-${adminId}`);
-    console.log(`Admin ${adminId} joined admin notification room`);
   });
 
   // Join admin orders room
   socket.on('join-admin-orders', () => {
     socket.join('admin-orders');
-    console.log('Socket joined admin-orders room');
   });
 
   socket.on('disconnect', () => {

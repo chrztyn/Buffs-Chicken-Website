@@ -139,21 +139,6 @@ router.post('/', async (req, res) => {
     // Re-fetch user to ensure latest data is available
     const freshUser = await User.findById(userId);
 
-    // Send branded receipt email (fire-and-forget — never blocks the order response)
-    sendOrderReceipt(order, freshUser).catch(() => {});
-
-    // Send admin notification email
-    try {
-      await sendAdminOrderNotification(process.env.ADMIN_EMAIL || process.env.EMAIL_USER, order, {
-        name: freshUser.name,
-        email: freshUser.email,
-        phone: freshUser.phone,
-        address: order.deliveryAddress
-      });
-    } catch (error) {
-      console.log('Admin email notification failed, but order created:', error);
-    }
-
     // Create database notification for user
     await Notification.create({
       user: userId,
@@ -161,38 +146,6 @@ router.post('/', async (req, res) => {
       type: 'order_confirmed',
       title: 'Order Confirmed',
       message: `Your order ${order.orderNumber} has been received.`
-    });
-
-    // Create database notification for admin
-    await Notification.create({
-      type: 'new_order',
-      order: order._id,
-      title: 'New Order Received',
-      message: `New order ${order.orderNumber} from ${freshUser.name}`
-    });
-
-    // Emit real-time notification to admin with complete order data
-    req.io.to('admin-orders').emit('new-order', {
-      orderId: order._id,
-      orderNumber: order.orderNumber,
-      userId: freshUser._id,
-      customerName: freshUser.name || 'Unknown Customer',
-      customerEmail: freshUser.email,
-      customerPhone: freshUser.phone,
-      items: orderItems,
-      subtotal: order.subtotal,
-      tax: order.tax,
-      totalAmount: order.totalAmount,
-      deliveryAddress: order.deliveryAddress,
-      status: order.status,
-      timestamp: new Date()
-    });
-
-    // Emit to specific user
-    req.io.to(`user-${userId}`).emit('order-status', {
-      orderId: order._id,
-      status: 'pending',
-      message: 'Order received'
     });
 
     res.status(201).json({
@@ -525,15 +478,6 @@ router.post('/submit', async (req, res) => {
 
     // Re-fetch user to ensure latest data is available
     const freshUser = await User.findById(userId);
-
-    // Create database notification for user (order received)
-    await Notification.create({
-      user: userId,
-      order: order._id,
-      type: 'order_confirmed',
-      title: 'Order Confirmed',
-      message: `Your order ${order.orderNumber} has been received.`
-    });
 
     res.status(201).json({
       message: 'Order submitted successfully',
