@@ -327,7 +327,7 @@
                 class="w-44 h-44 sm:w-48 sm:h-48 max-w-full rounded-xl object-contain border border-gray-200 bg-white"
               />
 
-              <!-- Quick Action Buttons — must fit side-by-side at 320px -->
+              <!-- Quick Action Buttons -->
               <div class="flex gap-2 justify-center mt-3 w-full max-w-full overflow-hidden px-2">
                 <button
                   type="button"
@@ -370,80 +370,99 @@
               <div class="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            <!-- Upload Zone (hidden when file already selected) -->
-            <div
-              v-if="!receiptFile"
-              @click="openFilePicker"
-              class="min-h-[80px] flex flex-col items-center justify-center border-2 border-dashed border-[#FE601C] rounded-xl p-4 cursor-pointer hover:bg-orange-50 transition-colors duration-200"
-            >
-              <svg class="w-8 h-8 text-[#FE601C] mb-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              <p class="text-sm font-bold text-gray-700">Upload Payment Receipt</p>
-              <p class="text-xs text-gray-400 mt-0.5">Tap to upload your screenshot</p>
-            </div>
+            <!-- ── Receipt Upload — styled to match order-status page ── -->
+            <div class="p-5 bg-orange-50 border border-orange-200 rounded-2xl">
+              <!-- Header alert row -->
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-5 h-5 text-[#FE601C] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-sm font-bold text-[#FE601C]">Receipt not yet uploaded</p>
+              </div>
+              <p class="text-xs text-gray-600 mb-4">
+                Your order was placed but we haven't received your payment receipt yet.
+                Please upload your screenshot to confirm your payment.
+              </p>
 
-            <!-- Hidden File Input — capture="environment" opens camera on mobile -->
-            <input
-              ref="receiptInput"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              class="hidden"
-              @change="handleFileSelect"
-            />
-
-            <!-- Receipt Preview -->
-            <div v-if="receiptFile && receiptPreviewUrl" class="mt-3">
-              <img
-                :src="receiptPreviewUrl"
-                class="max-h-40 w-full object-contain rounded-xl border border-gray-200"
-                alt="Receipt preview"
-              />
-              <div class="flex items-center justify-between mt-2 px-1">
-                <span class="text-xs text-green-600 font-semibold flex items-center gap-1">
-                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              <!-- Upload zone (hidden once file selected) -->
+              <div v-if="!receiptFile">
+                <!-- Desktop upload zone -->
+                <div
+                  @click="openFilePicker"
+                  class="sm:flex hidden flex-col items-center justify-center border-2 border-dashed border-[#FE601C] rounded-xl p-5 cursor-pointer hover:bg-orange-100 transition-colors duration-200"
+                >
+                  <svg class="w-8 h-8 text-[#FE601C] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
-                  Receipt ready
-                </span>
+                  <p class="text-sm font-bold text-gray-700">Upload Payment Receipt</p>
+                  <p class="text-xs text-gray-400 mt-1">Tap to select your screenshot</p>
+                </div>
+
+                <!-- Mobile upload options (two buttons) -->
+                <div class="sm:hidden flex gap-2 w-full">
+                  <button
+                    type="button"
+                    @click="openGallery"
+                    class="flex-1 flex flex-col items-center justify-center gap-1.5 px-2 py-2.5 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-300 rounded-lg hover:from-purple-100 transition-all duration-200 active:scale-95"
+                  >
+                    <svg class="w-4 h-4 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="text-xs font-semibold text-purple-700 leading-tight">Choose Photo</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Hidden file inputs -->
+              <input ref="receiptInput"        type="file" accept="image/*"             class="hidden" @change="handleFileSelect" />
+              <input ref="receiptCameraInput"  type="file" accept="image/*" capture="environment" class="hidden" @change="handleFileSelect" />
+              <input ref="receiptGalleryInput" type="file" accept="image/*"             class="hidden" @change="handleFileSelect" />
+
+              <!-- Preview -->
+              <div v-if="receiptFile && receiptPreviewUrl" class="mt-3">
+                <img
+                  :src="receiptPreviewUrl"
+                  class="max-h-40 w-full object-contain rounded-xl border border-gray-200"
+                  alt="Receipt preview"
+                />
+                <div class="flex items-center justify-between mt-2 px-1">
+                  <span class="text-xs text-green-600 font-semibold flex items-center gap-1">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Receipt ready
+                  </span>
+                  <button
+                    type="button"
+                    @click="removeReceipt"
+                    class="text-xs text-red-500 hover:text-red-700 underline transition-colors duration-200"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <!-- Submit button — only visible once file is selected -->
                 <button
                   type="button"
-                  @click="removeReceipt"
-                  class="text-xs text-red-500 hover:text-red-700 underline transition-colors duration-200"
+                  @click="paid"
+                  :disabled="receiptUploading"
+                  :class="receiptUploading
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-[#FE601C] text-white hover:bg-[#e25519] hover:shadow-lg active:scale-[0.98]'"
+                  class="mt-3 w-full py-3 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  Remove
+                  <svg v-if="receiptUploading" class="w-4 h-4 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  {{ receiptUploading ? 'Uploading...' : 'Submit Receipt' }}
                 </button>
               </div>
-            </div>
 
-            <!-- Client-side / Upload Error -->
-            <div v-if="receiptError" class="mt-2 p-3 bg-red-50 border-l-4 border-red-400 rounded-lg">
-              <p class="text-xs text-red-600">{{ receiptError }}</p>
+              <!-- Error -->
+              <p v-if="receiptError" class="mt-2 text-xs text-red-600">{{ receiptError }}</p>
             </div>
-
-            <!-- Paid Button -->
-            <button
-              type="button"
-              @click="paid"
-              :disabled="!receiptFile || receiptUploading"
-              :class="!receiptFile || receiptUploading
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-[#FE601C] text-white hover:bg-[#e25519] hover:shadow-lg active:scale-[0.98]'"
-              class="w-full mt-4 py-3.5 rounded-xl font-bold text-base transition-all duration-200 flex items-center justify-center gap-2"
-            >
-              <svg
-                v-if="receiptUploading"
-                class="w-5 h-5 animate-spin flex-shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
-              {{ receiptUploading ? 'Uploading...' : 'Paid' }}
-            </button>
           </div>
 
         </div>
@@ -499,6 +518,13 @@ watch(
   (isOpen) => {
     if (isOpen) {
       trackCheckoutStarted(props.itemsCount, props.total)
+      // Prevent scroll when modal opens
+      document.documentElement.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden'
+    } else {
+      // Re-enable scroll when modal closes
+      document.documentElement.style.overflow = ''
+      document.body.style.overflow = ''
     }
   }
 )
@@ -535,8 +561,13 @@ const receiptFile = ref(null)
 const receiptPreviewUrl = ref(null)
 const receiptUploading = ref(false)
 const receiptError = ref(null)
+const receiptUploaded = ref(false)
 const receiptInput = ref(null)
+const receiptCameraInput = ref(null)
+const receiptGalleryInput = ref(null)
 const copySuccess = ref(false)
+
+const QR_METHODS = ['gcash', 'maya', 'maribank', 'bpi']
 
 // ─── Payment config ──────────────────────────────────────────────────────────
 const paymentConfig = {
@@ -906,6 +937,9 @@ const resetModal = () => {
   copySuccess.value = false
   receiptUploading.value = false
   receiptError.value = null
+  if (receiptInput.value) receiptInput.value.value = ''
+  if (receiptCameraInput.value) receiptCameraInput.value.value = ''
+  if (receiptGalleryInput.value) receiptGalleryInput.value.value = ''
   resetOTP()
 }
 
@@ -957,6 +991,14 @@ const openFilePicker = () => {
   receiptInput.value?.click()
 }
 
+const openCamera = () => {
+  receiptCameraInput.value?.click()
+}
+
+const openGallery = () => {
+  receiptGalleryInput.value?.click()
+}
+
 const handleFileSelect = (event) => {
   const file = event.target?.files?.[0]
   receiptError.value = null
@@ -987,31 +1029,37 @@ const removeReceipt = () => {
   receiptPreviewUrl.value = null
   receiptError.value = null
   if (receiptInput.value) receiptInput.value.value = ''
+  if (receiptCameraInput.value) receiptCameraInput.value.value = ''
+  if (receiptGalleryInput.value) receiptGalleryInput.value.value = ''
+}
+
+// ─── Step 3: Upload receipt ──────────────────────────────────────────────────
+const uploadReceipt = async () => {
+  if (!receiptFile.value || !confirmedOrderId.value) return
+  receiptUploading.value = true
+  receiptError.value = null
+  try {
+    const fd = new FormData()
+    fd.append('receipt', receiptFile.value)
+    const res = await fetch(`${API_BASE_URL}/orders/${confirmedOrderId.value}/receipt`, {
+      method: 'POST',
+      body: fd
+    })
+    if (!res.ok) throw new Error('Upload failed')
+
+    receiptUploaded.value = true
+  } catch {
+    receiptError.value = 'Upload failed. Please message us on Facebook to confirm your payment.'
+  } finally {
+    receiptUploading.value = false
+  }
 }
 
 // ─── Step 3: Paid button ──────────────────────────────────────────────────────
 const paid = async () => {
-  receiptUploading.value = true
-  receiptError.value = null
-  let uploadFailed = false
-
-  try {
-    const fd = new FormData()
-    fd.append('receipt', receiptFile.value)
-    const response = await fetch(`${API_BASE_URL}/orders/${confirmedOrderId.value}/receipt`, {
-      method: 'POST',
-      body: fd
-    })
-    if (!response.ok) uploadFailed = true
-  } catch {
-    uploadFailed = true
-  }
-
-  if (uploadFailed) {
-    receiptError.value = 'Receipt upload failed. Please message us on Facebook.'
-    await new Promise(resolve => setTimeout(resolve, 2500))
-  }
-
+  // Upload receipt first
+  await uploadReceipt()
+  
   // Always redirect — never block on upload failure
   router.push('/order-status')
 }
@@ -1020,6 +1068,9 @@ const paid = async () => {
 onUnmounted(() => {
   if (otpTimerInterval.value) clearInterval(otpTimerInterval.value)
   if (receiptPreviewUrl.value) URL.revokeObjectURL(receiptPreviewUrl.value)
+  // Clean up scroll prevention
+  document.documentElement.style.overflow = ''
+  document.body.style.overflow = ''
 })
 </script>
 

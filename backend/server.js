@@ -36,7 +36,13 @@ const server = http.createServer(app);
 // Initialize Socket.io
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      'https://buffschicken.com',
+      'https://www.buffschicken.com',
+      'http://localhost:3000',
+      'http://192.168.68.134:3000',
+      'http://192.168.68.134:5001'
+    ],
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -48,9 +54,13 @@ const corsOptions = {
     const allowed = [
       'https://buffschicken.com',
       'https://www.buffschicken.com',
-      'http://localhost:3000'
+      'http://localhost:3000',
+      'http://localhost:5001',
+      'http://192.168.68.134:3000',
+      'http://192.168.68.134:5001'
     ];
-    if (!origin || allowed.includes(origin)) {
+    // In development, allow any localhost-like origin or if no origin header
+    if (!origin || allowed.includes(origin) || process.env.NODE_ENV !== 'production') {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -60,6 +70,12 @@ const corsOptions = {
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization']
 };
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} from ${req.hostname}`);
+  next();
+});
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
@@ -188,7 +204,7 @@ app.use((req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 

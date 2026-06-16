@@ -444,6 +444,15 @@ export default {
             return Math.max(0, this.subtotal - this.voucherDiscount);
         }
     },
+    watch: {
+        showOrderConfirmModal(newVal) {
+            if (newVal) {
+                document.documentElement.style.overflow = 'hidden';
+            } else {
+                document.documentElement.style.overflow = '';
+            }
+        }
+    },
     methods: {
         getImageUrl(image) {
             if (!image) return '';

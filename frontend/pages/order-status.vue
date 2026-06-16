@@ -265,9 +265,11 @@
                 <button
                   v-if="canCancelOrder"
                   @click="cancelOrder"
-                  class="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-colors"
+                  :disabled="isCancelingOrder"
+                  class="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-2"
                 >
-                  Cancel Order
+                  <svg v-if="isCancelingOrder" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                  {{ isCancelingOrder ? 'Cancelling...' : 'Cancel Order' }}
                 </button>
               </div>
             </div>
@@ -339,6 +341,19 @@
                 Please upload your screenshot to confirm your payment.
               </p>
 
+              <!-- Re-open payment credentials -->
+              <button
+                v-if="currentPaymentConfig && !receiptUploaded"
+                type="button"
+                @click="showPaymentModal = true"
+                class="w-full mb-4 flex items-center justify-center gap-2 py-2.5 px-4 border border-[#FE601C] text-[#FE601C] bg-white hover:bg-orange-50 rounded-xl text-xs font-bold transition-colors duration-200"
+              >
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.243m-4.243 0L9.757 9.757M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                View Payment Details Again
+              </button>
+
               <!-- Upload zone -->
               <div
                 v-if="!receiptFile"
@@ -357,7 +372,6 @@
                 ref="receiptInputRef"
                 type="file"
                 accept="image/*"
-                capture="environment"
                 class="hidden"
                 @change="handleFileSelect"
               />
@@ -450,6 +464,80 @@
     <!-- Footer -->
     <Footer />
 
+    <!-- Payment Details Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showPaymentModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-[#1A4189] to-[#2356b4] px-6 py-5 flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-bold text-white">Payment Details</h2>
+              <p class="text-white/70 text-xs mt-0.5">Send your payment to complete the order</p>
+            </div>
+            <button
+              @click="showPaymentModal = false"
+              class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors duration-200"
+            >
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="p-6">
+            <template v-if="currentPaymentConfig">
+              <!-- QR Code -->
+              <div class="flex flex-col items-center mb-5">
+                <img
+                  :src="currentPaymentConfig.qrImage"
+                  :alt="currentPaymentConfig.label + ' QR Code'"
+                  :class="paymentMethod === 'gcash' ? 'rotate-180' : ''"
+                  class="w-48 h-48 rounded-xl object-contain border border-gray-200 bg-white"
+                />
+              </div>
+
+              <!-- Account Details -->
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-center">
+                <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide mb-1">{{ currentPaymentConfig.label }} Account</p>
+                <p class="text-base font-bold text-gray-800">{{ currentPaymentConfig.accountName }}</p>
+                <p class="text-lg font-bold text-[#1A4189] mt-1">{{ currentPaymentConfig.accountNumber }}</p>
+                <p class="text-xs text-gray-400 mt-1 italic">{{ currentPaymentConfig.instruction }}</p>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  @click="downloadPaymentQR"
+                  class="flex-1 flex items-center justify-center gap-1.5 border border-[#1A4189] text-[#1A4189] bg-transparent py-2.5 rounded-xl text-xs font-bold hover:bg-blue-50 transition-colors duration-200"
+                >
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                  </svg>
+                  Download QR
+                </button>
+                <button
+                  type="button"
+                  @click="copyPaymentNumber"
+                  class="flex-1 flex items-center justify-center gap-1.5 border border-[#1A4189] py-2.5 rounded-xl text-xs font-bold transition-colors duration-200"
+                  :class="copySuccess ? 'text-green-600 border-green-400 bg-green-50' : 'text-[#1A4189] bg-transparent hover:bg-blue-50'"
+                >
+                  <svg v-if="!copySuccess" class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                  <svg v-else class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  {{ copySuccess ? 'Copied!' : 'Copy Number' }}
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Thank You Modal -->
     <Transition name="modal-fade">
       <div v-if="showThankYouModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -524,6 +612,9 @@ const toastTitle = ref('')
 const showToast = ref(false)
 const toastType = ref('success') // 'success', 'info', 'warning', 'error'
 
+// Cancel order loading state
+const isCancelingOrder = ref(false)
+
 const statuses = ref([
   { id: 'pending', label: 'Confirming' },
   { id: 'preparing', label: 'Preparing' },
@@ -542,6 +633,18 @@ const statusOrder = {
 
 // Thank you modal state
 const showThankYouModal = ref(false)
+
+// Prevent scroll when modal is open
+watch(
+  () => showThankYouModal.value,
+  (isOpen) => {
+    if (isOpen) {
+      document.documentElement.style.overflow = 'hidden'
+    } else {
+      document.documentElement.style.overflow = ''
+    }
+  }
+)
 
 const total = computed(() => {
   if (totalAmount.value > 0) return totalAmount.value
@@ -775,6 +878,63 @@ const receiptInputRef = ref(null)
 
 const QR_METHODS = ['gcash', 'maya', 'maribank', 'bpi']
 
+// ─── Payment credentials modal ───────────────────────────────────────────────
+const showPaymentModal = ref(false)
+
+const paymentConfig = {
+  gcash: {
+    label: 'GCash',
+    qrImage: '/gcash-qr.jpg',
+    accountName: 'Buffs Chicken',
+    accountNumber: '0927 064 3105',
+    instruction: 'Scan with your GCash app',
+  },
+  maya: {
+    label: 'Maya',
+    qrImage: '/maya-qr.jpg',
+    accountName: 'Buffs Chicken',
+    accountNumber: '0917 182 0520',
+    instruction: 'Scan with your Maya app',
+  },
+  maribank: {
+    label: 'Maribank',
+    qrImage: '/maribank-qr.jpg',
+    accountName: 'Buffs Chicken',
+    accountNumber: '18172480645',
+    instruction: 'Scan with your Maribank app',
+  },
+  bpi: {
+    label: 'BPI',
+    qrImage: '/bpi-qr.jpg',
+    accountName: 'Buffs Chicken',
+    accountNumber: '2569295354',
+    instruction: 'Scan with your BPI app',
+  }
+}
+
+const currentPaymentConfig = computed(() => paymentConfig[paymentMethod.value] || null)
+
+const copyPaymentNumber = async () => {
+  if (!currentPaymentConfig.value) return
+  try {
+    await navigator.clipboard.writeText(currentPaymentConfig.value.accountNumber)
+    copySuccess.value = true
+    setTimeout(() => { copySuccess.value = false }, 2000)
+  } catch {
+    // Silent fail
+  }
+}
+
+const downloadPaymentQR = () => {
+  if (!currentPaymentConfig.value) return
+  const link = document.createElement('a')
+  link.href = currentPaymentConfig.value.qrImage
+  link.download = `buffs-chicken-${paymentMethod.value}-qr.jpg`
+  link.click()
+}
+
+const copySuccess = ref(false)
+
 const handleFileSelect = (e) => {
   const file = e.target?.files?.[0]
   receiptError.value = null
@@ -833,6 +993,7 @@ const removeReceipt = () => {
 }
 
 const cancelOrder = async () => {
+  isCancelingOrder.value = true
   try {
     const response = await fetch(
       `${useRuntimeConfig().public.apiBase}/orders/${orderId.value}/cancel`,
@@ -854,6 +1015,8 @@ const cancelOrder = async () => {
   } catch (error) {
     console.error('Error cancelling order:', error)
     alert('Error cancelling order')
+  } finally {
+    isCancelingOrder.value = false
   }
 }
 
