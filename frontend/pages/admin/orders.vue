@@ -518,13 +518,6 @@ const filteredOrders = computed(() => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
   
-  // Filter out orders that require receipts but don't have one yet
-  result = result.filter((order) => {
-    const requiresReceipt = ['gcash', 'maya', 'maribank', 'bpi'].includes(order.paymentMethod)
-    // Show order if: it doesn't require receipt OR it has a receipt
-    return !requiresReceipt || (order.receiptImage && order.receiptImage.filename)
-  })
-  
   if (!filterStatus.value) return result
   return result.filter((order) => order.status === filterStatus.value)
 })
@@ -532,17 +525,10 @@ const filteredOrders = computed(() => {
 const loadOrders = async () => {
   try {
     const response = await getAllOrders()
-    orders.value = response.data
-      .filter((order: any) => {
-        // Only show orders that don't require receipts or already have receipts
-        const requiresReceipt = ['gcash', 'maya', 'maribank', 'bpi'].includes(order.paymentMethod)
-        const hasReceipt = order.receiptImage && order.receiptImage.filename
-        return !requiresReceipt || hasReceipt
-      })
-      .map((order: any) => ({
-        ...order,
-        inProgress: false
-      }))
+    orders.value = response.data.map((order: any) => ({
+      ...order,
+      inProgress: false
+    }))
   } catch (error) {
     console.error('Failed to load orders:', error)
   }
@@ -699,15 +685,6 @@ onMounted(async () => {
 
   if (socket.value) {
     socket.value.on('new-order', (data) => {
-      // Only show orders that don't require receipts or already have receipts
-      const requiresReceipt = ['gcash', 'maya', 'maribank', 'bpi'].includes(data.paymentMethod)
-      const hasReceipt = data.receiptImage && data.receiptImage.filename
-      
-      // Skip adding order if it requires receipt but doesn't have one
-      if (requiresReceipt && !hasReceipt) {
-        return
-      }
-      
       const newOrder = {
         _id: data.orderId,
         orderNumber: data.orderNumber,
