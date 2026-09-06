@@ -121,6 +121,12 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
   // Contact endpoints
   const submitContactForm = (data: any) => api.post('/contact/submit', data)
 
+  // Geocode endpoints (delivery pin picker — OpenStreetMap proxy, no API key)
+  const geocodeSearch = wrap((q: string) =>
+    api.get('/geocode/search', { params: { q } }), { results: [] })
+  const geocodeReverse = wrap((lat: number, lng: number) =>
+    api.get('/geocode/reverse', { params: { lat, lng } }), { label: null })
+
   // Upload endpoints
   const uploadImage = (file: File) => {
     const formData = new FormData()
@@ -212,6 +218,8 @@ const wrap = (fn: (...args: any[]) => Promise<any>, fallback: any = null) =>
     markNotificationRead,
     deleteNotification,
     submitContactForm,
+    geocodeSearch,
+    geocodeReverse,
     uploadImage,
     getPopularPicks,
     getStoreSettings,

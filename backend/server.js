@@ -48,6 +48,21 @@ const io = socketIo(server, {
   }
 });
 
+// Make io retrievable via req.app.get('io') — used by the PayMongo webhook handler,
+// which is mounted before the req.io middleware below.
+app.set('io', io);
+
+// ── PayMongo credential validation (runs before any route) ──────────────────
+if (process.env.PAYMONGO_SECRET_KEY && !process.env.PAYMONGO_SECRET_KEY.startsWith('sk_')) {
+  console.error('[STARTUP] PAYMONGO_SECRET_KEY is present but malformed (must start with sk_). Halting.');
+  process.exit(1);
+}
+if (!process.env.PAYMONGO_SECRET_KEY) {
+  console.warn('[STARTUP] PAYMONGO_SECRET_KEY not set — QR PH payments will fail until configured.');
+} else if (process.env.NODE_ENV === 'production' && process.env.PAYMONGO_SECRET_KEY.startsWith('sk_test_')) {
+  console.warn('[STARTUP] WARNING: using a PayMongo TEST key in a production environment.');
+}
+
 // Middleware
 const corsOptions = {
   origin: function(origin, callback) {
@@ -80,6 +95,12 @@ app.use((req, res, next) => {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(compression());
+
+// ⚠️ CRITICAL ORDERING: the PayMongo webhook route MUST be mounted before express.json().
+// It uses express.raw() internally and needs the raw request body for signature verification;
+// express.json() consumes that body and every webhook would fail verification silently.
+app.use('/api/webhooks', require('./routes/webhooks'));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -152,6 +173,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/store-settings', storeSettingsRoutes);
 app.use('/api/modifier-groups', modifierGroupRoutes);
+app.use('/api/geocode', require('./routes/geocode'));
 app.use('/api', voucherRoutes);
 app.use('/api/categories', categoriesRouter);
 

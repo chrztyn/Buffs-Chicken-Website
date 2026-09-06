@@ -46,6 +46,14 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
+    // Dev only: proxy backend-served product images so relative `/backend-images/...`
+    // URLs resolve the same way locally as they do behind nginx in production.
+    devProxy: {
+      '/backend-images': {
+        target: `${process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:5001'}/backend-images`,
+        changeOrigin: true
+      }
+    },
     compressPublicAssets: false,
     minify: false, // Disabled for faster builds on 1GB RAM
     sourceMap: false,
@@ -112,7 +120,7 @@ export default defineNuxtConfig({
     }]
   },
   pages: true,
-  css: ['~/assets/css/main.css'],
+  css: ['leaflet/dist/leaflet.css', '~/assets/css/main.css'],
   modules: ['@nuxt/image', '@nuxtjs/sitemap', '@nuxt/scripts'],
   // Sitemap temporarily disabled for faster builds
   // modules: ['@nuxt/image', '@nuxt/scripts'],
@@ -181,6 +189,9 @@ export default defineNuxtConfig({
           rel: 'dns-prefetch',
           href: 'https://www.buffschicken.com',
         },
+        // Map tiles (delivery location picker) — warm the connection early
+        { rel: 'preconnect', href: 'https://tile.openstreetmap.org', crossorigin: 'anonymous' },
+        { rel: 'dns-prefetch', href: 'https://tile.openstreetmap.org' },
         // Non-blocking font loading with media trick
         {
           rel: 'preload',

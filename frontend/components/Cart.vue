@@ -125,11 +125,11 @@
 
                                 <div class="flex flex-col sm:flex-row gap-5">
                                     <!-- Item Image with Border -->
-                                    <div class="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border-2 border-gray-200 group-hover:border-[#FE601C]/30 transition-all duration-300 shadow-sm">
+                                    <div class="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200 group-hover:border-[#FE601C]/30 transition-all duration-300 shadow-sm">
                                         <img
                                             :src="getImageUrl(item.image)"
                                             :alt="item.name"
-                                            class="w-full h-full object-contain p-3"
+                                            class="w-full h-full object-cover"
                                         />
                                     </div>
 

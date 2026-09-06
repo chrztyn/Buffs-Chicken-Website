@@ -260,8 +260,12 @@
                 </svg>
               </div>
               <div class="flex-1">
-                <h4 class="status-alert-title">Confirming Your Order</h4>
-                <p class="status-alert-description">Your order is being verified. Please wait a moment while we process your request.</p>
+                <h4 class="status-alert-title">{{ isQrph ? 'Payment Received' : 'Confirming Your Order' }}</h4>
+                <p class="status-alert-description">
+                  {{ isQrph
+                    ? 'Your payment is confirmed. Waiting for the store to accept your order — this usually only takes a few minutes.'
+                    : 'Your order is being verified. Please wait a moment while we process your request.' }}
+                </p>
                 <button
                   v-if="canCancelOrder"
                   @click="cancelOrder"
@@ -434,9 +438,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       </svg>
                     </div>
-                    <div>
-                      <span class="info-label">Delivery Address</span>
-                      <span class="info-value">{{ userAddress }}</span>
+                    <div class="flex-1">
+                      <span class="info-label">Delivery Location</span>
+                      <span v-if="!deliveryLocation" class="info-value">{{ userAddress }}</span>
+                      <DeliveryLocationPanel v-else :location="deliveryLocation" class="mt-2" />
                     </div>
                   </div>
                 </div>
@@ -598,6 +603,7 @@ const currentStatus = ref('pending')
 const hasOrder = ref(false)
 const userEmail = ref('')
 const userAddress = ref('Loading address...')
+const deliveryLocation = ref(null)
 const totalAmount = ref(0)
 const subtotal = ref(0)
 const itemsCount = ref(0)
@@ -763,6 +769,7 @@ const fetchOrderFromBackend = async (orderId) => {
       const order = await response.json()
 
       if (order.deliveryAddress) userAddress.value = order.deliveryAddress
+      if (order.deliveryLocation && order.deliveryLocation.lat != null) deliveryLocation.value = order.deliveryLocation
       currentStatus.value = order.status || 'pending'
       subtotal.value = order.subtotal || 0
       totalAmount.value = order.totalAmount || 0 
@@ -805,7 +812,10 @@ const loadOrder = async () => {
     if (order.deliveryAddress) {
       userAddress.value = order.deliveryAddress
     }
-    
+    if (order.deliveryLocation && order.deliveryLocation.lat != null) {
+      deliveryLocation.value = order.deliveryLocation
+    }
+
     console.log('Order loaded from localStorage:', {
       orderId: orderId.value,
       status: currentStatus.value,
@@ -913,6 +923,7 @@ const paymentConfig = {
 }
 
 const currentPaymentConfig = computed(() => paymentConfig[paymentMethod.value] || null)
+const isQrph = computed(() => paymentMethod.value === 'qrph')
 
 const copyPaymentNumber = async () => {
   if (!currentPaymentConfig.value) return

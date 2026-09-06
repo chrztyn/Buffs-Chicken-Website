@@ -13,39 +13,27 @@
     <transition name="slide-scale">
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-110 flex items-center justify-center p-4 pointer-events-none"
+        class="fixed inset-0 z-110 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none"
       >
         <div
           @click.stop
-          class="bg-white rounded-2xl shadow-xl max-w-2xl w-full pointer-events-auto overflow-y-auto max-h-[85vh] relative"
+          class="modal-panel bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-2xl w-full pointer-events-auto flex flex-col max-h-[92vh] sm:max-h-[85vh] relative"
         >
+          <!-- Mobile drag handle -->
+          <div class="sm:hidden mx-auto mt-3 mb-1 h-1 w-10 rounded-full bg-gray-300 flex-shrink-0"></div>
+
           <!-- Close Button -->
-          <!-- Step 1 & 2: normal X close -->
           <button
-            v-if="currentStep !== 3"
             @click="handleCloseBtn"
-            class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110"
+            class="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
 
-          <!-- Step 3: redirect to order status instead of closing -->
-          <button
-            v-else
-            @click="handleCloseBtn"
-            title="Go to Order Status"
-            class="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs font-medium transition-all duration-200"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            Order Status
-          </button>
-
           <!-- Step Indicator -->
-          <div class="flex items-center justify-center gap-2.5 pt-6 pb-0 px-6">
+          <div class="flex items-center justify-center gap-2.5 pt-4 sm:pt-6 pb-0 px-6 pr-14 flex-shrink-0">
             <div class="flex gap-1.5 items-center">
               <div
                 v-for="n in totalSteps"
@@ -126,77 +114,44 @@
                   />
                 </div>
 
-                <!-- Delivery Address -->
+                <!-- Delivery Location — map pin -->
                 <div class="form-field">
-                  <label for="address" class="form-label">Delivery Address *</label>
-                  <textarea
-                    id="address"
-                    v-model="formData.address"
-                    placeholder="Enter your complete delivery address"
-                    required
-                    rows="4"
-                    class="form-input resize-none"
-                  ></textarea>
+                  <label class="form-label">Delivery Location *</label>
+                  <p class="text-xs text-gray-500 mb-2">
+                    Pin exactly where the rider should drop off. We use this to book your Grab Express / Maxim delivery.
+                  </p>
+                  <LocationField v-model="formData.location" :error="locationError" />
+                  <p v-if="locationError" class="text-xs text-red-600 mt-2">{{ locationError }}</p>
                 </div>
 
-                <!-- Payment Method -->
+                <!-- Rider note -->
+                <div class="form-field">
+                  <label for="riderNote" class="form-label">Unit / Floor / Landmark *</label>
+                  <textarea
+                    id="riderNote"
+                    v-model="formData.location.note"
+                    rows="3"
+                    maxlength="200"
+                    placeholder="e.g. Unit 4B, 2nd flr. Blue gate beside the sari-sari store"
+                    required
+                    class="form-input"
+                  />
+                </div>
+
+                <!-- Payment Method — QR Ph only -->
                 <div class="form-field">
                   <label class="form-label">Payment Method *</label>
-                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                    <!-- Cash on Delivery (Coming Soon) -->
-                    <div
-                      class="col-span-2 sm:col-span-3 flex items-center gap-2 p-3 min-h-[64px] rounded-xl border border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed text-left"
-                    >
-                      <svg class="w-7 h-7 flex-shrink-0 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="6" width="20" height="12" rx="2"/>
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M6 12h.01M18 12h.01"/>
-                      </svg>
-                      <div>
-                        <p class="text-sm font-bold text-gray-400">Cash on Delivery</p>
-                        <p class="text-xs text-gray-400">Coming soon</p>
-                      </div>
+                  <div class="flex items-center gap-3 p-3 sm:p-4 rounded-xl border-2 border-[#FE601C] bg-orange-50">
+                    <svg class="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 text-[#FE601C]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1"/>
+                      <rect x="14" y="3" width="7" height="7" rx="1"/>
+                      <rect x="3" y="14" width="7" height="7" rx="1"/>
+                      <path d="M14 14h3v3h-3zM21 14v7M17 21h4M14 21h.01"/>
+                    </svg>
+                    <div class="text-left">
+                      <p class="text-[13px] sm:text-sm font-bold text-gray-800">QR Ph</p>
+                      <p class="text-[11px] sm:text-xs text-gray-500 leading-snug">Pay with any bank or e-wallet app · auto-confirmed</p>
                     </div>
-                    <!-- GCash -->
-                    <button
-                      type="button"
-                      @click="selectPayment('gcash')"
-                      :class="paymentMethod === 'gcash' ? 'border-2 border-[#FE601C] bg-orange-50' : 'border border-gray-200 bg-white hover:border-gray-300'"
-                      class="flex flex-col items-center justify-center gap-1 p-2 min-h-[64px] rounded-xl transition-all duration-200 text-center overflow-hidden"
-                    >
-                      <img src="/gcash-logo.png" alt="GCash" class="w-full h-8 object-contain" />
-                      <p class="text-xs font-bold text-gray-800">GCash</p>
-                    </button>
-                    <!-- Maya -->
-                    <button
-                      type="button"
-                      @click="selectPayment('maya')"
-                      :class="paymentMethod === 'maya' ? 'border-2 border-[#FE601C] bg-orange-50' : 'border border-gray-200 bg-white hover:border-gray-300'"
-                      class="flex flex-col items-center justify-center gap-1 p-2 min-h-[64px] rounded-xl transition-all duration-200 text-center overflow-hidden"
-                    >
-                      <img src="/maya-logo.jpg" alt="Maya" class="w-full h-10 object-contain" />
-                      <p class="text-xs font-bold text-gray-800">Maya</p>
-                    </button>
-                    <!-- Maribank -->
-                    <button
-                      type="button"
-                      @click="selectPayment('maribank')"
-                      :class="paymentMethod === 'maribank' ? 'border-2 border-[#FE601C] bg-orange-50' : 'border border-gray-200 bg-white hover:border-gray-300'"
-                      class="flex flex-col items-center justify-center gap-1 p-2 min-h-[64px] rounded-xl transition-all duration-200 text-center overflow-hidden"
-                    >
-                      <img src="/maribank-logo.png" alt="Maribank" class="w-full h-10 object-contain" />
-                      <p class="text-xs font-bold text-gray-800">Maribank</p>
-                    </button>
-                    <!-- BPI -->
-                    <button
-                      type="button"
-                      @click="selectPayment('bpi')"
-                      :class="paymentMethod === 'bpi' ? 'border-2 border-[#FE601C] bg-orange-50' : 'border border-gray-200 bg-white hover:border-gray-300'"
-                      class="flex flex-col items-center justify-center gap-1 p-2 min-h-[64px] rounded-xl transition-all duration-200 text-center overflow-hidden"
-                    >
-                      <img src="/bpi-logo.jpg" alt="BPI" class="w-full h-10 object-contain" />
-                      <p class="text-xs font-bold text-gray-800">BPI</p>
-                    </button>
                   </div>
                 </div>
 
@@ -310,160 +265,6 @@
             </div>
           </div>
 
-          <!-- ─────────────── STEP 3: QR PAYMENT + RECEIPT UPLOAD ─────────────── -->
-          <div v-if="currentStep === 3 && currentPaymentConfig" class="modal-content">
-            <!-- Header -->
-            <div class="text-center mb-3">
-              <h2 class="text-base sm:text-lg font-bold text-[#1A4189]">Almost done! Complete your payment</h2>
-              <p class="text-xs text-gray-500 mt-1">Transfer via {{ currentPaymentConfig.label }} and upload your receipt below</p>
-            </div>
-
-            <!-- QR Code -->
-            <div class="flex flex-col items-center">
-              <img
-                :src="currentPaymentConfig.qrImage"
-                :alt="currentPaymentConfig.label + ' QR Code'"
-                :class="paymentMethod === 'gcash' ? 'rotate-180' : ''"
-                class="w-44 h-44 sm:w-48 sm:h-48 max-w-full rounded-xl object-contain border border-gray-200 bg-white"
-              />
-
-              <!-- Quick Action Buttons -->
-              <div class="flex gap-2 justify-center mt-3 w-full max-w-full overflow-hidden px-2">
-                <button
-                  type="button"
-                  @click="downloadQR"
-                  class="flex items-center gap-1 border border-[#1A4189] text-[#1A4189] bg-transparent px-3 py-1.5 rounded-full text-xs min-h-[36px] hover:bg-blue-50 transition-colors duration-200 whitespace-nowrap flex-shrink-0"
-                >
-                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                  </svg>
-                  Download QR
-                </button>
-                <button
-                  type="button"
-                  @click="copyNumber"
-                  class="flex items-center gap-1.5 border border-[#1A4189] text-[#1A4189] bg-transparent px-3 py-1.5 rounded-full text-xs min-h-[36px] hover:bg-blue-50 transition-colors duration-200 whitespace-nowrap flex-shrink-0"
-                >
-                  <svg v-if="!copySuccess" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  <span :class="copySuccess ? 'text-green-600' : ''">{{ copySuccess ? 'Copied!' : 'Copy Number' }}</span>
-                </button>
-              </div>
-
-              <!-- Account Details -->
-              <div class="mt-3 text-center">
-                <p class="text-sm font-bold text-gray-800">{{ currentPaymentConfig.accountName }}</p>
-                <p class="text-sm font-semibold text-gray-600">{{ currentPaymentConfig.accountNumber }}</p>
-                <p class="text-xs text-gray-500 mt-0.5 italic">{{ currentPaymentConfig.instruction }}</p>
-              </div>
-            </div>
-
-            <!-- Divider -->
-            <div class="flex items-center gap-2 my-4">
-              <div class="flex-1 h-px bg-gray-200"></div>
-              <span class="text-xs text-gray-400 whitespace-nowrap">Then upload your receipt</span>
-              <div class="flex-1 h-px bg-gray-200"></div>
-            </div>
-
-            <!-- ── Receipt Upload — styled to match order-status page ── -->
-            <div class="p-5 bg-orange-50 border border-orange-200 rounded-2xl">
-              <!-- Header alert row -->
-              <div class="flex items-center gap-2 mb-3">
-                <svg class="w-5 h-5 text-[#FE601C] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <p class="text-sm font-bold text-[#FE601C]">Receipt not yet uploaded</p>
-              </div>
-              <p class="text-xs text-gray-600 mb-4">
-                Your order was placed but we haven't received your payment receipt yet.
-                Please upload your screenshot to confirm your payment.
-              </p>
-
-              <!-- Upload zone (hidden once file selected) -->
-              <div v-if="!receiptFile">
-                <!-- Desktop upload zone -->
-                <div
-                  @click="openFilePicker"
-                  class="sm:flex hidden flex-col items-center justify-center border-2 border-dashed border-[#FE601C] rounded-xl p-5 cursor-pointer hover:bg-orange-100 transition-colors duration-200"
-                >
-                  <svg class="w-8 h-8 text-[#FE601C] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  <p class="text-sm font-bold text-gray-700">Upload Payment Receipt</p>
-                  <p class="text-xs text-gray-400 mt-1">Tap to select your screenshot</p>
-                </div>
-
-                <!-- Mobile upload options (two buttons) -->
-                <div class="sm:hidden flex gap-2 w-full">
-                  <button
-                    type="button"
-                    @click="openGallery"
-                    class="flex-1 flex flex-col items-center justify-center gap-1.5 px-2 py-2.5 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-300 rounded-lg hover:from-purple-100 transition-all duration-200 active:scale-95"
-                  >
-                    <svg class="w-4 h-4 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <span class="text-xs font-semibold text-purple-700 leading-tight">Choose Photo</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Hidden file inputs -->
-              <input ref="receiptInput"        type="file" accept="image/*"             class="hidden" @change="handleFileSelect" />
-              <input ref="receiptCameraInput"  type="file" accept="image/*" capture="environment" class="hidden" @change="handleFileSelect" />
-              <input ref="receiptGalleryInput" type="file" accept="image/*"             class="hidden" @change="handleFileSelect" />
-
-              <!-- Preview -->
-              <div v-if="receiptFile && receiptPreviewUrl" class="mt-3">
-                <img
-                  :src="receiptPreviewUrl"
-                  class="max-h-40 w-full object-contain rounded-xl border border-gray-200"
-                  alt="Receipt preview"
-                />
-                <div class="flex items-center justify-between mt-2 px-1">
-                  <span class="text-xs text-green-600 font-semibold flex items-center gap-1">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Receipt ready
-                  </span>
-                  <button
-                    type="button"
-                    @click="removeReceipt"
-                    class="text-xs text-red-500 hover:text-red-700 underline transition-colors duration-200"
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                <!-- Submit button — only visible once file is selected -->
-                <button
-                  type="button"
-                  @click="paid"
-                  :disabled="receiptUploading"
-                  :class="receiptUploading
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-[#FE601C] text-white hover:bg-[#e25519] hover:shadow-lg active:scale-[0.98]'"
-                  class="mt-3 w-full py-3 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <svg v-if="receiptUploading" class="w-4 h-4 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                  {{ receiptUploading ? 'Uploading...' : 'Submit Receipt' }}
-                </button>
-              </div>
-
-              <!-- Error -->
-              <p v-if="receiptError" class="mt-2 text-xs text-red-600">{{ receiptError }}</p>
-            </div>
-          </div>
 
         </div>
       </div>
@@ -534,12 +335,51 @@ const currentStep = ref(1) // 1 = form, 2 = otp, 3 = qr payment
 const confirmedOrderId = ref(null)
 
 // ─── Form state ─────────────────────────────────────────────────────────────
+const emptyLocation = () => ({
+  lat: null, lng: null, label: null, note: null,
+  contactName: null, contactPhone: null, source: 'pin'
+})
+
 const formData = ref({
   name: '',
   email: '',
   phone: '',
-  address: ''
+  address: '',
+  location: emptyLocation()
 })
+
+const locationError = ref('')
+
+// Human-readable address string derived from the pin — used for the user record
+// (check-email / send-otp `location` field). The order itself sends the full
+// `location` object; the backend derives its own canonical string.
+const derivedAddress = () => {
+  const loc = formData.value.location || {}
+  const parts = []
+  if (loc.label) parts.push(loc.label)
+  if (loc.note) parts.push(`(${loc.note})`)
+  if (loc.lat && loc.lng) parts.push(`— ${loc.lat},${loc.lng}`)
+  return parts.join(' ') || loc.label || ''
+}
+
+// Full delivery-location payload — pin + rider note + contact reused from the
+// customer's own name/phone (no separate contact fields in the form).
+const locationPayload = () => {
+  const loc = formData.value.location || {}
+  return {
+    ...loc,
+    contactName: loc.contactName || formData.value.name || null,
+    contactPhone: loc.contactPhone || formData.value.phone || null
+  }
+}
+
+// Returns an error message string if the pinned location is incomplete, else ''.
+const validateLocation = () => {
+  const loc = formData.value.location || {}
+  if (!loc.lat || !loc.lng) return 'Please pin your delivery location on the map.'
+  if (!loc.note || !loc.note.trim()) return 'Please add a unit / floor / house number or a landmark for the rider.'
+  return ''
+}
 
 // ─── OTP state ──────────────────────────────────────────────────────────────
 const otpCode = ref('')
@@ -553,65 +393,10 @@ const userId = ref(null)
 const isReturningCustomer = ref(false)
 const requiresOTP = ref(false)
 
-// ─── Payment state ───────────────────────────────────────────────────────────
-const paymentMethod = ref('gcash')
+// ─── Payment state — QR Ph only ──────────────────────────────────────────────
+const paymentMethod = ref('qrph')
 
-// ─── Receipt state (Step 3) ──────────────────────────────────────────────────
-const receiptFile = ref(null)
-const receiptPreviewUrl = ref(null)
-const receiptUploading = ref(false)
-const receiptError = ref(null)
-const receiptUploaded = ref(false)
-const receiptInput = ref(null)
-const receiptCameraInput = ref(null)
-const receiptGalleryInput = ref(null)
-const copySuccess = ref(false)
-
-const QR_METHODS = ['gcash', 'maya', 'maribank', 'bpi']
-
-// ─── Payment config ──────────────────────────────────────────────────────────
-const paymentConfig = {
-  gcash: {
-    label: 'GCash',
-    qrImage: '/gcash-qr.jpg',
-    accountName: 'Buffs Chicken',
-    accountNumber: '0927 064 3105',
-    instruction: 'Scan with your GCash app',
-    color: '#007DFF'
-  },
-  maya: {
-    label: 'Maya',
-    qrImage: '/maya-qr.jpg',
-    accountName: 'Buffs Chicken',
-    accountNumber: '0917 182 0520',
-    instruction: 'Scan with your Maya app',
-    color: '#42A647'
-  },
-  maribank: {
-    label: 'Maribank',
-    qrImage: '/maribank-qr.jpg',
-    accountName: 'Buffs Chicken',
-    accountNumber: '18172480645',
-    instruction: 'Scan with your Maribank app',
-    color: '#6B21A8'
-  },
-  bpi: {
-    label: 'BPI',
-    qrImage: '/bpi-qr.jpg',
-    accountName: 'Buffs Chicken',
-    accountNumber: '2569295354',
-    instruction: 'Scan with your BPI app',
-    color: '#CC0000'
-  }
-}
-
-const isQrPayment = computed(() => ['gcash', 'maya', 'maribank', 'bpi'].includes(paymentMethod.value))
-const currentPaymentConfig = computed(() => paymentConfig[paymentMethod.value] || null)
-const totalSteps = computed(() => isQrPayment.value ? 3 : 2)
-
-const selectPayment = (method) => {
-  paymentMethod.value = method
-}
+const totalSteps = computed(() => 2)
 
 // ─── Backdrop & close button behaviour ───────────────────────────────────────
 const handleBackdropClick = () => {
@@ -620,12 +405,6 @@ const handleBackdropClick = () => {
 }
 
 const handleCloseBtn = () => {
-  if (currentStep.value === 3) {
-    router.push('/order-status')
-    resetModal()
-    emit('close')
-    return
-  }
   if (currentStep.value === 2) goBackToDelivery()
   else closeModal()
 }
@@ -654,7 +433,7 @@ const checkEmailExists = async () => {
         email: formData.value.email,
         name: formData.value.name,
         phone: formData.value.phone,
-        location: formData.value.address
+        location: derivedAddress()
       })
     })
 
@@ -672,7 +451,6 @@ const checkEmailExists = async () => {
       userId.value = data.userId
       formData.value.name = data.name || formData.value.name
       formData.value.phone = data.phone || formData.value.phone
-      formData.value.address = data.location || formData.value.address
       await proceedToCheckout()
     } else {
       isReturningCustomer.value = false
@@ -692,10 +470,12 @@ const sendOTPForNewUser = async () => {
   try {
     console.log('Sending OTP for new user:', formData.value.email)
 
-    if (!formData.value.name || !formData.value.email || !formData.value.phone || !formData.value.address) {
+    if (!formData.value.name || !formData.value.email || !formData.value.phone) {
       otpError.value = 'Please fill in all fields'
       return
     }
+    const locErr = validateLocation()
+    if (locErr) { otpError.value = locErr; return }
 
     isLoading.value = true
     otpError.value = ''
@@ -707,7 +487,7 @@ const sendOTPForNewUser = async () => {
         name: formData.value.name,
         email: formData.value.email,
         phone: formData.value.phone,
-        location: formData.value.address
+        location: derivedAddress()
       })
     })
 
@@ -813,7 +593,8 @@ const createOrderForQR = async () => {
     name: formData.value.name,
     email: formData.value.email,
     phone: formData.value.phone,
-    address: formData.value.address,
+    address: derivedAddress(),
+    deliveryLocation: locationPayload(),
     cartItems: transformedCartItems,
     subtotal: props.subtotal,
     total: props.total,
@@ -863,7 +644,8 @@ const createOrderForQR = async () => {
       customer: { ...formData.value, userId: userId.value },
       verificationStatus: 'verified',
       paymentMethod: paymentMethod.value,
-      deliveryAddress: formData.value.address,
+      deliveryAddress: derivedAddress(),
+      deliveryLocation: locationPayload(),
       customerEmail: formData.value.email,
       voucher: props.voucherCode
         ? { code: props.voucherCode, discountAmount: props.voucherDiscount }
@@ -878,32 +660,16 @@ const createOrderForQR = async () => {
   confirmedOrderId.value = data.order._id
 }
 
-// ─── Proceed to checkout (split by payment method) ────────────────────────────
+// ─── Proceed to checkout — QR Ph only, redirect to dedicated payment page ─────
 const proceedToCheckout = async () => {
   try {
     isCreatingOrder.value = true
 
-    if (isQrPayment.value) {
-      await createOrderForQR()
-      clearInterval(otpTimerInterval.value)
-      currentStep.value = 3
-    } else {
-      // Cash on Delivery — keep existing flow, Cart.vue handles everything
-      emit('confirm', {
-        ...formData.value,
-        userId: userId.value,
-        verificationStatus: 'verified',
-        cartItems: props.cartItems,
-        subtotal: props.subtotal,
-        total: props.total,
-        isReturningCustomer: isReturningCustomer.value,
-        paymentMethod: paymentMethod.value,
-        paymentReference: null,
-        gcashReference: null
-      })
-      resetModal()
-      emit('close')
-    }
+    await createOrderForQR()
+    clearInterval(otpTimerInterval.value)
+    resetModal()
+    emit('close')
+    router.push('/qr-payment')
   } catch (error) {
     console.error('Error proceeding to checkout:', error)
     otpError.value = error.message || 'Failed to proceed. Please try again.'
@@ -925,21 +691,13 @@ const goBackToDelivery = () => {
 }
 
 const resetModal = () => {
-  formData.value = { name: '', email: '', phone: '', address: '' }
+  formData.value = { name: '', email: '', phone: '', address: '', location: emptyLocation() }
+  locationError.value = ''
   currentStep.value = 1
   confirmedOrderId.value = null
   isReturningCustomer.value = false
   requiresOTP.value = false
-  paymentMethod.value = 'gcash'
-  if (receiptPreviewUrl.value) URL.revokeObjectURL(receiptPreviewUrl.value)
-  receiptFile.value = null
-  receiptPreviewUrl.value = null
-  copySuccess.value = false
-  receiptUploading.value = false
-  receiptError.value = null
-  if (receiptInput.value) receiptInput.value.value = ''
-  if (receiptCameraInput.value) receiptCameraInput.value.value = ''
-  if (receiptGalleryInput.value) receiptGalleryInput.value.value = ''
+  paymentMethod.value = 'qrph'
   resetOTP()
 }
 
@@ -950,11 +708,17 @@ const closeModal = () => {
 
 const confirmOrder = () => {
   console.log('confirmOrder called')
+  const locErr = validateLocation()
+  if (locErr) { locationError.value = locErr; otpError.value = locErr; return }
+  locationError.value = ''
   checkEmailExists()
 }
 
 const handleSendOTP = () => {
   console.log('handleSendOTP clicked')
+  const locErr = validateLocation()
+  if (locErr) { locationError.value = locErr; otpError.value = locErr; return }
+  locationError.value = ''
   isLoading.value = true
   otpError.value = ''
   checkEmailExists()
@@ -966,108 +730,9 @@ const resendOTP = async () => {
   await sendOTPForNewUser()
 }
 
-// ─── Step 3: QR quick actions ─────────────────────────────────────────────────
-const downloadQR = () => {
-  if (!currentPaymentConfig.value) return
-  const link = document.createElement('a')
-  link.href = currentPaymentConfig.value.qrImage
-  link.download = `buffs-chicken-${paymentMethod.value}-qr.jpg`
-  link.click()
-}
-
-const copyNumber = async () => {
-  if (!currentPaymentConfig.value) return
-  try {
-    await navigator.clipboard.writeText(currentPaymentConfig.value.accountNumber)
-    copySuccess.value = true
-    setTimeout(() => { copySuccess.value = false }, 2000)
-  } catch {
-    // Silent fail — clipboard not supported on all browsers
-  }
-}
-
-// ─── Step 3: Receipt upload ───────────────────────────────────────────────────
-const openFilePicker = () => {
-  receiptInput.value?.click()
-}
-
-const openCamera = () => {
-  receiptCameraInput.value?.click()
-}
-
-const openGallery = () => {
-  receiptGalleryInput.value?.click()
-}
-
-const handleFileSelect = (event) => {
-  const file = event.target?.files?.[0]
-  receiptError.value = null
-
-  if (!file) return
-
-  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
-  if (!validTypes.includes(file.type) && !file.type.startsWith('image/')) {
-    receiptError.value = 'Please upload an image file'
-    if (event.target) event.target.value = ''
-    return
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    receiptError.value = 'Image too large. Please upload under 5MB'
-    if (event.target) event.target.value = ''
-    return
-  }
-
-  receiptFile.value = file
-  if (receiptPreviewUrl.value) URL.revokeObjectURL(receiptPreviewUrl.value)
-  receiptPreviewUrl.value = URL.createObjectURL(file)
-}
-
-const removeReceipt = () => {
-  if (receiptPreviewUrl.value) URL.revokeObjectURL(receiptPreviewUrl.value)
-  receiptFile.value = null
-  receiptPreviewUrl.value = null
-  receiptError.value = null
-  if (receiptInput.value) receiptInput.value.value = ''
-  if (receiptCameraInput.value) receiptCameraInput.value.value = ''
-  if (receiptGalleryInput.value) receiptGalleryInput.value.value = ''
-}
-
-// ─── Step 3: Upload receipt ──────────────────────────────────────────────────
-const uploadReceipt = async () => {
-  if (!receiptFile.value || !confirmedOrderId.value) return
-  receiptUploading.value = true
-  receiptError.value = null
-  try {
-    const fd = new FormData()
-    fd.append('receipt', receiptFile.value)
-    const res = await fetch(`${API_BASE_URL}/orders/${confirmedOrderId.value}/receipt`, {
-      method: 'POST',
-      body: fd
-    })
-    if (!res.ok) throw new Error('Upload failed')
-
-    receiptUploaded.value = true
-  } catch {
-    receiptError.value = 'Upload failed. Please message us on Facebook to confirm your payment.'
-  } finally {
-    receiptUploading.value = false
-  }
-}
-
-// ─── Step 3: Paid button ──────────────────────────────────────────────────────
-const paid = async () => {
-  // Upload receipt first
-  await uploadReceipt()
-  
-  // Always redirect — never block on upload failure
-  router.push('/order-status')
-}
-
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 onUnmounted(() => {
   if (otpTimerInterval.value) clearInterval(otpTimerInterval.value)
-  if (receiptPreviewUrl.value) URL.revokeObjectURL(receiptPreviewUrl.value)
   // Clean up scroll prevention
   document.documentElement.style.overflow = ''
   document.body.style.overflow = ''
@@ -1076,12 +741,19 @@ onUnmounted(() => {
 
 <style scoped>
 /* Modal Container */
+.modal-panel {
+  overscroll-behavior: contain;
+}
+
 .modal-content {
   padding: 1.5rem 2rem;
   max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Section Titles */
@@ -1191,6 +863,12 @@ onUnmounted(() => {
 
 .form-input::placeholder {
   color: #9ca3af;
+}
+
+textarea.form-input {
+  min-height: 74px;
+  line-height: 1.45;
+  resize: none;
 }
 
 /* Payment Info */
@@ -1518,6 +1196,136 @@ onUnmounted(() => {
   }
   100% {
     stroke-dashoffset: -31.4;
+  }
+}
+
+/* ─────────────── Mobile tuning ───────────────
+   Compact mobile type scale, matched to Cart.vue so the two screens
+   feel like one product. Only the <input> font stays at 16px — below
+   that, iOS Safari auto-zooms the viewport on focus.
+     section title .......... 13px / 700
+     input text ............. 16px / 400   ← keep at 16, no lower
+     field label ............ 10px / 600 uppercase
+     helper / caption ....... 11px / 400
+     summary rows ........... 12px
+     button ................. 14px / 600
+     step / fine print ...... 10px
+     total-amount emphasis .. 20px / 700
+*/
+@media (max-width: 640px) {
+  .modal-content {
+    padding: 0.9rem 1rem 0;
+    gap: 1rem;
+  }
+
+  .section-title {
+    font-size: 0.8125rem; /* 13px */
+    letter-spacing: 0.2px;
+    margin-bottom: 0.55rem;
+  }
+
+  .summary-items {
+    padding: 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .summary-label,
+  .summary-value {
+    font-size: 0.75rem; /* 12px */
+  }
+
+  .summary-total-amount {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  .form-group {
+    gap: 0.55rem;
+  }
+
+  .form-label {
+    font-size: 0.625rem; /* 10px */
+    letter-spacing: 0.2px;
+    margin-bottom: 0.3rem;
+  }
+
+  /* Helper / hint line under a label (e.g. delivery-location note) */
+  .form-field p.text-xs {
+    font-size: 0.6875rem; /* 11px */
+    line-height: 1.4;
+  }
+
+  .form-input {
+    font-size: 1rem; /* 16px — do NOT reduce, prevents iOS focus zoom */
+    padding: 0.6rem 0.85rem;
+  }
+
+  /* Placeholder can be smaller than the input without triggering the
+     iOS zoom (that keys off the input's own font-size, not this). */
+  .form-input::placeholder {
+    font-size: 0.8125rem; /* 13px */
+  }
+
+  textarea.form-input {
+    min-height: 76px;
+  }
+
+  /* Sticky bottom action bar so Confirm is always reachable */
+  .action-buttons {
+    position: sticky;
+    bottom: 0;
+    margin: 0.25rem -1.1rem 0;
+    padding: 0.8rem 1.1rem calc(0.8rem + env(safe-area-inset-bottom, 0px));
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.06);
+    z-index: 5;
+  }
+
+  .btn-cancel,
+  .btn-confirm {
+    padding: 0.72rem 0.75rem;
+    font-size: 0.875rem; /* 14px */
+    white-space: nowrap;
+    border-radius: 10px;
+  }
+
+  .btn-cancel {
+    flex: 0 0 auto;
+    min-width: 92px;
+  }
+
+  .btn-confirm {
+    flex: 1 1 auto;
+  }
+
+  .otp-header {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+  }
+
+  .otp-check-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .otp-modal-title {
+    font-size: 1.25rem;
+  }
+
+  .otp-description {
+    font-size: 0.85rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .otp-input {
+    font-size: 1.6rem;
+    letter-spacing: 0.5rem;
+  }
+
+  .otp-input::placeholder {
+    font-size: 1.6rem;
+    letter-spacing: 0.5rem;
   }
 }
 

@@ -10,15 +10,15 @@
             ]"
         >
             <!-- Image Section -->
-            <div class="image-container rounded-xl p-1 sm:p-1.5 mb-2 sm:mb-2.5 flex items-center justify-center overflow-hidden transition-colors duration-300">
-                <img 
-                    :src="image" 
-                    :alt="name" 
+            <div class="image-container flex items-center justify-center overflow-hidden transition-colors duration-300">
+                <img
+                    :src="image"
+                    :alt="name"
                     width="300"
                     height="300"
                     loading="lazy"
                     :class="[
-                        'w-full h-32 sm:h-40 object-contain transition-transform duration-300',
+                        'w-full h-full object-cover transition-transform duration-300',
                         disabled ? 'grayscale' : 'group-hover:scale-105'
                     ]"
                 />
@@ -44,7 +44,7 @@
             <!-- Disabled Overlay Badge -->
             <div 
                 v-if="disabled"
-                class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold font-['Unbounded'] px-2 py-1 rounded-full"
+                class="absolute top-2 right-2 bg-red-500 text-white text-[10px] sm:text-xs font-bold font-['Unbounded'] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full"
             >
                 Closed
             </div>
@@ -123,7 +123,7 @@ export default {
 
 <style scoped>
 .menu-card {
-    min-height: 320px;
+    min-height: 210px;
     transition: transform 0.3s ease;
     height: 100%;
     display: flex;
@@ -135,7 +135,7 @@ export default {
 }
 
 .image-container {
-    min-height: 160px;
+    height: 120px;
     flex-shrink: 0;
 }
 
@@ -163,12 +163,12 @@ export default {
 }
 
 .product-description {
-    font-size: 0.65rem;
-    line-height: 1.4;
+    font-size: 0.6rem;
+    line-height: 1.35;
     color: #6b7280;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -178,18 +178,18 @@ export default {
 /* Small Mobile (375px) */
 @media (min-width: 375px) {
     .menu-card {
-        min-height: 340px;
+        min-height: 235px;
     }
-    
+
     .image-container {
-        min-height: 180px;
+        height: 135px;
     }
-    
+
     .product-description {
-        font-size: 0.7rem;
-        line-height: 1.45;
-        -webkit-line-clamp: 3;
-        line-clamp: 3;
+        font-size: 0.65rem;
+        line-height: 1.4;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
 }
 
@@ -200,7 +200,7 @@ export default {
     }
     
     .image-container {
-        min-height: 200px;
+        height: 190px;
     }
     
     .product-name {
@@ -226,7 +226,7 @@ export default {
     }
     
     .image-container {
-        min-height: 240px;
+        height: 240px;
     }
     
     .product-description {
