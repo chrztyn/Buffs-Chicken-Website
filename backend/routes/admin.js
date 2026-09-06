@@ -359,7 +359,9 @@ router.get('/blogs', authenticateAdmin, async (req, res) => {
 // Get all orders (admin view)
 router.get('/orders', authenticateAdmin, async (req, res) => {
   try {
-    const orders = await Order.find()
+    // Exclude QR PH orders that have not been paid yet — they are not real orders
+    // until the PayMongo `payment.paid` webhook flips them to 'pending'.
+    const orders = await Order.find({ status: { $ne: 'awaiting_payment' } })
       .populate('user', 'name email phone')
       .populate('items.product')
       .sort({ createdAt: -1 })

@@ -79,7 +79,10 @@
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Customer</p>
               <p class="font-['Poppins'] font-bold text-[#1A4189] text-sm">{{ order.user?.name || 'Guest' }}</p>
               <p class="text-xs text-gray-600">{{ order.user?.phone }}</p>
-              <p class="text-xs text-gray-600">{{ order.deliveryAddress }}</p>
+              <p class="text-xs text-gray-600">
+                {{ order.deliveryLocation?.label || order.deliveryAddress }}
+                <span v-if="order.deliveryLocation?.note" class="block text-gray-500">{{ order.deliveryLocation.note }}</span>
+              </p>
             </div>
             <div>
               <p class="text-gray-600 font-['Poppins'] text-xs font-bold uppercase tracking-wider">Amount</p>
@@ -240,8 +243,12 @@
               <p class="font-bold text-gray-800">{{ selectedOrder.user?.email }}</p>
             </div>
             <div class="col-span-2">
-              <p class="text-gray-600 font-semibold mb-1">Delivery Address</p>
-              <p class="font-bold text-gray-800">{{ selectedOrder.deliveryAddress }}</p>
+              <p class="text-gray-600 font-semibold mb-2">Delivery Location</p>
+              <DeliveryLocationPanel
+                :location="selectedOrder.deliveryLocation"
+                :fallback-address="selectedOrder.deliveryAddress"
+                :admin="true"
+              />
             </div>
           </div>
         </div>
@@ -700,6 +707,7 @@ onMounted(async () => {
         totalAmount: data.totalAmount,
         status: data.status || 'pending',
         deliveryAddress: data.deliveryAddress,
+        deliveryLocation: data.deliveryLocation || null,
         notes: data.notes || '',
         paymentMethod: data.paymentMethod,
         receiptImage: data.receiptImage || null,

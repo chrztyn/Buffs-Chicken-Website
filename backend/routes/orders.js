@@ -13,6 +13,56 @@ const { sendOrderNotification, sendAdminOrderNotification } = require('../config
 const { sendOrderReceipt } = require('../utils/sendOrderReceipt');
 const { saveReceipt, deleteReceipt } = require('../utils/receiptStorage');
 const authenticateAdmin = require('../middleware/authenticateAdmin');
+const { createQRPhPayment, getPaymentIntent } = require('../services/paymongo');
+const { validateAndNormalize } = require('../services/deliveryLocation');
+
+const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
+
+// PaymentIntent statuses for which the existing QR is still scannable / usable.
+const PI_REUSABLE = ['awaiting_next_action'];
+
+/**
+ * Mark a QR Ph order as paid and notify the admin dashboard.
+ * Idempotent — safe to call from the webhook OR from a status-poll reconcile.
+ * @param {Object} order - a full Mongoose Order doc (user should be populated for the emit)
+ * @param {Object} req   - Express request (for req.app.get('io'))
+ * @param {string} [paymentId] - PayMongo payment id, if known
+ */
+async function markQRPhOrderPaid(order, req, paymentId) {
+  if (order.paymongo?.status === 'paid') return;
+
+  order.paymongo.paymentId = paymentId || order.paymongo.paymentId || null;
+  order.paymongo.status = 'paid';
+  order.paymongo.paidAt = new Date();
+  order.status = 'pending';
+  await order.save();
+
+  const user = order.user && order.user._id ? order.user : await User.findById(order.user);
+  const io = req.app.get('io');
+  if (io) {
+    io.to('admin-orders').emit('new-order', {
+      orderId: order._id,
+      orderNumber: order.orderNumber,
+      userId: user?._id,
+      customerName: user?.name || 'Unknown Customer',
+      customerEmail: user?.email,
+      customerPhone: user?.phone,
+      items: order.items,
+      subtotal: order.subtotal,
+      tax: order.tax,
+      totalAmount: order.totalAmount,
+      deliveryAddress: order.deliveryAddress,
+      deliveryLocation: order.deliveryLocation || null,
+      paymentMethod: 'qrph',
+      voucher: order.voucher?.code ? order.voucher : null,
+      paidAt: order.paymongo.paidAt,
+      status: 'pending',
+      timestamp: new Date(),
+    });
+    console.log(`[QRPH] markQRPhOrderPaid: emitted new-order for order ${order._id}`);
+  }
+  console.log(`[QRPH] Order ${order._id} marked paid at ${order.paymongo.paidAt.toISOString()}`);
+}
 
 // Multer instance — memory storage; never writes raw files to disk
 const upload = multer({
@@ -82,7 +132,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const { userId, cartId, deliveryAddress, notes, subtotal, tax } = req.body;
+    const { userId, cartId, deliveryAddress, deliveryLocation, notes, subtotal, tax } = req.body;
 
     const user = await User.findById(userId);
     if (!user || !user.isVerified) {
@@ -120,6 +170,16 @@ router.post('/', async (req, res) => {
 
     const totalAmount = subtotal + tax;
 
+    // Optional pinned location (map picker). Falls back to the typed/legacy address.
+    let normalizedLocation = null;
+    if (deliveryLocation) {
+      try {
+        normalizedLocation = validateAndNormalize(deliveryLocation);
+      } catch (locErr) {
+        return res.status(locErr.statusCode || 400).json({ success: false, message: locErr.message });
+      }
+    }
+
     // Create order
     const order = new Order({
       user: userId,
@@ -127,6 +187,7 @@ router.post('/', async (req, res) => {
       subtotal,
       tax,
       totalAmount,
+      deliveryLocation: normalizedLocation || undefined,
       deliveryAddress: deliveryAddress || user.location,
       status: 'pending'
     });
@@ -319,6 +380,9 @@ router.post('/:orderId/reorder', async (req, res) => {
       tax: previousOrder.tax,
       totalAmount: previousOrder.totalAmount,
       deliveryAddress: previousOrder.deliveryAddress,
+      deliveryLocation: previousOrder.deliveryLocation && previousOrder.deliveryLocation.lat != null
+        ? previousOrder.deliveryLocation.toObject()
+        : undefined,
       status: 'pending'
     });
 
@@ -349,10 +413,11 @@ router.post('/submit', async (req, res) => {
     const { 
       userId, 
       name,
-      email, 
-      phone, 
-      address, 
-      cartItems, 
+      email,
+      phone,
+      address,
+      deliveryLocation,
+      cartItems,
       subtotal, 
       total,
       notes,
@@ -367,6 +432,18 @@ router.post('/submit', async (req, res) => {
     const user = await User.findById(userId);
     if (!user || !user.isVerified) {
       return res.status(400).json({ message: 'User not verified' });
+    }
+
+    // Delivery orders must carry a valid pinned location from the map picker.
+    let normalizedLocation;
+    try {
+      normalizedLocation = validateAndNormalize({
+        ...deliveryLocation,
+        contactName: deliveryLocation?.contactName || name,
+        contactPhone: deliveryLocation?.contactPhone || phone
+      });
+    } catch (locErr) {
+      return res.status(locErr.statusCode || 400).json({ success: false, message: locErr.message });
     }
 
     // Create order items from cart
@@ -395,8 +472,11 @@ router.post('/submit', async (req, res) => {
       subtotal,
       tax,
       totalAmount,
-      deliveryAddress: address,
-      status: 'pending',
+      deliveryLocation: normalizedLocation,
+      deliveryAddress: address, // overwritten by the pre-save hook with the derived string
+      // QR PH orders wait in 'awaiting_payment' until the payment.paid webhook fires.
+      // All other payment methods keep the default 'pending'.
+      status: paymentMethod === 'qrph' ? 'awaiting_payment' : 'pending',
       notes: notes || '',
       isVerified: true,
       paymentMethod: paymentMethod || 'cash_on_delivery',
@@ -623,6 +703,7 @@ router.post('/:orderId/receipt', upload.single('receipt'), async (req, res) => {
         tax: order.tax,
         totalAmount: order.totalAmount,
         deliveryAddress: order.deliveryAddress,
+        deliveryLocation: order.deliveryLocation || null,
         paymentMethod: order.paymentMethod,
         receiptImage: order.receiptImage,
         voucher: order.voucher?.code ? order.voucher : null, 
@@ -662,6 +743,130 @@ router.patch('/:orderId/verify-receipt', authenticateAdmin, async (req, res) => 
   } catch (error) {
     console.error('Error verifying receipt:', error);
     res.status(500).json({ message: error.message });
+  }
+});
+
+// POST /orders/:orderId/qrph — generate (or return cached) PayMongo QR Ph payment
+router.post('/:orderId/qrph', async (req, res) => {
+  try {
+    if (!OBJECT_ID_RE.test(req.params.orderId)) {
+      return res.status(400).json({ error: 'Invalid order ID.' });
+    }
+
+    const order = await Order.findById(req.params.orderId).populate('user', 'name email phone');
+    if (!order) return res.status(404).json({ error: 'Order not found.' });
+
+    if (order.paymentMethod !== 'qrph') {
+      return res.status(400).json({ error: 'This order does not use QR Ph payment.' });
+    }
+
+    if (order.paymongo?.status === 'paid') {
+      return res.json({ paymentIntentId: order.paymongo.paymentIntentId, status: 'paid', amount: order.totalAmount });
+    }
+
+    // Idempotency — reuse the existing PaymentIntent only if it is still usable.
+    // Check the LIVE status so a missed webhook / consumed source doesn't hand the
+    // customer a dead QR code.
+    if (order.paymongo?.paymentIntentId) {
+      try {
+        const pi = await getPaymentIntent(order.paymongo.paymentIntentId);
+        const piStatus = pi.attributes.status;
+        console.log(`[QRPH] Existing PaymentIntent ${pi.id} live status: ${piStatus}`);
+
+        if (piStatus === 'succeeded') {
+          const paidPayment = (pi.attributes.payments || []).find((p) => p.attributes?.status === 'paid');
+          await markQRPhOrderPaid(order, req, paidPayment?.id);
+          return res.json({ paymentIntentId: pi.id, status: 'paid', amount: order.totalAmount });
+        }
+
+        if (PI_REUSABLE.includes(piStatus)) {
+          return res.json({
+            paymentIntentId: order.paymongo.paymentIntentId,
+            qrCodeImageUrl: order.paymongo.qrCodeImageUrl,
+            testUrl: order.paymongo.testUrl,
+            status: order.paymongo.status,
+            amount: order.totalAmount,
+          });
+        }
+        // Any other status (awaiting_payment_method after a consumed source,
+        // processing that stalled, etc.) — fall through and mint a fresh PaymentIntent.
+        console.log(`[QRPH] PaymentIntent ${pi.id} no longer usable (${piStatus}) — regenerating.`);
+      } catch (e) {
+        console.warn('[QRPH] Could not fetch existing PaymentIntent — regenerating:', e.response?.data || e.message);
+      }
+    }
+
+    const result = await createQRPhPayment({
+      amountPeso: order.totalAmount, // authoritative amount — never client-supplied
+      orderId: order._id.toString(),
+      billing: {
+        name: order.user?.name,
+        email: order.user?.email,
+        phone: order.user?.phone,
+        addressLine: order.deliveryLocation?.label || order.deliveryAddress,
+      },
+    });
+
+    order.paymongo.paymentIntentId = result.paymentIntentId;
+    order.paymongo.paymentMethodId = result.paymentMethodId;
+    order.paymongo.status = result.status;
+    order.paymongo.qrCodeImageUrl = result.qrCodeImageUrl;
+    order.paymongo.testUrl = result.testUrl;
+    await order.save();
+
+    if (!result.liveMode && result.testUrl) {
+      console.log(`[QRPH] TEST MODE — simulate payment at: ${result.testUrl}`);
+    }
+    console.log(`[QRPH] PaymentIntent ${result.paymentIntentId} created for order ${order._id} — amount: PHP ${order.totalAmount}, status: ${result.status}`);
+
+    res.json({
+      paymentIntentId: result.paymentIntentId,
+      qrCodeImageUrl: result.qrCodeImageUrl,
+      testUrl: result.testUrl,
+      status: result.status,
+      amount: order.totalAmount,
+    });
+  } catch (err) {
+    console.error('[QRPH] Payment creation error:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Failed to generate QR code. Please try again.' });
+  }
+});
+
+// GET /orders/:orderId/status — lightweight status poll for the QR Ph frontend
+router.get('/:orderId/status', async (req, res) => {
+  try {
+    if (!OBJECT_ID_RE.test(req.params.orderId)) {
+      return res.status(400).json({ error: 'Invalid order ID.' });
+    }
+
+    const order = await Order.findById(req.params.orderId).populate('user', 'name email phone');
+    if (!order) return res.status(404).json({ error: 'Order not found.' });
+
+    // Webhook-independent reconcile: if still waiting, ask PayMongo directly.
+    if (
+      order.paymentMethod === 'qrph' &&
+      order.paymongo?.paymentIntentId &&
+      !['paid', 'failed', 'expired'].includes(order.paymongo?.status)
+    ) {
+      try {
+        const pi = await getPaymentIntent(order.paymongo.paymentIntentId);
+        if (pi.attributes.status === 'succeeded') {
+          const paidPayment = (pi.attributes.payments || []).find((p) => p.attributes?.status === 'paid');
+          await markQRPhOrderPaid(order, req, paidPayment?.id);
+        }
+      } catch (e) {
+        console.warn('[STATUS] reconcile failed:', e.response?.data || e.message);
+      }
+    }
+
+    res.json({
+      orderStatus: order.status,
+      paymongoStatus: order.paymongo?.status ?? null,
+      paidAt: order.paymongo?.paidAt ?? null,
+    });
+  } catch (err) {
+    console.error('[STATUS] Error:', err.message);
+    res.status(500).json({ error: 'Status check failed.' });
   }
 });
 

@@ -105,6 +105,13 @@
                   :notes="notes"
                   @update:notes="notes = $event"
                 />
+
+                <!-- Quantity lives in the scroll body on mobile; footer is button-only -->
+                <MenuModalQuantity
+                  class="md:hidden border-t border-gray-100"
+                  :quantity="quantity"
+                  @update:quantity="quantity = $event"
+                />
               </div>
             </div>
 
@@ -131,6 +138,7 @@ import MenuModalVariants from '~/components/menu/MenuModalVariants.vue'
 import MenuModalSauces from '~/components/menu/MenuModalSauces.vue'
 import MenuModalAddons from '~/components/menu/MenuModalAddons.vue'
 import MenuModalNotes from '~/components/menu/MenuModalNotes.vue'
+import MenuModalQuantity from '~/components/menu/MenuModalQuantity.vue'
 import MenuModalFooter from '~/components/menu/MenuModalFooter.vue'
 import { useMenuModal } from '~/composables/useMenuModal'
 import type { Product } from '~/composables/useMenuModal'

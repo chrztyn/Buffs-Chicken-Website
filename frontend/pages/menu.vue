@@ -193,8 +193,8 @@
           <div v-if="loading" class="space-y-10">
             <div v-for="s in 3" :key="s">
               <div class="h-7 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                <div v-for="n in 3" :key="n" class="h-[220px] bg-white rounded-xl animate-pulse"></div>
+              <div class="menu-card-grid">
+                <div v-for="n in 4" :key="n" class="h-[230px] sm:h-[360px] bg-white rounded-xl animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -228,7 +228,7 @@
                 </span>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+              <div class="menu-card-grid">
                 <ClientOnly>
                   <MenuCard
                     v-for="item in cat.items"
@@ -476,25 +476,6 @@ useHead({
 /* Badge */
 .badge-pop-enter-active, .badge-pop-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
 .badge-pop-enter-from, .badge-pop-leave-to { opacity: 0; transform: scale(0); }
-
-/* Menu card */
-:deep(.menu-card) {
-  display: flex; flex-direction: column; background: #ffffff; border-radius: 12px;
-  padding: 0.875rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);
-  position: relative; overflow: hidden; max-width: 280px; margin: 0 auto; height: 220px;
-}
-:deep(.menu-card:hover) { transform: translateY(-6px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-:deep(.menu-card .image-container) {
-  background: linear-gradient(135deg,#fafbfc 0%,#f3f4f6 100%); border-radius: 10px;
-  padding: 0.5rem; margin-bottom: 0.625rem; height: 145px;
-  display: flex; align-items: center; justify-content: center; overflow: hidden;
-}
-:deep(.menu-card .image-container img) { width: 100%; height: 100%; object-fit: cover; transform: scale(1.06); transition: transform 0.3s ease; }
-:deep(.menu-card:hover .image-container img) { transform: scale(1.1); }
-:deep(.menu-card .text-section) { flex: 1; display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 0.625rem; }
-:deep(.menu-card .product-name) { font-size: 0.8rem; font-weight: 700; color: #1a4189; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-:deep(.menu-card .product-price) { font-size: 0.95rem; font-weight: 700; color: #1a4189; white-space: nowrap; flex-shrink: 0; }
 
 @media (prefers-reduced-motion: reduce) { :deep(.menu-card) { transition: none; } }
 </style>
