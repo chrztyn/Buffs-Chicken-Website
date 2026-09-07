@@ -1,6 +1,8 @@
 const axios = require('axios');
 
-const BASE_URL = 'https://api.paymongo.com/v1';
+// Resolved per call (not at module load) so a test/sandbox override via
+// PAYMONGO_BASE_URL is picked up. Production always talks to PayMongo directly.
+const baseUrl = () => process.env.PAYMONGO_BASE_URL || 'https://api.paymongo.com/v1';
 
 /**
  * Basic-auth headers for the PayMongo REST API.
@@ -39,7 +41,7 @@ async function createQRPhPayment({ amountPeso, orderId, billing = {} }) {
 
   // 1. Payment Intent
   const piRes = await axios.post(
-    `${BASE_URL}/payment_intents`,
+    `${baseUrl()}/payment_intents`,
     {
       data: {
         attributes: {
@@ -57,7 +59,7 @@ async function createQRPhPayment({ amountPeso, orderId, billing = {} }) {
 
   // 2. Payment Method (type: qrph)
   const pmRes = await axios.post(
-    `${BASE_URL}/payment_methods`,
+    `${baseUrl()}/payment_methods`,
     {
       data: {
         attributes: {
@@ -83,7 +85,7 @@ async function createQRPhPayment({ amountPeso, orderId, billing = {} }) {
 
   // 3. Attach
   const attachRes = await axios.post(
-    `${BASE_URL}/payment_intents/${pi.id}/attach`,
+    `${baseUrl()}/payment_intents/${pi.id}/attach`,
     {
       data: {
         attributes: {
@@ -117,7 +119,7 @@ async function createQRPhPayment({ amountPeso, orderId, billing = {} }) {
  * @returns {Promise<Object>} PaymentIntent resource ({ id, attributes: { status, payments, ... } })
  */
 async function getPaymentIntent(paymentIntentId) {
-  const { data } = await axios.get(`${BASE_URL}/payment_intents/${paymentIntentId}`, {
+  const { data } = await axios.get(`${baseUrl()}/payment_intents/${paymentIntentId}`, {
     headers: getAuthHeaders(),
   });
   return data.data;

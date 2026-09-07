@@ -58,6 +58,7 @@ const sendOrderNotification = async (email, orderNumber, status) => {
     const statusMessages = {
       pending: 'Your order has been received and is pending confirmation.',
       preparing: 'Your order is being prepared.',
+      'waiting for rider': 'Your order is packed and waiting for a rider.',
       'out for delivery': 'Your order is out for delivery.',
       delivered: 'Your order has been delivered.',
       cancelled: 'Your order has been cancelled.',
@@ -212,6 +213,15 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
             <div style="background-color: #ebeff7; padding: 20px; border-radius: 8px; border-left: 4px solid #1A4189;">
               <h3 style="margin-top: 0; color: #1A4189;">Delivery Address</h3>
               <p style="margin: 0; line-height: 1.6;">${order.deliveryAddress}</p>
+              ${order.deliveryLocation && order.deliveryLocation.note ? `
+              <p style="margin: 8px 0 0 0; line-height: 1.6; color: #555;"><strong>Rider note:</strong> ${order.deliveryLocation.note}</p>` : ''}
+              ${order.deliveryLocation && order.deliveryLocation.mapsUrl ? `
+              <p style="margin: 12px 0 0 0;">
+                <a href="${order.deliveryLocation.mapsUrl}" target="_blank" rel="noopener"
+                  style="display: inline-block; background: #1A4189; color: #fff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+                  📍 Open delivery pin in Google Maps
+                </a>
+              </p>` : ''}
             </div>
 
             ${order.notes ? `

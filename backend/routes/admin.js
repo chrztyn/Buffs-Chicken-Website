@@ -13,6 +13,13 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const { compressImage, ensureCompressedImagesDir } = require('../utils/imageCompression');
+const {
+  ADMIN_SETTABLE_STATUSES,
+  ACTIVE_STATUSES,
+  REVENUE_STATUSES,
+  STATUS_MESSAGES,
+  STATUS_NOTIFICATION_TYPE,
+} = require('../constants/orderStatus');
 
 // Ensure backend-images directory exists
 const backendImagesDir = path.join(__dirname, '../public/backend-images');
@@ -381,7 +388,7 @@ router.put('/orders/:id/status', authenticateAdmin, async (req, res) => {
 
     console.log(`[ORDER UPDATE] Attempting to update order ${orderId} to status: ${status}`);
 
-    if (!['pending', 'preparing', 'out for delivery', 'delivered', 'cancelled'].includes(status)) {
+    if (!ADMIN_SETTABLE_STATUSES.includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
@@ -406,23 +413,9 @@ router.put('/orders/:id/status', authenticateAdmin, async (req, res) => {
       }
     }
 
-    // Send notification email
-    const statusMessages = {
-      pending: 'Your order has been confirmed.',
-      preparing: 'Your order is being prepared.',
-      'out for delivery': 'Your order is out for delivery.',
-      delivered: 'Your order has been delivered.',
-      cancelled: 'Your order has been cancelled.'
-    };
-
-    // Map status to notification type
-    const statusToNotificationType = {
-      pending: 'order_confirmed',
-      preparing: 'order_preparing',
-      'out for delivery': 'order_out_for_delivery',
-      delivered: 'order_delivered',
-      cancelled: 'order_cancelled'
-    };
+    // Customer-facing copy + notification type (source of truth: constants/orderStatus.js)
+    const statusMessages = STATUS_MESSAGES;
+    const statusToNotificationType = STATUS_NOTIFICATION_TYPE;
 
     try {
       const { sendOrderNotification } = require('../config/mailer');
@@ -506,7 +499,7 @@ router.get('/analytics/monthly/:year/:month', authenticateAdmin, async (req, res
       .sort({ createdAt: -1 });
 
     const delivered = orders.filter(o =>
-      ['delivered', 'out for delivery', 'preparing'].includes(o.status)
+      REVENUE_STATUSES.includes(o.status)
     );
 
     const totalRevenue = delivered.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
@@ -546,7 +539,7 @@ router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
   try {
     const totalOrders = await Order.countDocuments();
     const totalRevenue = await Order.aggregate([
-      { $match: { status: { $in: ['delivered', 'out for delivery', 'preparing'] } } },
+      { $match: { status: { $in: REVENUE_STATUSES } } },
       { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]);
 
@@ -559,7 +552,7 @@ router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
     const todayOrders = await Order.countDocuments({ createdAt: { $gte: startOfToday } });
 
     const activeOrders = await Order.countDocuments({
-      status: { $in: ['pending', 'preparing', 'out for delivery'] }
+      status: { $in: ACTIVE_STATUSES }
     });
 
     const startOfMonth = new Date();
@@ -568,7 +561,7 @@ router.get('/analytics/dashboard', authenticateAdmin, async (req, res) => {
 
     const monthlyOrders = await Order.countDocuments({ createdAt: { $gte: startOfMonth } });
     const monthlyRevenueAgg = await Order.aggregate([
-      { $match: { status: { $in: ['delivered', 'out for delivery', 'preparing'] }, createdAt: { $gte: startOfMonth } } },
+      { $match: { status: { $in: REVENUE_STATUSES }, createdAt: { $gte: startOfMonth } } },
       { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]);
 

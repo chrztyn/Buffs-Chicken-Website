@@ -290,6 +290,18 @@
               </div>
             </div>
 
+            <div v-if="currentStatus === 'waiting for rider'" class="status-alert status-alert-amber">
+              <div class="status-icon-wrapper status-icon-amber">
+                <svg class="status-alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="status-alert-title">Waiting for Rider</h4>
+                <p class="status-alert-description">Your order is packed and ready. We're booking a rider to bring it to you — this usually only takes a few minutes.</p>
+              </div>
+            </div>
+
             <div v-if="currentStatus === 'out for delivery'" class="status-alert status-alert-purple">
               <div class="status-icon-wrapper status-icon-purple">
                 <svg class="status-alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -593,6 +605,7 @@ import { useRuntimeConfig } from '#app'
 import io from 'socket.io-client'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
+import { CUSTOMER_TIMELINE, STATUS_ORDER, STATUS_TOAST, paymentMethodLabel } from '@/constants/orderStatus'
 
 useSeoMeta({ robots: 'noindex, nofollow' })
 
@@ -621,20 +634,9 @@ const toastType = ref('success') // 'success', 'info', 'warning', 'error'
 // Cancel order loading state
 const isCancelingOrder = ref(false)
 
-const statuses = ref([
-  { id: 'pending', label: 'Confirming' },
-  { id: 'preparing', label: 'Preparing' },
-  { id: 'out for delivery', label: 'Out for Delivery' },
-  { id: 'delivered', label: 'Delivered' }
-])
+const statuses = ref(CUSTOMER_TIMELINE.map(s => ({ ...s })))
 
-const statusOrder = {
-  pending: 0,
-  preparing: 1,
-  'out for delivery': 2,
-  delivered: 3,
-  cancelled: -1
-}
+const statusOrder = STATUS_ORDER
 
 
 // Thank you modal state
@@ -657,15 +659,7 @@ const total = computed(() => {
   return Math.max(0, subtotal.value - voucherDiscount.value)
 })
 
-const formatPaymentMethod = (method) => {
-  const methods = {
-    'gcash': 'GCash',
-    'maya': 'Maya', 
-    'maribank': 'Maribank',
-    'bpi': 'BPI'
-  }
-  return methods[method] || method
-}
+const formatPaymentMethod = (method) => paymentMethodLabel(method)
 
 const getProgressPercentage = () => {
   const currentIndex = statusOrder[currentStatus.value]
@@ -853,15 +847,7 @@ const handleOrderStatusUpdate = (data) => {
     saveOrderStatus()
     
     // Show notification
-    const statusMessages = {
-      pending: 'Confirming',
-      preparing: 'Your order is being prepared',
-      'out for delivery': 'Your order is on the way',
-      delivered: 'Your order has arrived',
-      cancelled: 'Your order has been cancelled'
-    }
-    
-    showNotification('Order Updated', data.message || statusMessages[data.status], 'info')
+    showNotification('Order Updated', data.message || STATUS_TOAST[data.status] || 'Order updated', 'info')
     
     // Show thank you modal when delivered
     if (data.status === 'delivered') {
@@ -1487,6 +1473,10 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
 }
 
+.status-icon-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+}
+
 .status-icon-green {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 }
@@ -1508,6 +1498,15 @@ onUnmounted(() => {
 .status-alert-purple {
   background: linear-gradient(135deg, rgba(243, 232, 255, 0.95) 0%, rgba(237, 233, 254, 0.95) 100%);
   border-color: #d8b4fe;
+}
+
+.status-alert-amber {
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.95) 0%, rgba(254, 243, 199, 0.95) 100%);
+  border-color: #fcd34d;
+}
+
+.status-alert-amber .status-alert-title {
+  color: #b45309;
 }
 
 .status-alert-green {

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ORDER_STATUS } = require('../constants/orderStatus');
 
 const orderItemSchema = new mongoose.Schema({
   product: {
@@ -52,8 +53,18 @@ const orderSchema = new mongoose.Schema(
       type: String,
       // 'awaiting_payment' precedes 'pending' in the lifecycle — QR PH orders sit here
       // until the PayMongo `payment.paid` webhook fires. Kitchen views must exclude it.
-      enum: ['awaiting_payment', 'pending', 'preparing', 'out for delivery', 'delivered', 'cancelled'],
-      default: 'pending'
+      // 'waiting for rider' sits between 'preparing' and 'out for delivery'.
+      // Source of truth: constants/orderStatus.js
+      enum: [
+        ORDER_STATUS.AWAITING_PAYMENT,
+        ORDER_STATUS.PENDING,
+        ORDER_STATUS.PREPARING,
+        ORDER_STATUS.WAITING_FOR_RIDER,
+        ORDER_STATUS.OUT_FOR_DELIVERY,
+        ORDER_STATUS.DELIVERED,
+        ORDER_STATUS.CANCELLED,
+      ],
+      default: ORDER_STATUS.PENDING
     },
     deliveryAddress: String,
     // Pinned delivery location from the map picker. Absent (lat null) on legacy orders —
@@ -121,7 +132,11 @@ const orderSchema = new mongoose.Schema(
       status:          { type: String, default: null }, // awaiting_next_action | paid | failed | expired
       qrCodeImageUrl:  { type: String, default: null }, // base64 data URI from next_action.code.image_url
       testUrl:         { type: String, default: null }, // test-mode payment simulation URL (null in live mode)
-      paidAt:          { type: Date,   default: null }
+      paidAt:          { type: Date,   default: null },
+      // Set exactly once, the first time the admin is notified that this QR Ph order
+      // was paid. Guards against the webhook AND the status-poll reconcile both firing
+      // the admin email / Notification / socket event for the same payment.
+      adminNotifiedAt: { type: Date,   default: null }
     }
   },
   { timestamps: true }

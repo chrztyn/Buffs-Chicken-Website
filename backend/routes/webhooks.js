@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
 const Order = require('../models/Order');
+const { markQRPhOrderPaid } = require('../services/qrphOrder');
 
 /**
  * POST /api/webhooks/paymongo
@@ -95,43 +96,15 @@ router.post('/paymongo', express.raw({ type: 'application/json' }), async (req, 
         return res.sendStatus(200);
       }
 
-      order.paymongo.paymentId = resource.id;
-      order.paymongo.status = 'paid';
-      order.paymongo.paidAt = new Date();
-      order.status = 'pending'; // enters the kitchen queue
-      await order.save();
+      // Single shared path: flips the order to 'pending' (unless cancelled) and runs the
+      // idempotent admin fan-out — email + bell Notification + `new-order` socket event.
+      // The status-poll reconcile calls the exact same routine, so the two cannot drift.
+      await markQRPhOrderPaid(order, req.app.get('io'), resource.id);
 
-      const user = order.user;
-      const io = req.app.get('io');
-      if (io) {
-        io.to('admin-orders').emit('new-order', {
-          orderId: order._id,
-          orderNumber: order.orderNumber,
-          userId: user?._id,
-          customerName: user?.name || 'Unknown Customer',
-          customerEmail: user?.email,
-          customerPhone: user?.phone,
-          items: order.items,
-          subtotal: order.subtotal,
-          tax: order.tax,
-          totalAmount: order.totalAmount,
-          deliveryAddress: order.deliveryAddress,
-          paymentMethod: 'qrph',
-          voucher: order.voucher?.code ? order.voucher : null,
-          paidAt: order.paymongo.paidAt,
-          status: 'pending',
-          timestamp: new Date(),
-        });
-        console.log(`[WEBHOOK] payment.paid: emitted new-order to admin-orders for order ${order._id}`);
-      } else {
-        console.warn('[WEBHOOK] payment.paid: Socket.io (io) not found on app — admin not notified in real-time.');
-      }
-
-      // TODO: trigger customer order-confirmation email here once template is confirmed.
-
-      console.log(`[WEBHOOK] payment.paid: Order ${order._id} confirmed paid via QR Ph at ${order.paymongo.paidAt.toISOString()}`);
+      console.log(`[WEBHOOK] payment.paid: Order ${order._id} processed for QR Ph payment.`);
       return res.sendStatus(200);
     } catch (err) {
+      // Side effects may not have completed — 500 so PayMongo retries.
       console.error('[WEBHOOK] payment.paid handler error:', err.message);
       return res.sendStatus(500);
     }

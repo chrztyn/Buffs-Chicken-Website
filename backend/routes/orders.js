@@ -14,55 +14,18 @@ const { sendOrderReceipt } = require('../utils/sendOrderReceipt');
 const { saveReceipt, deleteReceipt } = require('../utils/receiptStorage');
 const authenticateAdmin = require('../middleware/authenticateAdmin');
 const { createQRPhPayment, getPaymentIntent } = require('../services/paymongo');
+const { notifyQRPhOrderPaid } = require('../services/orderNotifications');
+const { markQRPhOrderPaid } = require('../services/qrphOrder');
 const { validateAndNormalize } = require('../services/deliveryLocation');
 
 const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
 
 // PaymentIntent statuses for which the existing QR is still scannable / usable.
 const PI_REUSABLE = ['awaiting_next_action'];
-
-/**
- * Mark a QR Ph order as paid and notify the admin dashboard.
- * Idempotent — safe to call from the webhook OR from a status-poll reconcile.
- * @param {Object} order - a full Mongoose Order doc (user should be populated for the emit)
- * @param {Object} req   - Express request (for req.app.get('io'))
- * @param {string} [paymentId] - PayMongo payment id, if known
- */
-async function markQRPhOrderPaid(order, req, paymentId) {
-  if (order.paymongo?.status === 'paid') return;
-
-  order.paymongo.paymentId = paymentId || order.paymongo.paymentId || null;
-  order.paymongo.status = 'paid';
-  order.paymongo.paidAt = new Date();
-  order.status = 'pending';
-  await order.save();
-
-  const user = order.user && order.user._id ? order.user : await User.findById(order.user);
-  const io = req.app.get('io');
-  if (io) {
-    io.to('admin-orders').emit('new-order', {
-      orderId: order._id,
-      orderNumber: order.orderNumber,
-      userId: user?._id,
-      customerName: user?.name || 'Unknown Customer',
-      customerEmail: user?.email,
-      customerPhone: user?.phone,
-      items: order.items,
-      subtotal: order.subtotal,
-      tax: order.tax,
-      totalAmount: order.totalAmount,
-      deliveryAddress: order.deliveryAddress,
-      deliveryLocation: order.deliveryLocation || null,
-      paymentMethod: 'qrph',
-      voucher: order.voucher?.code ? order.voucher : null,
-      paidAt: order.paymongo.paidAt,
-      status: 'pending',
-      timestamp: new Date(),
-    });
-    console.log(`[QRPH] markQRPhOrderPaid: emitted new-order for order ${order._id}`);
-  }
-  console.log(`[QRPH] Order ${order._id} marked paid at ${order.paymongo.paidAt.toISOString()}`);
-}
+// PaymentIntent is mid-settlement at the bank: no fresh QR to hand back and a NEW
+// PaymentIntent must NOT be minted (that risks a second scannable QR / double charge).
+// The caller returns { status: 'processing' } and the frontend keeps polling.
+const PI_IN_PROGRESS = ['processing'];
 
 // Multer instance — memory storage; never writes raw files to disk
 const upload = multer({
@@ -259,7 +222,7 @@ router.get('/summary/today', authenticateAdmin, async (req, res) => {
       0
     );
 
-    const paymentMethods = ['cash_on_delivery', 'gcash', 'maya', 'maribank', 'bpi'];
+    const paymentMethods = ['qrph', 'cash_on_delivery', 'gcash', 'maya', 'maribank', 'bpi'];
     const paymentBreakdown = {};
     paymentMethods.forEach(m => { paymentBreakdown[m] = { count: 0, total: 0 }; });
     todayOrders.forEach(order => {
@@ -761,7 +724,14 @@ router.post('/:orderId/qrph', async (req, res) => {
     }
 
     if (order.paymongo?.status === 'paid') {
-      return res.json({ paymentIntentId: order.paymongo.paymentIntentId, status: 'paid', amount: order.totalAmount });
+      // Recover a missed admin notification if the webhook marked it paid but the
+      // email/socket fan-out failed. No-ops if the admin was already notified.
+      await notifyQRPhOrderPaid(order, req.app.get('io'));
+      return res.json({
+        paymentIntentId: order.paymongo.paymentIntentId,
+        status: 'paid',
+        amount: order.totalAmount,
+      });
     }
 
     // Idempotency — reuse the existing PaymentIntent only if it is still usable.
@@ -775,8 +745,21 @@ router.post('/:orderId/qrph', async (req, res) => {
 
         if (piStatus === 'succeeded') {
           const paidPayment = (pi.attributes.payments || []).find((p) => p.attributes?.status === 'paid');
-          await markQRPhOrderPaid(order, req, paidPayment?.id);
+          await markQRPhOrderPaid(order, req.app.get('io'), paidPayment?.id);
           return res.json({ paymentIntentId: pi.id, status: 'paid', amount: order.totalAmount });
+        }
+
+        // Payment is being settled at the bank. There is no fresh QR to show and we
+        // MUST NOT mint a second PaymentIntent (that could hand the customer a second
+        // scannable QR → double payment). Tell the frontend to keep polling.
+        if (PI_IN_PROGRESS.includes(piStatus)) {
+          console.log(`[QRPH] PaymentIntent ${pi.id} is ${piStatus} — not regenerating; client will poll.`);
+          return res.json({
+            paymentIntentId: order.paymongo.paymentIntentId,
+            qrCodeImageUrl: order.paymongo.qrCodeImageUrl || null,
+            status: 'processing',
+            amount: order.totalAmount,
+          });
         }
 
         if (PI_REUSABLE.includes(piStatus)) {
@@ -788,8 +771,8 @@ router.post('/:orderId/qrph', async (req, res) => {
             amount: order.totalAmount,
           });
         }
-        // Any other status (awaiting_payment_method after a consumed source,
-        // processing that stalled, etc.) — fall through and mint a fresh PaymentIntent.
+        // Any other status (awaiting_payment_method after a consumed source, etc.)
+        // — fall through and mint a fresh PaymentIntent.
         console.log(`[QRPH] PaymentIntent ${pi.id} no longer usable (${piStatus}) — regenerating.`);
       } catch (e) {
         console.warn('[QRPH] Could not fetch existing PaymentIntent — regenerating:', e.response?.data || e.message);
@@ -852,7 +835,7 @@ router.get('/:orderId/status', async (req, res) => {
         const pi = await getPaymentIntent(order.paymongo.paymentIntentId);
         if (pi.attributes.status === 'succeeded') {
           const paidPayment = (pi.attributes.payments || []).find((p) => p.attributes?.status === 'paid');
-          await markQRPhOrderPaid(order, req, paidPayment?.id);
+          await markQRPhOrderPaid(order, req.app.get('io'), paidPayment?.id);
         }
       } catch (e) {
         console.warn('[STATUS] reconcile failed:', e.response?.data || e.message);
