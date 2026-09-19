@@ -48,6 +48,12 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    // Distance-based delivery fee (pesos) — 0 when free (<=5km + subtotal>=350), 35 flat
+    // otherwise, computed authoritatively server-side. See services/deliveryFee.js.
+    deliveryFee: {
+      type: Number,
+      default: 0
+    },
     totalAmount: Number,
     status: {
       type: String,

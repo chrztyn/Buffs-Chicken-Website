@@ -218,6 +218,17 @@
                   </span>
                   <span class="summary-value">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
+                <div v-if="deliveryFee > 0 || subtotal >= 350" class="summary-item group">
+                  <span class="summary-label">
+                    <svg class="w-4 h-4 inline mr-2 text-[#1A4189]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M4 17h12m0 0l-4 4m4-4l-4-4"></path>
+                    </svg>
+                    Delivery Fee
+                  </span>
+                  <span class="summary-value" :style="deliveryFee === 0 ? { color: '#16a34a', fontWeight: 700 } : {}">
+                    {{ deliveryFee === 0 ? 'FREE' : `₱${deliveryFee.toFixed(2)}` }}
+                  </span>
+                </div>
                 <div v-if="voucherCode" class="summary-item group">
                   <span class="summary-label" style="color: #16a34a;">
                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -619,6 +630,15 @@ const userAddress = ref('Loading address...')
 const deliveryLocation = ref(null)
 const totalAmount = ref(0)
 const subtotal = ref(0)
+const deliveryFee = ref(0)
+// total = subtotal - voucherDiscount + tax + deliveryFee. Deriving from totals keeps the fee
+// accurate even if the stored deliveryFee field is missing (older orders / stale server).
+const deriveDeliveryFee = (o) => {
+  const stored = Number(o.deliveryFee || 0)
+  const discount = Number(o.voucher?.discountAmount || 0)
+  const derived = Number(o.totalAmount || o.total || 0) - (Number(o.subtotal || 0) - discount) - Number(o.tax || 0)
+  return Math.max(stored, Math.round(derived * 100) / 100, 0)
+}
 const itemsCount = ref(0)
 const orderItems = ref([])
 const paymentMethod = ref('')
@@ -766,7 +786,8 @@ const fetchOrderFromBackend = async (orderId) => {
       if (order.deliveryLocation && order.deliveryLocation.lat != null) deliveryLocation.value = order.deliveryLocation
       currentStatus.value = order.status || 'pending'
       subtotal.value = order.subtotal || 0
-      totalAmount.value = order.totalAmount || 0 
+      deliveryFee.value = deriveDeliveryFee(order)
+      totalAmount.value = order.totalAmount || 0
 
       if (order.paymentMethod) paymentMethod.value = order.paymentMethod
 
@@ -794,6 +815,7 @@ const loadOrder = async () => {
     receiptUploaded.value = order?.receiptUploaded || false
     currentStatus.value = order.status || 'pending'
     subtotal.value = order.subtotal
+    deliveryFee.value = deriveDeliveryFee(order)
     itemsCount.value = order.itemsCount
     userEmail.value = order.customerEmail || ''
     orderItems.value = order.items || []

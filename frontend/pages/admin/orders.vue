@@ -325,6 +325,10 @@
               <span>Voucher ({{ selectedOrder.voucher.code }}):</span>
               <span class="font-bold">−₱{{ selectedOrder.voucher.discountAmount.toFixed(2) }}</span>
             </div>
+            <div v-if="orderDeliveryFee(selectedOrder) > 0 || selectedOrder.subtotal >= 350" class="flex justify-between text-sm">
+              <span>Delivery Fee:</span>
+              <span class="font-bold">{{ orderDeliveryFee(selectedOrder) === 0 ? 'FREE' : `₱${orderDeliveryFee(selectedOrder).toFixed(2)}` }}</span>
+            </div>
             <div class="flex justify-between text-sm">
               <span>Tax:</span>
               <span class="font-bold">₱{{ selectedOrder.tax.toFixed(2) }}</span>
@@ -517,6 +521,12 @@ const filterStatus = ref('')
 const showOrderDetails = ref(false)
 const showStatusModal = ref(false)
 const selectedOrder = ref<any>(null)
+// total = subtotal - voucherDiscount + tax + deliveryFee (derived so it's right even when the
+// stored deliveryFee field is missing).
+const orderDeliveryFee = (o: any): number => {
+  const derived = Number(o.totalAmount || 0) - (Number(o.subtotal || 0) - Number(o.voucher?.discountAmount || 0)) - Number(o.tax || 0)
+  return Math.max(Number(o.deliveryFee || 0), Math.round(derived * 100) / 100, 0)
+}
 const newStatus = ref('')
 const showToast = ref(false)
 const isUpdating = ref(false)
@@ -701,6 +711,7 @@ onMounted(async () => {
         },
         items: data.items || [],
         subtotal: data.subtotal || 0,
+        deliveryFee: data.deliveryFee || 0,
         tax: data.tax || 0,
         totalAmount: data.totalAmount,
         status: data.status || 'pending',

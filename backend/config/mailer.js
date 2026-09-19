@@ -123,6 +123,8 @@ const sendContactFormEmail = async (name, email, message) => {
 
 // ─── sendAdminOrderNotification ──────────────────────────────────────────────
 
+const { getOrderDeliveryFee } = require('../services/deliveryFee');
+
 const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
   try {
     const itemsList = order.items
@@ -203,6 +205,11 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
                     <strong>−₱${Number(order.voucher.discountAmount || 0).toFixed(2)}</strong>
                   </td>
                 </tr>` : ''}
+                ${(() => { const fee = getOrderDeliveryFee(order); return (fee > 0 || order.subtotal >= 350) ? `
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Delivery Fee:</strong></td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;${fee === 0 ? ' color: #16a34a;' : ''}">${fee === 0 ? '<strong>FREE</strong>' : '₱' + fee.toFixed(2)}</td>
+                </tr>` : ''; })()}
                 <tr>
                   <td style="padding: 12px 0; font-size: 16px;"><strong>Total:</strong></td>
                   <td style="padding: 12px 0; text-align: right; font-size: 16px; color: #FE601C;"><strong>₱${order.totalAmount.toFixed(2)}</strong></td>

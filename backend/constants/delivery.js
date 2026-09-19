@@ -45,6 +45,17 @@ const GEOCODE = {
 const MAPS_URL = (lat, lng) => `https://www.google.com/maps?q=${lat},${lng}`;
 const WAZE_URL = (lat, lng) => `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
 
+// Distance-based delivery pricing. Straight-line (haversine) distance from the store —
+// no routing API, zero added cost, consistent with the pin-location feature's constraints.
+// Frontend mirror: frontend/constants/delivery.ts — keep both in sync; backend is authoritative
+// (routes/orders.js POST /submit recomputes and enforces this server-side regardless of client input).
+const STORE_LOCATION = { lat: 15.127774, lng: 120.596859 };
+const DELIVERY_FEE_PESOS = 35;
+const FREE_DELIVERY_RADIUS_KM = 5;
+const MAX_DELIVERY_RADIUS_KM = 8;
+const FREE_DELIVERY_MIN_SUBTOTAL = 350;
+const OUT_OF_RANGE_MESSAGE = 'Sorry, this location is not yet covered by our delivery service.';
+
 module.exports = {
   PH_BOUNDS,
   GLOBAL_BOUNDS,
@@ -52,5 +63,11 @@ module.exports = {
   PH_PHONE_REGEX,
   GEOCODE,
   MAPS_URL,
-  WAZE_URL
+  WAZE_URL,
+  STORE_LOCATION,
+  DELIVERY_FEE_PESOS,
+  FREE_DELIVERY_RADIUS_KM,
+  MAX_DELIVERY_RADIUS_KM,
+  FREE_DELIVERY_MIN_SUBTOTAL,
+  OUT_OF_RANGE_MESSAGE
 };

@@ -106,7 +106,8 @@
 
         <!-- Footer -->
         <footer class="lpm-foot">
-          <p class="lpm-resolved">
+          <p v-if="isOutOfDeliveryRange" class="lpm-resolved lpm-out-of-range">{{ OUT_OF_RANGE_MESSAGE }}</p>
+          <p v-else class="lpm-resolved">
             <template v-if="geocoding">Resolving address…</template>
             <template v-else-if="resolvedAddress">{{ resolvedAddress }}</template>
             <template v-else>No location pinned yet</template>
@@ -114,7 +115,7 @@
           <button
             type="button"
             class="lpm-confirm"
-            :disabled="!pin || geocoding"
+            :disabled="!pin || geocoding || isOutOfDeliveryRange"
             @click="confirm"
           >
             Use This Location
@@ -126,9 +127,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useApi } from '~/composables/useApi'
 import { loadLeaflet, createPinIcon, TILE_URL, TILE_OPTIONS, SHOP_LATLNG } from '~/composables/useLeaflet'
+import { useDeliveryFee } from '~/composables/useDeliveryFee'
 
 const props = defineProps({
   initial: { type: Object, default: null } // { lat, lng }
@@ -136,6 +138,7 @@ const props = defineProps({
 const emit = defineEmits(['confirm', 'close'])
 
 const { geocodeSearch, geocodeReverse } = useApi()
+const { getDistanceFromStoreKm, MAX_DELIVERY_RADIUS_KM, OUT_OF_RANGE_MESSAGE } = useDeliveryFee()
 const uid = `lpm-${Math.random().toString(36).slice(2, 8)}`
 
 const panelEl = ref(null)
@@ -147,6 +150,11 @@ const pin = ref(
     ? { lat: Number(props.initial.lat), lng: Number(props.initial.lng) }
     : null
 )
+
+// Primary >8km block — enforced here, at pin-drop, before the customer can even confirm.
+// Backend re-checks and rejects at POST /submit as a backstop (defense in depth).
+const distanceFromStoreKm = computed(() => pin.value ? getDistanceFromStoreKm(pin.value.lat, pin.value.lng) : null)
+const isOutOfDeliveryRange = computed(() => distanceFromStoreKm.value !== null && distanceFromStoreKm.value > MAX_DELIVERY_RADIUS_KM)
 const resolvedAddress = ref('')
 const geocoding = ref(false)
 const source = ref('pin')
@@ -536,6 +544,7 @@ onBeforeUnmount(() => {
   overflow-wrap: anywhere; line-height: 1.4;
   max-height: 3.2em; overflow-y: auto;
 }
+.lpm-resolved.lpm-out-of-range { color: #b91c1c; font-weight: 600; max-height: none; overflow: visible; }
 .lpm-confirm {
   flex-shrink: 0; padding: 11px 20px; border-radius: 10px; background: #FE601C; color: #fff;
   font-weight: 700; font-size: .9rem; transition: opacity .15s, transform .1s;
@@ -575,6 +584,7 @@ onBeforeUnmount(() => {
     background: #fff; border-top: 1px solid #eef0f2;
   }
   .lpm-resolved { font-size: .8rem; flex: none; max-height: 3em; }
+  .lpm-resolved.lpm-out-of-range { max-height: none; overflow: visible; }
   .lpm-confirm { width: 100%; padding: 12px 20px; }
 }
 </style>

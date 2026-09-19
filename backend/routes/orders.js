@@ -17,6 +17,8 @@ const { createQRPhPayment, getPaymentIntent } = require('../services/paymongo');
 const { notifyQRPhOrderPaid } = require('../services/orderNotifications');
 const { markQRPhOrderPaid } = require('../services/qrphOrder');
 const { validateAndNormalize } = require('../services/deliveryLocation');
+const { getDistanceFromStoreKm, computeDeliveryFee } = require('../services/deliveryFee');
+const { OUT_OF_RANGE_MESSAGE } = require('../constants/delivery');
 
 const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
 
@@ -409,6 +411,19 @@ router.post('/submit', async (req, res) => {
       return res.status(locErr.statusCode || 400).json({ success: false, message: locErr.message });
     }
 
+    // Distance-based delivery fee — recomputed authoritatively server-side, never trusted
+    // from the client. Defense-in-depth: the frontend already blocks >8km pins at pin-drop
+    // (LocationPickerModal), this is the backstop.
+    const distanceFromStoreKm = getDistanceFromStoreKm(normalizedLocation.lat, normalizedLocation.lng);
+    const { fee: deliveryFee, isOutOfRange } = computeDeliveryFee(subtotal, distanceFromStoreKm);
+    if (isOutOfRange) {
+      return res.status(400).json({
+        success: false,
+        message: OUT_OF_RANGE_MESSAGE,
+        outOfDeliveryRange: true
+      });
+    }
+
     // Create order items from cart
     const orderItems = cartItems.map(item => ({
       product: item.id || item._id,
@@ -426,7 +441,10 @@ router.post('/submit', async (req, res) => {
 
     // Calculate totals
     const tax = 0;
-    const totalAmount = total; // Use the discounted total from frontend
+    // Use the discounted total from frontend — the frontend already folds deliveryFee into
+    // this value (OrderConfirmModal grandTotal). If the voucher later proves invalid below,
+    // totalAmount is fully recomputed server-side including deliveryFee (never trusted alone).
+    const totalAmount = total;
 
     // Create order
     const order = new Order({
@@ -434,6 +452,7 @@ router.post('/submit', async (req, res) => {
       items: orderItems,
       subtotal,
       tax,
+      deliveryFee,
       totalAmount,
       deliveryLocation: normalizedLocation,
       deliveryAddress: address, // overwritten by the pre-save hook with the derived string
@@ -509,8 +528,9 @@ router.post('/submit', async (req, res) => {
           console.log('[Voucher] Successfully attached to order')
         } else {
           console.warn('[Voucher] FAILED isValid — check conditions above')
-          // Recompute total WITHOUT discount since voucher is invalid
-          order.totalAmount = subtotal + tax
+          // Recompute total WITHOUT discount since voucher is invalid. Delivery fee is
+          // applied last, after any discount, so it stays on top of the full subtotal here.
+          order.totalAmount = subtotal + tax + deliveryFee
         }
       } else {
         console.warn('[Voucher] not found or inactive:', { found: !!voucher, isActive: voucher?.isActive })

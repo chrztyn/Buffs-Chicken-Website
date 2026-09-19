@@ -55,6 +55,16 @@
                   <span class="summary-label">Subtotal:</span>
                   <span class="summary-value">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
+                <div class="summary-item">
+                  <span class="summary-label">Delivery Fee:</span>
+                  <span v-if="distanceFromStoreKm === null" class="summary-value" style="color: #6b7280; font-weight: 500;">
+                    Pin your location to calculate
+                  </span>
+                  <span v-else-if="isOutOfDeliveryRange" class="summary-value" style="color: #b91c1c;">Not available</span>
+                  <span v-else class="summary-value" :style="isFreeDelivery ? { color: '#16a34a', fontWeight: 700 } : {}">
+                    {{ isFreeDelivery ? 'FREE' : `₱${deliveryFee.toFixed(2)}` }}
+                  </span>
+                </div>
                 <div v-if="voucherCode" class="summary-item">
                   <span class="summary-label" style="color: #16a34a;">
                     <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,9 +74,13 @@
                   </span>
                   <span class="summary-value" style="color: #16a34a;">−₱{{ voucherDiscount.toFixed(2) }}</span>
                 </div>
+                <p v-if="showFreeDeliveryPrompt" class="free-delivery-prompt">
+                  Add ₱{{ amountToFreeDelivery.toFixed(2) }} more to get FREE delivery!
+                </p>
+                <p v-if="isOutOfDeliveryRange" class="out-of-range-notice">{{ OUT_OF_RANGE_MESSAGE }}</p>
                 <div class="summary-divider"></div>
                 <span class="summary-label font-bold">Total Amount:</span>
-                <span class="summary-total-amount">₱{{ total.toFixed(2) }}</span>
+                <span class="summary-total-amount">₱{{ grandTotal.toFixed(2) }}</span>
               </div>
             </div>
 
@@ -78,40 +92,55 @@
                 <!-- Full Name -->
                 <div class="form-field">
                   <label for="name" class="form-label">Full Name *</label>
+<div class="input-wrap">
                   <input
                     id="name"
                     v-model="formData.name"
                     type="text"
                     placeholder="Enter your full name"
                     required
-                    class="form-input"
+                    class="form-input has-clear"
                   />
+                    <button v-if="formData.name" type="button" class="input-clear" aria-label="Clear name" @click="formData.name = ''">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Email Address -->
                 <div class="form-field">
                   <label for="email" class="form-label">Email Address *</label>
+<div class="input-wrap">
                   <input
                     id="email"
                     v-model="formData.email"
                     type="email"
                     placeholder="Enter your email address"
                     required
-                    class="form-input"
+                    class="form-input has-clear"
                   />
+                    <button v-if="formData.email" type="button" class="input-clear" aria-label="Clear email" @click="formData.email = ''">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Phone Number -->
                 <div class="form-field">
                   <label for="phone" class="form-label">Phone Number *</label>
+<div class="input-wrap">
                   <input
                     id="phone"
                     v-model="formData.phone"
                     type="tel"
                     placeholder="Enter your phone number"
                     required
-                    class="form-input"
+                    class="form-input has-clear"
                   />
+                    <button v-if="formData.phone" type="button" class="input-clear" aria-label="Clear phone number" @click="formData.phone = ''">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Delivery Location — map pin -->
@@ -127,6 +156,7 @@
                 <!-- Rider note -->
                 <div class="form-field">
                   <label for="riderNote" class="form-label">Unit / Floor / Landmark *</label>
+<div class="input-wrap">
                   <textarea
                     id="riderNote"
                     v-model="formData.location.note"
@@ -134,8 +164,12 @@
                     maxlength="200"
                     placeholder="e.g. Unit 4B, 2nd flr. Blue gate beside the sari-sari store"
                     required
-                    class="form-input"
+                    class="form-input has-clear"
                   />
+                    <button v-if="formData.location.note" type="button" class="input-clear input-clear-top" aria-label="Clear note" @click="formData.location.note = ''">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Payment Method — QR Ph only -->
@@ -273,7 +307,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useDeliveryFee } from '~/composables/useDeliveryFee'
 
 const config = useRuntimeConfig()
 const API_BASE_URL = config.public.apiBase
@@ -311,6 +346,36 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'confirm'])
+
+// ─── Distance-based delivery fee ────────────────────────────────────────────
+// subtotal/total arrive as static props from Cart.vue (computed before the pin exists).
+// Distance is only known once formData.location is set below, so the fee/grand-total
+// must be reactive to the pin, not just the cart. Backend recomputes/enforces this
+// again authoritatively at POST /submit (never trusted from the client alone).
+const { getDistanceFromStoreKm, FREE_DELIVERY_MIN_SUBTOTAL, OUT_OF_RANGE_MESSAGE, computeDeliveryFee } = useDeliveryFee()
+
+const distanceFromStoreKm = computed(() => {
+  const loc = formData.value.location
+  return loc && Number.isFinite(loc.lat) && Number.isFinite(loc.lng)
+    ? getDistanceFromStoreKm(loc.lat, loc.lng)
+    : null
+})
+const deliveryFeeResult = computed(() =>
+  distanceFromStoreKm.value === null ? null : computeDeliveryFee(props.subtotal, distanceFromStoreKm.value)
+)
+// Null until a pin exists — treated as 0 for the grand total until then (form can't be
+// submitted without a pin anyway, see validateLocation()).
+const deliveryFee = computed(() => deliveryFeeResult.value?.fee ?? 0)
+const isFreeDelivery = computed(() => deliveryFeeResult.value?.isFree ?? false)
+const isOutOfDeliveryRange = computed(() => deliveryFeeResult.value?.isOutOfRange ?? false)
+const amountToFreeDelivery = computed(() => Math.max(0, FREE_DELIVERY_MIN_SUBTOTAL - props.subtotal))
+// Shown only when a nearby (<=5km) pin exists but the free-delivery minimum isn't met yet.
+const showFreeDeliveryPrompt = computed(() =>
+  distanceFromStoreKm.value !== null && !isOutOfDeliveryRange.value && !isFreeDelivery.value &&
+  distanceFromStoreKm.value <= 5 && amountToFreeDelivery.value > 0
+)
+// subtotal - voucherDiscount (props.total) + delivery fee, applied last, never itself discounted.
+const grandTotal = computed(() => props.total + deliveryFee.value)
 
 // Track checkout started when the modal is opened
 const { trackCheckoutStarted } = useTracking()
@@ -350,6 +415,49 @@ const formData = ref({
 
 const locationError = ref('')
 
+// ─── Draft persistence (localStorage, per-device only, never sent to the server) ──
+// Keeps typed details if the customer closes the modal or reloads. Cleared on a
+// successful order and expires after DRAFT_TTL_MS.
+const DRAFT_KEY = 'buffs_checkout_draft'
+const DRAFT_TTL_MS = 24 * 60 * 60 * 1000
+
+const saveDraft = () => {
+  if (!process.client) return
+  try {
+    const f = formData.value
+    const hasContent = f.name || f.email || f.phone || f.location?.lat || f.location?.note
+    if (!hasContent) { localStorage.removeItem(DRAFT_KEY); return }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ savedAt: Date.now(), formData: f }))
+  } catch (_) { /* storage unavailable (private mode / quota) — draft is best-effort */ }
+}
+
+const clearDraft = () => {
+  if (!process.client) return
+  try { localStorage.removeItem(DRAFT_KEY) } catch (_) { /* best-effort */ }
+}
+
+const restoreDraft = () => {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY)
+    if (!raw) return
+    const draft = JSON.parse(raw)
+    if (!draft?.savedAt || Date.now() - draft.savedAt > DRAFT_TTL_MS) { clearDraft(); return }
+    const f = draft.formData || {}
+    formData.value = {
+      name: typeof f.name === 'string' ? f.name : '',
+      email: typeof f.email === 'string' ? f.email : '',
+      phone: typeof f.phone === 'string' ? f.phone : '',
+      address: '',
+      location: { ...emptyLocation(), ...(f.location || {}) }
+    }
+  } catch (_) {
+    clearDraft()
+  }
+}
+
+onMounted(restoreDraft)
+watch(formData, saveDraft, { deep: true })
+
 // Human-readable address string derived from the pin — used for the user record
 // (check-email / send-otp `location` field). The order itself sends the full
 // `location` object; the backend derives its own canonical string.
@@ -378,6 +486,9 @@ const validateLocation = () => {
   const loc = formData.value.location || {}
   if (!loc.lat || !loc.lng) return 'Please pin your delivery location on the map.'
   if (!loc.note || !loc.note.trim()) return 'Please add a unit / floor / house number or a landmark for the rider.'
+  // Belt-and-suspenders — LocationPickerModal already blocks confirming a >8km pin, but
+  // guard here too in case formData.location was set another way (e.g. a stale prop).
+  if (isOutOfDeliveryRange.value) return OUT_OF_RANGE_MESSAGE
   return ''
 }
 
@@ -597,7 +708,8 @@ const createOrderForQR = async () => {
     deliveryLocation: locationPayload(),
     cartItems: transformedCartItems,
     subtotal: props.subtotal,
-    total: props.total,
+    total: grandTotal.value,
+    deliveryFee: deliveryFee.value,
     notes: '',
     paymentMethod: paymentMethod.value,
     paymentReference: null,
@@ -608,7 +720,7 @@ const createOrderForQR = async () => {
       : null,
     voucherDiscount: props.voucherDiscount || 0
   }
-  
+
   console.log('[createOrderForQR] payload.voucherCode:', payload.voucherCode)
 
   const response = await fetch(`${API_BASE_URL}/orders/submit`, {
@@ -624,6 +736,10 @@ const createOrderForQR = async () => {
       if (process.client) window.location.reload()
       return
     }
+    if (errData.outOfDeliveryRange) {
+      alert(errData.message || 'Sorry, this location is not yet covered by our delivery service.')
+      return
+    }
     throw new Error(errData.message || 'Failed to create order')
   }
 
@@ -637,7 +753,8 @@ const createOrderForQR = async () => {
       userId: userId.value,
       items: props.cartItems,
       subtotal: props.subtotal,
-      total: props.total,
+      total: grandTotal.value,
+      deliveryFee: deliveryFee.value,
       itemsCount: props.cartItems.length,
       status: 'pending',
       timestamp: new Date().toISOString(),
@@ -690,8 +807,10 @@ const goBackToDelivery = () => {
   currentStep.value = 1
 }
 
+// Full reset — only after a successful order. Also wipes the saved draft.
 const resetModal = () => {
   formData.value = { name: '', email: '', phone: '', address: '', location: emptyLocation() }
+  clearDraft()
   locationError.value = ''
   currentStep.value = 1
   confirmedOrderId.value = null
@@ -701,8 +820,15 @@ const resetModal = () => {
   resetOTP()
 }
 
+// Closing keeps the typed details (form + saved draft) so reopening restores them.
 const closeModal = () => {
-  resetModal()
+  locationError.value = ''
+  currentStep.value = 1
+  confirmedOrderId.value = null
+  isReturningCustomer.value = false
+  requiresOTP.value = false
+  paymentMethod.value = 'qrph'
+  resetOTP()
   emit('close')
 }
 
@@ -818,6 +944,28 @@ onUnmounted(() => {
   color: #FE601C;
 }
 
+.free-delivery-prompt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #FE601C;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  margin: 0.25rem 0 0;
+}
+
+.out-of-range-notice {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  margin: 0.25rem 0 0;
+}
+
 /* Delivery Section */
 .delivery-section {
   padding: 0;
@@ -860,6 +1008,18 @@ onUnmounted(() => {
   border-color: #1A4189;
   box-shadow: 0 0 0 3px rgba(254, 96, 28, 0.1);
 }
+
+.input-wrap { position: relative; }
+.form-input.has-clear { padding-right: 2.5rem; }
+.input-clear {
+  position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%);
+  width: 24px; height: 24px; border-radius: 9999px; border: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #f3f4f6; color: #6b7280; cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.input-clear:hover { background: #e5e7eb; color: #111827; }
+.input-clear:focus-visible { outline: 2px solid #1A4189; outline-offset: 1px; }
+.input-clear-top { top: 0.6rem; transform: none; }
 
 .form-input::placeholder {
   color: #9ca3af;

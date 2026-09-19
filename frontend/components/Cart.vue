@@ -245,6 +245,16 @@
                                 <span>Subtotal</span>
                                 <span class="font-semibold">₱{{ subtotal.toFixed(2) }}</span>
                             </div>
+                            <div class="flex justify-between text-xs sm:text-sm text-white/90">
+                                <span>Delivery Fee</span>
+                                <span class="font-semibold text-white/70">Calculated at checkout</span>
+                            </div>
+                            <p v-if="amountToFreeDelivery > 0" class="text-[11px] sm:text-xs text-[#FEB90E] leading-snug">
+                                Add ₱{{ amountToFreeDelivery.toFixed(2) }} more to get FREE delivery within {{ FREE_DELIVERY_RADIUS_KM }}km. Otherwise ₱{{ DELIVERY_FEE_PESOS }} flat fee.
+                            </p>
+                            <p v-else class="text-[11px] sm:text-xs text-[#FEB90E] leading-snug">
+                                You qualify for FREE delivery within {{ FREE_DELIVERY_RADIUS_KM }}km. Otherwise ₱{{ DELIVERY_FEE_PESOS }} flat fee.
+                            </p>
                             <div v-if="appliedVoucher" class="flex justify-between text-xs sm:text-sm text-[#FEB90E]">
                                 <span>Voucher ({{ appliedVoucher.code }})</span>
                                 <span class="font-semibold">−₱{{ voucherDiscount.toFixed(2) }}</span>
@@ -389,6 +399,7 @@
 
 <script>
 import OrderConfirmModal from './OrderConfirmModal.vue';
+import { DELIVERY_FEE_PESOS, FREE_DELIVERY_RADIUS_KM, FREE_DELIVERY_MIN_SUBTOTAL } from '~/constants/delivery';
 import MenuModal from './MenuModal.vue';
 
 export default {
@@ -426,6 +437,11 @@ export default {
             if (!order) return false;
             const parsedOrder = JSON.parse(order);
             return parsedOrder.status === 'cancelled';
+        },
+        DELIVERY_FEE_PESOS() { return DELIVERY_FEE_PESOS; },
+        FREE_DELIVERY_RADIUS_KM() { return FREE_DELIVERY_RADIUS_KM; },
+        amountToFreeDelivery() {
+            return Math.max(0, FREE_DELIVERY_MIN_SUBTOTAL - this.subtotal);
         },
         subtotal() {
             return this.cartItems.reduce((sum, item) => {

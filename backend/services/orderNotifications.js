@@ -12,6 +12,8 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 // Namespace import (not destructured) so the send can be spied in tests.
 const mailer = require('../config/mailer');
+const { sendOrderReceipt } = require('../utils/sendOrderReceipt');
+const { getOrderDeliveryFee } = require('./deliveryFee');
 
 const ADMIN_ORDERS_ROOM = 'admin-orders';
 
@@ -30,6 +32,7 @@ function buildNewOrderPayload(order, user) {
     items: order.items,
     subtotal: order.subtotal,
     tax: order.tax,
+    deliveryFee: getOrderDeliveryFee(order),
     totalAmount: order.totalAmount,
     deliveryAddress: order.deliveryAddress,
     deliveryLocation: order.deliveryLocation || null,
@@ -93,7 +96,15 @@ async function notifyQRPhOrderPaid(order, io) {
     console.error('[QRPH] admin email failed:', err.message);
   }
 
-  // 3. Real-time admin dashboard
+  // 3. Customer confirmation — sent only now that payment is confirmed (rule 9).
+  // sendOrderReceipt never throws; failures are logged inside it.
+  if (user?.email) {
+    await sendOrderReceipt(order, user);
+  } else {
+    console.warn(`[QRPH] no customer email on file for order ${order._id} — receipt skipped`);
+  }
+
+  // 4. Real-time admin dashboard
   if (io) {
     io.to(ADMIN_ORDERS_ROOM).emit('new-order', buildNewOrderPayload(order, user));
     console.log(`[QRPH] notifyQRPhOrderPaid: emitted new-order for order ${order._id}`);
