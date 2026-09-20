@@ -11,7 +11,7 @@ const API_BASE_URL = config.public.apiBase
 
 const MAX_AMOUNT = 50000 // PayMongo QR Ph per-transaction limit (PHP)
 
-const status = ref('loading') // 'loading' | 'ready' | 'paid' | 'failed'
+const status = ref('loading') // 'loading' | 'ready' | 'processing' | 'paid' | 'failed'
 const qrImageUrl = ref('')
 const testUrl = ref('')
 const errorMsg = ref('')
@@ -42,12 +42,32 @@ async function generateQR() {
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data?.error || 'Failed to generate QR code.')
+
+    if (data.amount != null) displayAmount.value = Number(data.amount)
+
+    // Payment already settled — a webhook landed before this call, or the customer
+    // reopened the page. This is success, NOT an error.
+    if (data.status === 'paid') {
+      status.value = 'paid'
+      emit('paid')
+      return
+    }
+
+    // Payment is being confirmed at the customer's bank. There is no fresh QR to show;
+    // keep polling until it clears (or fails).
+    if (data.status === 'processing') {
+      if (data.qrCodeImageUrl) qrImageUrl.value = data.qrCodeImageUrl
+      status.value = 'processing'
+      startPolling()
+      return
+    }
+
+    // Only now is a missing QR a real problem.
     if (!data.qrCodeImageUrl) throw new Error('QR code was not returned. Please try again.')
 
     // PayMongo returns next_action.code.image_url already as a base64 data URI.
     qrImageUrl.value = data.qrCodeImageUrl
     testUrl.value = data.testUrl || '' // present only in PayMongo test mode
-    if (data.amount != null) displayAmount.value = Number(data.amount)
 
     status.value = 'ready'
     startPolling()
@@ -136,6 +156,24 @@ function stopPolling() {
       >
         🧪 Simulate payment (test mode)
       </a>
+    </template>
+
+    <!-- Processing — payment received, awaiting bank confirmation -->
+    <template v-else-if="status === 'processing'">
+      <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center animate-pulse">
+        <svg class="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="text-center space-y-1">
+        <p class="font-bold text-amber-700 text-lg">Confirming your payment…</p>
+        <p class="text-sm text-gray-500 max-w-xs">
+          We've received your payment and are waiting for your bank to confirm it. This
+          usually takes a few moments — please don't close this page.
+        </p>
+        <p class="text-sm font-bold text-[#1A4189]">₱{{ displayAmount.toLocaleString() }}</p>
+      </div>
+      <p class="text-xs text-gray-400 animate-pulse">Waiting for payment confirmation…</p>
     </template>
 
     <!-- Paid -->

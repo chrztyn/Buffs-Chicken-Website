@@ -8,7 +8,8 @@
  */
 
 // Buffs Chicken shop location — used to center a fresh map before the user pins.
-export const SHOP_LATLNG: [number, number] = [14.5995, 120.9842] // Metro Manila fallback
+// Must match STORE_LOCATION in constants/delivery.ts (the delivery-fee distance origin).
+export const SHOP_LATLNG: [number, number] = [15.127774, 120.596859]
 
 // Tile source: OpenStreetMap standard raster tiles. Genuinely free, no API key,
 // no registration. Their tile-usage policy asks for a valid Referer/UA (browsers

@@ -218,6 +218,17 @@
                   </span>
                   <span class="summary-value">₱{{ subtotal.toFixed(2) }}</span>
                 </div>
+                <div v-if="deliveryFee > 0 || subtotal >= 350" class="summary-item group">
+                  <span class="summary-label">
+                    <svg class="w-4 h-4 inline mr-2 text-[#1A4189]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M4 17h12m0 0l-4 4m4-4l-4-4"></path>
+                    </svg>
+                    Delivery Fee
+                  </span>
+                  <span class="summary-value" :style="deliveryFee === 0 ? { color: '#16a34a', fontWeight: 700 } : {}">
+                    {{ deliveryFee === 0 ? 'FREE' : `₱${deliveryFee.toFixed(2)}` }}
+                  </span>
+                </div>
                 <div v-if="voucherCode" class="summary-item group">
                   <span class="summary-label" style="color: #16a34a;">
                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,6 +298,18 @@
               <div>
                 <h4 class="status-alert-title">Preparing Your Delicious Order</h4>
                 <p class="status-alert-description">Our chefs are now preparing your meal with fresh ingredients and care.</p>
+              </div>
+            </div>
+
+            <div v-if="currentStatus === 'waiting for rider'" class="status-alert status-alert-amber">
+              <div class="status-icon-wrapper status-icon-amber">
+                <svg class="status-alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="status-alert-title">Waiting for Rider</h4>
+                <p class="status-alert-description">Your order is packed and ready. We're booking a rider to bring it to you — this usually only takes a few minutes.</p>
               </div>
             </div>
 
@@ -593,6 +616,7 @@ import { useRuntimeConfig } from '#app'
 import io from 'socket.io-client'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
+import { CUSTOMER_TIMELINE, STATUS_ORDER, STATUS_TOAST, paymentMethodLabel } from '@/constants/orderStatus'
 
 useSeoMeta({ robots: 'noindex, nofollow' })
 
@@ -606,6 +630,15 @@ const userAddress = ref('Loading address...')
 const deliveryLocation = ref(null)
 const totalAmount = ref(0)
 const subtotal = ref(0)
+const deliveryFee = ref(0)
+// total = subtotal - voucherDiscount + tax + deliveryFee. Deriving from totals keeps the fee
+// accurate even if the stored deliveryFee field is missing (older orders / stale server).
+const deriveDeliveryFee = (o) => {
+  const stored = Number(o.deliveryFee || 0)
+  const discount = Number(o.voucher?.discountAmount || 0)
+  const derived = Number(o.totalAmount || o.total || 0) - (Number(o.subtotal || 0) - discount) - Number(o.tax || 0)
+  return Math.max(stored, Math.round(derived * 100) / 100, 0)
+}
 const itemsCount = ref(0)
 const orderItems = ref([])
 const paymentMethod = ref('')
@@ -621,20 +654,9 @@ const toastType = ref('success') // 'success', 'info', 'warning', 'error'
 // Cancel order loading state
 const isCancelingOrder = ref(false)
 
-const statuses = ref([
-  { id: 'pending', label: 'Confirming' },
-  { id: 'preparing', label: 'Preparing' },
-  { id: 'out for delivery', label: 'Out for Delivery' },
-  { id: 'delivered', label: 'Delivered' }
-])
+const statuses = ref(CUSTOMER_TIMELINE.map(s => ({ ...s })))
 
-const statusOrder = {
-  pending: 0,
-  preparing: 1,
-  'out for delivery': 2,
-  delivered: 3,
-  cancelled: -1
-}
+const statusOrder = STATUS_ORDER
 
 
 // Thank you modal state
@@ -657,15 +679,7 @@ const total = computed(() => {
   return Math.max(0, subtotal.value - voucherDiscount.value)
 })
 
-const formatPaymentMethod = (method) => {
-  const methods = {
-    'gcash': 'GCash',
-    'maya': 'Maya', 
-    'maribank': 'Maribank',
-    'bpi': 'BPI'
-  }
-  return methods[method] || method
-}
+const formatPaymentMethod = (method) => paymentMethodLabel(method)
 
 const getProgressPercentage = () => {
   const currentIndex = statusOrder[currentStatus.value]
@@ -772,7 +786,8 @@ const fetchOrderFromBackend = async (orderId) => {
       if (order.deliveryLocation && order.deliveryLocation.lat != null) deliveryLocation.value = order.deliveryLocation
       currentStatus.value = order.status || 'pending'
       subtotal.value = order.subtotal || 0
-      totalAmount.value = order.totalAmount || 0 
+      deliveryFee.value = deriveDeliveryFee(order)
+      totalAmount.value = order.totalAmount || 0
 
       if (order.paymentMethod) paymentMethod.value = order.paymentMethod
 
@@ -800,6 +815,7 @@ const loadOrder = async () => {
     receiptUploaded.value = order?.receiptUploaded || false
     currentStatus.value = order.status || 'pending'
     subtotal.value = order.subtotal
+    deliveryFee.value = deriveDeliveryFee(order)
     itemsCount.value = order.itemsCount
     userEmail.value = order.customerEmail || ''
     orderItems.value = order.items || []
@@ -853,15 +869,7 @@ const handleOrderStatusUpdate = (data) => {
     saveOrderStatus()
     
     // Show notification
-    const statusMessages = {
-      pending: 'Confirming',
-      preparing: 'Your order is being prepared',
-      'out for delivery': 'Your order is on the way',
-      delivered: 'Your order has arrived',
-      cancelled: 'Your order has been cancelled'
-    }
-    
-    showNotification('Order Updated', data.message || statusMessages[data.status], 'info')
+    showNotification('Order Updated', data.message || STATUS_TOAST[data.status] || 'Order updated', 'info')
     
     // Show thank you modal when delivered
     if (data.status === 'delivered') {
@@ -1487,6 +1495,10 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
 }
 
+.status-icon-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+}
+
 .status-icon-green {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 }
@@ -1508,6 +1520,15 @@ onUnmounted(() => {
 .status-alert-purple {
   background: linear-gradient(135deg, rgba(243, 232, 255, 0.95) 0%, rgba(237, 233, 254, 0.95) 100%);
   border-color: #d8b4fe;
+}
+
+.status-alert-amber {
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.95) 0%, rgba(254, 243, 199, 0.95) 100%);
+  border-color: #fcd34d;
+}
+
+.status-alert-amber .status-alert-title {
+  color: #b45309;
 }
 
 .status-alert-green {

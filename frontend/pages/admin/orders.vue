@@ -36,7 +36,7 @@
         All Orders ({{ orders.length }})
       </button>
       <button
-        v-for="status in ['pending', 'preparing', 'out for delivery', 'delivered', 'cancelled']"
+        v-for="status in ADMIN_STATUS_FLOW"
         :key="status"
         @click="filterStatus = status"
         :class="filterStatus === status
@@ -325,6 +325,10 @@
               <span>Voucher ({{ selectedOrder.voucher.code }}):</span>
               <span class="font-bold">−₱{{ selectedOrder.voucher.discountAmount.toFixed(2) }}</span>
             </div>
+            <div v-if="orderDeliveryFee(selectedOrder) > 0 || selectedOrder.subtotal >= 350" class="flex justify-between text-sm">
+              <span>Delivery Fee:</span>
+              <span class="font-bold">{{ orderDeliveryFee(selectedOrder) === 0 ? 'FREE' : `₱${orderDeliveryFee(selectedOrder).toFixed(2)}` }}</span>
+            </div>
             <div class="flex justify-between text-sm">
               <span>Tax:</span>
               <span class="font-bold">₱{{ selectedOrder.tax.toFixed(2) }}</span>
@@ -358,21 +362,25 @@
           <div class="flex items-center gap-3 flex-wrap">
             <span
               :class="{
-                'bg-gray-100 text-gray-600': selectedOrder.paymentMethod === 'cash_on_delivery' || !selectedOrder.paymentMethod,
+                'bg-teal-100 text-teal-700': selectedOrder.paymentMethod === 'qrph',
                 'bg-blue-100 text-blue-700': selectedOrder.paymentMethod === 'gcash',
                 'bg-green-100 text-green-700': selectedOrder.paymentMethod === 'maya',
                 'bg-purple-100 text-purple-700': selectedOrder.paymentMethod === 'maribank',
-                'bg-red-100 text-red-700': selectedOrder.paymentMethod === 'bpi'
+                'bg-red-100 text-red-700': selectedOrder.paymentMethod === 'bpi',
+                'bg-gray-100 text-gray-600': selectedOrder.paymentMethod === 'cash_on_delivery' || !selectedOrder.paymentMethod
               }"
               class="px-3 py-1 rounded-full text-sm font-['Poppins'] font-bold"
             >
-              {{
-                selectedOrder.paymentMethod === 'gcash' ? 'GCash' :
-                selectedOrder.paymentMethod === 'maya' ? 'Maya' :
-                selectedOrder.paymentMethod === 'maribank' ? 'Maribank' :
-                selectedOrder.paymentMethod === 'bpi' ? 'BPI' :
-                'Cash on Delivery'
-              }}
+              {{ paymentMethodLabel(selectedOrder.paymentMethod) }}
+            </span>
+            <span
+              v-if="selectedOrder.paymentMethod === 'qrph' && selectedOrder.paymongo?.status === 'paid'"
+              class="inline-flex items-center gap-1 text-xs font-['Poppins'] font-semibold text-green-700"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Paid via QR Ph{{ selectedOrder.paymongo?.paidAt ? ` · ${formatTime(selectedOrder.paymongo.paidAt)}` : '' }}
             </span>
           </div>
 
@@ -465,7 +473,7 @@
           <label class="block font-['Poppins'] font-semibold text-[#1A4189] mb-3">New Status</label>
           <div class="space-y-2">
             <button
-              v-for="status in ['pending', 'preparing', 'out for delivery', 'delivered', 'cancelled']"
+              v-for="status in ADMIN_STATUS_FLOW"
               :key="status"
               @click="newStatus = status"
               :disabled="isUpdating"
@@ -496,6 +504,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useApi } from '~/composables/useApi'
 import { useSocket } from '~/composables/useSocket'
 import Modal from '~/components/admin/Modal.vue'
+import { ADMIN_STATUS_FLOW, STATUS_BADGE_CLASS, paymentMethodLabel } from '~/constants/orderStatus'
 
 definePageMeta({
   layout: 'admin'
@@ -512,6 +521,12 @@ const filterStatus = ref('')
 const showOrderDetails = ref(false)
 const showStatusModal = ref(false)
 const selectedOrder = ref<any>(null)
+// total = subtotal - voucherDiscount + tax + deliveryFee (derived so it's right even when the
+// stored deliveryFee field is missing).
+const orderDeliveryFee = (o: any): number => {
+  const derived = Number(o.totalAmount || 0) - (Number(o.subtotal || 0) - Number(o.voucher?.discountAmount || 0)) - Number(o.tax || 0)
+  return Math.max(Number(o.deliveryFee || 0), Math.round(derived * 100) / 100, 0)
+}
 const newStatus = ref('')
 const showToast = ref(false)
 const isUpdating = ref(false)
@@ -542,14 +557,7 @@ const loadOrders = async () => {
 }
 
 const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800 font-bold',
-    preparing: 'bg-blue-100 text-blue-800 font-bold',
-    'out for delivery': 'bg-purple-100 text-purple-800 font-bold',
-    delivered: 'bg-green-100 text-green-800 font-bold',
-    cancelled: 'bg-red-100 text-red-800 font-bold'
-  }
-  return colors[status] || 'bg-gray-100 text-gray-800'
+  return STATUS_BADGE_CLASS[status] || 'bg-gray-100 text-gray-800'
 }
 
 const getStatusCount = (status: string) => {
@@ -703,6 +711,7 @@ onMounted(async () => {
         },
         items: data.items || [],
         subtotal: data.subtotal || 0,
+        deliveryFee: data.deliveryFee || 0,
         tax: data.tax || 0,
         totalAmount: data.totalAmount,
         status: data.status || 'pending',
@@ -710,6 +719,9 @@ onMounted(async () => {
         deliveryLocation: data.deliveryLocation || null,
         notes: data.notes || '',
         paymentMethod: data.paymentMethod,
+        // QR Ph orders only reach the admin list once paid; carry that through so the
+        // "Paid via QR Ph" badge shows without a page refresh.
+        paymongo: data.paymentMethod === 'qrph' && data.paidAt ? { status: 'paid', paidAt: data.paidAt } : null,
         receiptImage: data.receiptImage || null,
         voucher: data.voucher || null,
         createdAt: data.timestamp,

@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { getOrderDeliveryFee } = require('../services/deliveryFee');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -78,6 +79,7 @@ async function sendOrderReceipt(order, user) {
     const orderNumber = order.orderNumber || String(order._id);
     const subtotal = Number(order.subtotal || 0).toFixed(2);
     const total = Number(order.totalAmount || 0).toFixed(2);
+    const deliveryFee = getOrderDeliveryFee(order);
     const deliveryAddress = order.deliveryAddress || 'N/A';
     const trackingUrl = `https://buffschicken.com/order-status?order=${encodeURIComponent(orderNumber)}`;
 
@@ -86,6 +88,7 @@ async function sendOrderReceipt(order, user) {
       maya: 'Maya',
       maribank: 'Maribank',
       bpi: 'BPI',
+      qrph: 'QR Ph',
     };
     const paymentMethodDisplay =
       paymentMethodMap[order.paymentMethod] || order.paymentMethod || 'GCash';
@@ -202,6 +205,13 @@ async function sendOrderReceipt(order, user) {
                   </td>
                   <td style="padding:4px 0;font-size:13px;color:#16a34a;text-align:right;">
                     &minus;&#8369;${Number(order.voucher.discountAmount || 0).toFixed(2)}
+                  </td>
+                </tr>` : ''}
+                ${(deliveryFee > 0 || Number(order.subtotal || 0) >= 350) ? `
+                <tr>
+                  <td style="padding:4px 0;font-size:13px;color:#555;">Delivery Fee</td>
+                  <td style="padding:4px 0;font-size:13px;text-align:right;${deliveryFee === 0 ? 'color:#16a34a;font-weight:bold;' : 'color:#555;'}">
+                    ${deliveryFee === 0 ? 'FREE' : '&#8369;' + deliveryFee.toFixed(2)}
                   </td>
                 </tr>` : ''}
                 <tr>

@@ -58,6 +58,7 @@ const sendOrderNotification = async (email, orderNumber, status) => {
     const statusMessages = {
       pending: 'Your order has been received and is pending confirmation.',
       preparing: 'Your order is being prepared.',
+      'waiting for rider': 'Your order is packed and waiting for a rider.',
       'out for delivery': 'Your order is out for delivery.',
       delivered: 'Your order has been delivered.',
       cancelled: 'Your order has been cancelled.',
@@ -121,6 +122,8 @@ const sendContactFormEmail = async (name, email, message) => {
 };
 
 // ─── sendAdminOrderNotification ──────────────────────────────────────────────
+
+const { getOrderDeliveryFee } = require('../services/deliveryFee');
 
 const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
   try {
@@ -202,6 +205,11 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
                     <strong>−₱${Number(order.voucher.discountAmount || 0).toFixed(2)}</strong>
                   </td>
                 </tr>` : ''}
+                ${(() => { const fee = getOrderDeliveryFee(order); return (fee > 0 || order.subtotal >= 350) ? `
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Delivery Fee:</strong></td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;${fee === 0 ? ' color: #16a34a;' : ''}">${fee === 0 ? '<strong>FREE</strong>' : '₱' + fee.toFixed(2)}</td>
+                </tr>` : ''; })()}
                 <tr>
                   <td style="padding: 12px 0; font-size: 16px;"><strong>Total:</strong></td>
                   <td style="padding: 12px 0; text-align: right; font-size: 16px; color: #FE601C;"><strong>₱${order.totalAmount.toFixed(2)}</strong></td>
@@ -212,6 +220,15 @@ const sendAdminOrderNotification = async (adminEmail, order, customerInfo) => {
             <div style="background-color: #ebeff7; padding: 20px; border-radius: 8px; border-left: 4px solid #1A4189;">
               <h3 style="margin-top: 0; color: #1A4189;">Delivery Address</h3>
               <p style="margin: 0; line-height: 1.6;">${order.deliveryAddress}</p>
+              ${order.deliveryLocation && order.deliveryLocation.note ? `
+              <p style="margin: 8px 0 0 0; line-height: 1.6; color: #555;"><strong>Rider note:</strong> ${order.deliveryLocation.note}</p>` : ''}
+              ${order.deliveryLocation && order.deliveryLocation.mapsUrl ? `
+              <p style="margin: 12px 0 0 0;">
+                <a href="${order.deliveryLocation.mapsUrl}" target="_blank" rel="noopener"
+                  style="display: inline-block; background: #1A4189; color: #fff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+                  📍 Open delivery pin in Google Maps
+                </a>
+              </p>` : ''}
             </div>
 
             ${order.notes ? `

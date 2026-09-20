@@ -1,5 +1,5 @@
 <template>
-  <div class="menu-page min-h-screen bg-[#FBF4E5] overflow-x-hidden w-full">
+  <div class="menu-page min-h-screen bg-[#FBF4E5] overflow-x-hidden w-full" :style="{ '--banner-h': bannerHeight + 'px' }">
     <!-- Toast Notification -->
     <transition name="toast-fade">
       <div
@@ -27,11 +27,12 @@
 
     <Navbar class="relative z-20"/>
 
-    <!-- Store Status Banner -->
+    <!-- Store Status Banner (sticky — stays pinned to top while scrolling) -->
     <div
       v-if="storeStatus"
+      ref="statusBanner"
       :class="[
-        'py-4 px-6 shadow-md border-b-2',
+        'sticky top-0 z-40 py-4 px-6 shadow-md border-b-2',
         storeStatus.isOpen
           ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-400'
           : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-400'
@@ -79,7 +80,7 @@
          MOBILE + TABLET STICKY BAR (hidden on lg+)
          search row + category pill tabs, always on top while scrolling
     ══════════════════════════════════════════════════════════════ -->
-    <div class="lg:hidden sticky top-0 z-30 bg-[#FBF4E5] border-b border-gray-200 shadow-sm">
+    <div class="lg:hidden sticky z-30 bg-[#FBF4E5] border-b border-gray-200 shadow-sm" :style="{ top: bannerHeight + 'px' }">
       <div class="flex items-center gap-3 px-4 pt-3 pb-2">
         <div class="relative flex-1">
           <input
@@ -126,7 +127,10 @@
       <div class="flex flex-col lg:flex-row gap-8 lg:gap-12 xl:gap-16 items-start">
 
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:block w-[240px] xl:w-[260px] flex-shrink-0 sticky top-0 self-start pt-8 pb-8 max-h-screen overflow-y-auto scrollbar-hide">
+        <aside
+          class="hidden lg:block w-[240px] xl:w-[260px] flex-shrink-0 sticky self-start pt-8 pb-8 overflow-y-auto scrollbar-hide"
+          :style="{ top: bannerHeight + 'px', maxHeight: `calc(100vh - ${bannerHeight}px)` }"
+        >
           <h2 class="text-3xl xl:text-4xl font-['Unbounded'] text-[#1A4189] mb-6 leading-tight">Grab your favorites</h2>
 
           <!-- Search + Cart -->
@@ -317,7 +321,9 @@ useHead({
       storeStatus: null,
       showOperatingHours: false,
       operatingHours: {},
-      _observer: null
+      bannerHeight: 0,
+      _observer: null,
+      _bannerObserver: null
     }
   },
   computed: {
@@ -362,6 +368,7 @@ useHead({
   },
   beforeUnmount() {
     if (this._observer) this._observer.disconnect()
+    if (this._bannerObserver) this._bannerObserver.disconnect()
   },
   methods: {
     async loadCategories() {
@@ -441,8 +448,19 @@ useHead({
           }
           this.storeStatus = { isOpen, message: displayMessage, activeClosure: activeClosure || null }
           this.operatingHours = operatingHours || {}
+          this.$nextTick(() => this.observeBannerHeight())
         }
       } catch (e) { console.error('[Menu] loadStoreStatus', e) }
+    },
+    observeBannerHeight() {
+      const el = this.$refs.statusBanner
+      if (!el || this._bannerObserver) return
+      // getBoundingClientRect = full border-box height (padding + border included).
+      // entry.contentRect excludes padding/border and under-measures the banner.
+      this._bannerObserver = new ResizeObserver(() => {
+        this.bannerHeight = Math.ceil(el.getBoundingClientRect().height)
+      })
+      this._bannerObserver.observe(el)
     },
     formatTime(time) {
       if (!time) return ''
@@ -464,9 +482,9 @@ useHead({
   Mobile/tablet sticky bar is ~110px tall (search ~52px + tabs ~44px + padding).
   Desktop has no sticky bar so just a small offset.
 */
-.menu-scroll-target { scroll-margin-top: 120px; }
+.menu-scroll-target { scroll-margin-top: calc(120px + var(--banner-h, 0px)); }
 @media (min-width: 1024px) {
-  .menu-scroll-target { scroll-margin-top: 32px; }
+  .menu-scroll-target { scroll-margin-top: calc(32px + var(--banner-h, 0px)); }
 }
 
 /* Toast */
